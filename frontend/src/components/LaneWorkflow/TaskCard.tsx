@@ -8,11 +8,18 @@
  * @phase Phase 3 - User Story 1 (Basic Lane Visualization)
  */
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS, needsTruncation } from '@/types/task'
 import { ActionEmblem } from './ActionEmblem'
 import { ErrorMessage } from './ErrorMessage'
+
+/**
+ * Detect user's reduced-motion preference
+ */
+const prefersReducedMotion = typeof window !== 'undefined'
+  ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  : false
 
 export interface TaskCardProps {
   /**
@@ -67,11 +74,11 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -100 }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -100 }}
       transition={{
-        duration: 0.18, // Optimized to <200ms for cancel action
+        duration: prefersReducedMotion ? 0.01 : 0.18, // Instant for reduced-motion, <200ms otherwise (T127)
         ease: 'easeOut' // Smoother easing for better perceived performance
       }}
       className={`p-3 bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}

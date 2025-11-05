@@ -63,7 +63,7 @@ export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, clas
             {config.emptyMessage}
           </div>
         ) : (
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="popLayout" initial={false}>
             {tasks.map((task) => (
               <TaskCardErrorBoundary key={task.id} taskId={task.id}>
                 <TaskCard

@@ -303,9 +303,9 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Animation Tuning
 
-- [ ] T126 [P] Fine-tune lane transition animations to meet <300ms target in frontend/src/hooks/useLaneTransition.ts
-- [ ] T127 [P] Add reduced-motion preference support for accessibility in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
-- [ ] T128 [P] Optimize AnimatePresence performance for large task lists in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T126 [P] Fine-tune lane transition animations to meet <300ms target in frontend/src/hooks/useLaneTransition.ts
+- [X] T127 [P] Add reduced-motion preference support for accessibility in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
+- [X] T128 [P] Optimize AnimatePresence performance for large task lists in frontend/src/components/LaneWorkflow/Lane.tsx
 
 ### Accessibility Improvements
 
