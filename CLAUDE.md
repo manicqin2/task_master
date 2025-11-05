@@ -43,11 +43,25 @@ backend/
 
 frontend/
 ├── src/
-│   ├── components/       # ChatInput, TaskList, TaskItem (shadcn/ui based)
+│   ├── components/
+│   │   ├── ChatInput, TaskList, TaskItem (Feature 001)
+│   │   └── LaneWorkflow/ # Multi-lane task visualization (Feature 003)
+│   │       ├── LaneWorkflow.tsx    # Container with 3-column layout
+│   │       ├── Lane.tsx            # Single lane component
+│   │       ├── TaskCard.tsx        # Task card with emblems
+│   │       ├── ActionEmblem.tsx    # Action button with tooltip
+│   │       └── ErrorMessage.tsx    # Error display component
+│   ├── hooks/
+│   │   ├── useTasks.ts             # TanStack Query for task fetching
+│   │   ├── useTaskActions.ts       # Cancel, retry, expand mutations
+│   │   ├── useLaneWorkflow.ts      # Lane distribution logic
+│   │   └── useTimeoutDetection.ts  # 30s timeout detection
+│   ├── types/            # Task, TaskWithLane, Lane types
 │   ├── pages/            # Main task entry page
 │   ├── services/         # API client, polling logic
 │   └── lib/              # UI utilities
 └── tests/
+    ├── e2e/              # Playwright end-to-end tests (Feature 003)
     ├── integration/      # Frontend-backend integration tests
     └── unit/             # Component unit tests
 
@@ -92,6 +106,9 @@ docker compose exec backend pytest tests/integration/
 
 # Run frontend tests
 docker compose exec frontend npm test
+
+# Run E2E tests (Feature 003)
+docker compose exec frontend npm run test:e2e
 ```
 
 ## Code Style
@@ -115,4 +132,36 @@ docker compose exec frontend npm test
 - 001-chat-task-entry: Added
 
 <!-- MANUAL ADDITIONS START -->
+
+### Feature 003: Multi-Lane Task Workflow
+
+**Key Concepts**:
+- Three-lane layout: Pending, Error/More Info, Finished
+- Lane derivation: Based on `enrichment_status` (pending/processing → Pending, failed → Error, completed → Finished)
+- Action emblems: Cancel (Pending), Retry+Cancel (Error), Expand (long text)
+- Frontend-only actions: Cancel and Expand (optimistic updates, no backend calls)
+- Backend integration: Retry action calls POST /api/tasks/:id/retry
+- Text truncation: 100 character limit with line-clamp CSS, expand/collapse toggle
+- Animations: Framer Motion with <300ms targets for perceived performance
+- Polling: Reuses Feature 001's 500ms polling for status updates
+
+**Component Architecture**:
+```
+LaneWorkflow (container)
+├── Lane × 3 (Pending, Error, Finished)
+│   └── TaskCard × N
+│       ├── ActionEmblem (cancel/retry/expand buttons with tooltips)
+│       └── ErrorMessage (for failed tasks)
+```
+
+**State Management**:
+- TanStack Query cache stores tasks with `isExpanded` client-side flag
+- Mutations: cancelMutation (removes from cache), retryMutation (backend call), expandMutation (toggles flag)
+- Optimistic updates for instant UI feedback on cancel/expand
+
+**Testing Strategy**:
+- Unit tests: Component rendering, emblem visibility, lane derivation logic
+- Integration tests: Polling updates, cache invalidation, mutation behavior
+- E2E tests (Playwright): Full user journeys, performance validation, timeout scenarios
+
 <!-- MANUAL ADDITIONS END -->

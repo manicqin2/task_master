@@ -330,7 +330,7 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Documentation Updates
 
-- [ ] T141 [P] Update CLAUDE.md with framer-motion dependency and new components in /Users/bzpysmn/work/task_master/CLAUDE.md
+- [X] T141 [P] Update CLAUDE.md with framer-motion dependency and new components in /Users/bzpysmn/work/task_master/CLAUDE.md
 - [ ] T142 [P] Add LaneWorkflow usage examples to quickstart.md in /Users/bzpysmn/work/task_master/specs/003-task-lane-workflow/quickstart.md
 - [ ] T143 [P] Add architecture diagrams to frontend README in /Users/bzpysmn/work/task_master/frontend/README.md
 - [ ] T144 [P] Document action emblem API in contracts/ directory in /Users/bzpysmn/work/task_master/specs/003-task-lane-workflow/contracts/README.md
