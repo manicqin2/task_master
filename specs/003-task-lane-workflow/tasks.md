@@ -338,11 +338,11 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Final Validation
 
-- [ ] T146 Run full test suite (unit + integration + E2E) with `npm test && npm run test:e2e`
-- [ ] T147 Run backend test suite with `pytest` in backend/
+- [X] T146 Run full test suite (unit + integration + E2E) with `npm test && npm run test:e2e`
+- [X] T147 Run backend test suite with `pytest` in backend/
 - [ ] T148 Validate quickstart.md instructions work on clean environment
 - [ ] T149 [P] Run lighthouse accessibility audit on lane workflow page
-- [ ] T150 [P] Verify all success criteria from spec.md are met (SC-001 through SC-008)
+- [X] T150 [P] Verify all success criteria from spec.md are met (SC-001 through SC-008)
 
 ---
 
