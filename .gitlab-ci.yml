@@ -39,6 +39,7 @@ variables:
 include:
   - template: Security/Secret-Detection.gitlab-ci.yml  # T014: Include GitLab Secret Detection template
   - template: Security/Dependency-Scanning.gitlab-ci.yml  # T030: Include GitLab Dependency Scanning template
+  - template: Security/SAST.gitlab-ci.yml  # T046: Include GitLab SAST template
 
 # ==============================================================================
 # Secret Detection Job (User Story 1 - P1) 🔐
@@ -177,6 +178,97 @@ dependency_scanning:
 
   # T034: Block merge if high/critical CVEs detected
   allow_failure: false
+
+  # Job timeout (within 5-minute performance requirement)
+  timeout: 5 minutes
+
+# ==============================================================================
+# SAST Job (User Story 3 - P3) 🔍
+# ==============================================================================
+# Purpose: Detect code-level security vulnerabilities (SQL injection, XSS, weak crypto)
+# Scanner: Semgrep (GitLab's built-in SAST engine)
+# Blocking: No (allow_failure: true) - Warning-only, doesn't block merge
+# Performance: <180 seconds for typical changes
+# GitLab Tier: FREE tier ✓
+#
+# T047-T050: Configuration Summary:
+# - Multi-language support: JavaScript, TypeScript, Python, Go, Java, etc.
+# - Confidence level: HIGH (reduces false positives)
+# - Path exclusions: tests/, docs/ (performance + reduce noise)
+# - Artifact retention: 30 days
+# - GitLab Security Dashboard integration: Automatic
+#
+# Common Detections:
+# - SQL Injection (CWE-89): String concatenation in SQL queries
+# - Cross-Site Scripting (CWE-79): Unsafe HTML rendering, dangerouslySetInnerHTML
+# - Code Injection (CWE-95): eval(), exec() with user input
+# - Weak Cryptography (CWE-327): MD5, SHA1, DES, RC4 algorithms
+# - Insecure Random (CWE-330): random module instead of secrets
+# - Hardcoded Secrets (CWE-798): Credentials in source code
+# - Command Injection (CWE-78): Shell commands with user input
+# - Path Traversal (CWE-22): File access with user-controlled paths
+#
+# How to Fix SAST Findings:
+# 1. Review the finding in GitLab Security Dashboard
+# 2. Check the CWE link for vulnerability details
+# 3. Apply the suggested remediation:
+#    - SQL Injection: Use parameterized queries
+#    - XSS: Sanitize HTML with DOMPurify or use textContent
+#    - Weak Crypto: Use bcrypt, AES-256-GCM, secrets module
+#    - Hardcoded Secrets: Move to environment variables
+# 4. Test the fix and verify scanner no longer flags it
+# 5. For false positives: Add inline comment "# nosec" with justification
+#
+# Example Fixes:
+#   ❌ const query = "SELECT * FROM users WHERE id = '" + userId + "'"
+#   ✅ db.query("SELECT * FROM users WHERE id = ?", [userId])
+#
+#   ❌ <div dangerouslySetInnerHTML={{ __html: userBio }} />
+#   ✅ <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userBio) }} />
+#
+#   ❌ hashlib.md5(password.encode()).hexdigest()
+#   ✅ bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+#
+# False Positive Handling:
+# - Add inline suppression comment with justification:
+#   Python: # nosec B303 (MD5 used for non-security purpose)
+#   JavaScript: // eslint-disable-next-line security/detect-sql-injection
+# - Document in code review why it's safe
+# ==============================================================================
+
+sast:
+  stage: security  # T047: Configure job in security stage
+
+  variables:
+    # T049: Set confidence level to HIGH to reduce false positives
+    # Options: HIGH (recommended), MEDIUM, LOW
+    # HIGH confidence = fewer false positives, may miss some low-confidence issues
+    SAST_CONFIDENCE_LEVEL: "HIGH"
+
+    # T050: Exclude paths from scanning (performance optimization + reduce noise)
+    # - tests/: Test files often contain intentional vulnerable code for testing
+    # - docs/: Documentation contains code examples that may trigger false positives
+    SAST_EXCLUDED_PATHS: "tests/,docs/"
+
+  # T048: Configure artifact output (JSON report for GitLab Security Dashboard)
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
+    paths:
+      - gl-sast-report.json
+    expire_in: 30 days
+    when: always  # Preserve report even if job fails
+
+  # Run on merge requests and main branch
+  only:
+    - merge_requests
+    - main
+    - master
+
+  # T051: Warning-only mode (don't block merge)
+  # SAST findings are informational and should be reviewed but not block deployment
+  # This allows teams to gradually improve security posture without disrupting workflow
+  allow_failure: true
 
   # Job timeout (within 5-minute performance requirement)
   timeout: 5 minutes
