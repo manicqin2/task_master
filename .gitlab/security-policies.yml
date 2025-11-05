@@ -1,0 +1,383 @@
+# GitLab Security Policies Configuration
+# Feature: 002-gitlab-security-pipeline
+# Purpose: Define merge request blocking rules and approval requirements based on security scan findings
+#
+# Documentation:
+# - Security Policies: https://docs.gitlab.com/ee/user/application_security/policies/
+# - Scan Result Policies: https://docs.gitlab.com/ee/user/application_security/policies/scan-result-policies.html
+#
+# GitLab Tier Requirements:
+# - Security Policies: ULTIMATE tier (requires license)
+# - Note: This file provides configuration examples but won't enforce in FREE tier
+#
+# Policy Enforcement Hierarchy:
+# 1. Critical: BLOCK merge (pipeline fails, MR cannot be merged)
+# 2. High: BLOCK merge (pipeline fails, MR cannot be merged)
+# 3. Medium: REQUIRE approval (MR can merge after security team approval)
+# 4. Low: WARN only (visible in Security Dashboard, doesn't block)
+# ==============================================================================
+
+schema_version: "2.0"
+
+# ==============================================================================
+# Secret Detection Policy (T057)
+# ==============================================================================
+# Purpose: Block merges containing hardcoded secrets (API keys, passwords, tokens)
+# Scanner: Gitleaks
+# Rationale: Secrets in version control are immediately exploitable and can't be
+#            easily rotated once committed to history
+#
+# Policy Rules:
+# - Critical secrets (AWS keys, GitHub tokens, private keys): BLOCK merge
+# - High severity secrets (generic API keys, database passwords): BLOCK merge
+# - Medium severity (weak passwords, potential secrets): WARN
+# - Low severity (test credentials in test files): WARN
+#
+# Override Mechanism:
+# - Add pattern to .gitleaksignore for documentation examples
+# - Use risk acceptance (below) for false positives
+# - Requires security team approval for genuine secrets needing exception
+# ==============================================================================
+
+secret_detection_policy:
+  enabled: true
+  description: "Block merges containing hardcoded secrets (Critical/High severity)"
+
+  rules:
+    - severity: critical
+      action: block
+      reason: "Critical secrets (AWS keys, GitHub tokens, private keys) expose systems to immediate compromise"
+
+    - severity: high
+      action: block
+      reason: "High severity secrets (API keys, DB passwords) must be removed before merge"
+
+    - severity: medium
+      action: warn
+      reason: "Medium severity findings require review but don't block merge"
+
+    - severity: low
+      action: warn
+      reason: "Low severity findings are informational only"
+
+  exemptions:
+    # Example: Document false positives that shouldn't block
+    - pattern: "EXAMPLE_API_KEY"
+      reason: "Documentation example, not a real secret"
+      expires: null  # Permanent exemption
+
+    - pattern: "test_secret_key_12345"
+      reason: "Test fixture used in automated tests"
+      file_path: "tests/**/*"
+      expires: null
+
+# ==============================================================================
+# Dependency Scanning Policy (T058)
+# ==============================================================================
+# Purpose: Block merges with vulnerable npm/Python dependencies containing known CVEs
+# Scanner: Gemnasium
+# Rationale: Critical/High CVEs in dependencies can be exploited if not patched
+#
+# Policy Rules:
+# - Critical CVEs (CVSS 9.0-10.0): BLOCK merge, patch immediately
+# - High CVEs (CVSS 7.0-8.9): BLOCK merge, patch required
+# - Medium CVEs (CVSS 4.0-6.9): REQUIRE approval (can accept risk with justification)
+# - Low CVEs (CVSS 0.1-3.9): WARN (track for future patching)
+#
+# Risk Acceptance Workflow:
+# 1. Developer identifies CVE with no available patch
+# 2. Opens security exception ticket with:
+#    - CVE ID and severity
+#    - Business justification for accepting risk
+#    - Mitigation measures (WAF rules, network isolation, etc.)
+#    - Expiration date (30-90 days recommended)
+# 3. Security team reviews and approves/denies
+# 4. If approved, add to exemptions below
+# 5. Re-review at expiration date
+# ==============================================================================
+
+dependency_scanning_policy:
+  enabled: true
+  description: "Block merges with critical/high CVEs in dependencies, require approval for medium"
+
+  rules:
+    - severity: critical
+      action: block
+      reason: "Critical CVEs (CVSS 9.0-10.0) require immediate patching - upgrade dependency"
+
+    - severity: high
+      action: block
+      reason: "High CVEs (CVSS 7.0-8.9) must be patched before merge"
+
+    - severity: medium
+      action: require_approval
+      approvers:
+        - security-team
+      reason: "Medium CVEs require security team approval and risk acceptance"
+
+    - severity: low
+      action: warn
+      reason: "Low CVEs are tracked but don't block - plan for future patching"
+
+  exemptions:
+    # Example: CVE with no available patch, risk accepted temporarily
+    - cve: "CVE-2023-XXXXX"
+      package: "example-package"
+      version: "1.2.3"
+      reason: "No patch available, isolated environment, WAF rules applied"
+      approved_by: "security-team@example.com"
+      expires: "2025-12-31"  # Re-review in 30-90 days
+      ticket: "SEC-1234"
+
+    # Example: Transitive dependency with no direct upgrade path
+    - cve: "CVE-2024-YYYYY"
+      package: "transitive-dep"
+      version: "2.0.0"
+      reason: "Transitive dependency of locked framework version, upgrade planned for Q2"
+      approved_by: "security-team@example.com"
+      expires: "2025-06-30"
+      ticket: "SEC-5678"
+
+# ==============================================================================
+# SAST Policy (T059)
+# ==============================================================================
+# Purpose: Enforce code review for critical security anti-patterns (SQL injection, XSS, weak crypto)
+# Scanner: Semgrep
+# Rationale: Code-level vulnerabilities require developer education and secure coding practices
+#
+# Policy Rules:
+# - Critical findings (SQL injection, command injection): REQUIRE approval
+# - High findings (XSS, weak crypto, hardcoded secrets): REQUIRE approval
+# - Medium findings (insecure random, deprecated functions): WARN
+# - Low findings (code smells, best practice violations): WARN
+#
+# Note: SAST is configured as warning-only (allow_failure: true) in .gitlab-ci.yml
+#       This policy layer adds approval requirements without hard blocking
+#       Allows gradual adoption of SAST without disrupting existing workflows
+#
+# False Positive Handling:
+# - Add inline suppression comment in code with justification:
+#   Python: # nosec B303 (MD5 used for non-security checksum)
+#   JavaScript: // eslint-disable-next-line security/detect-sql-injection
+# - Document in code review why finding is not exploitable
+# ==============================================================================
+
+sast_policy:
+  enabled: true
+  description: "Require security approval for critical/high SAST findings (SQL injection, XSS, weak crypto)"
+
+  rules:
+    - severity: critical
+      action: require_approval
+      approvers:
+        - security-team
+        - senior-developers
+      reason: "Critical code vulnerabilities (SQL injection, command injection) require expert review"
+
+    - severity: high
+      action: require_approval
+      approvers:
+        - security-team
+        - senior-developers
+      reason: "High severity findings (XSS, weak crypto) need security team review"
+
+    - severity: medium
+      action: warn
+      reason: "Medium findings are informational - consider fixing in future refactoring"
+
+    - severity: low
+      action: warn
+      reason: "Low findings track code quality but don't require immediate action"
+
+  exemptions:
+    # Example: MD5 used for non-security purpose (file checksums, cache keys)
+    - finding_id: "python.lang.security.audit.insecure-hash-function.insecure-hash-md5"
+      file_path: "src/utils/cache.py"
+      reason: "MD5 used for cache key generation, not cryptographic security"
+      approved_by: "security-team@example.com"
+      expires: null  # Permanent - use case justified
+
+    # Example: eval() in controlled environment (configuration DSL)
+    - finding_id: "javascript.lang.security.audit.eval-detected"
+      file_path: "src/config/parser.js"
+      reason: "eval() used in sandboxed configuration parser with input validation"
+      approved_by: "security-team@example.com"
+      expires: "2025-12-31"  # Re-review when refactoring to AST parser
+
+# ==============================================================================
+# Global Settings (T060)
+# ==============================================================================
+# Purpose: Configure cross-cutting policy settings (protected branches, notifications, dashboard)
+#
+# Protected Branches:
+# - main/master: All policies enforced
+# - release/*: All policies enforced
+# - develop: Warning-only (for rapid iteration)
+#
+# Notification Settings:
+# - Critical/High findings: Email + Slack to security-team
+# - Medium findings: Security Dashboard only
+# - Low findings: Dashboard only, weekly digest
+# ==============================================================================
+
+global_settings:
+  # Protected branches where policies are strictly enforced
+  protected_branches:
+    - main
+    - master
+    - release/*
+    - production
+
+  # Branches where policies are advisory only (warn but don't block)
+  advisory_branches:
+    - develop
+    - feature/*
+    - hotfix/*
+
+  # Notification configuration
+  notifications:
+    enabled: true
+
+    # Critical findings: Immediate notification
+    critical:
+      channels:
+        - email: security-team@example.com
+        - slack: "#security-alerts"
+      message: "🚨 Critical security finding detected - merge blocked"
+
+    # High findings: Immediate notification
+    high:
+      channels:
+        - email: security-team@example.com
+        - slack: "#security-alerts"
+      message: "⚠️ High severity security finding - merge blocked"
+
+    # Medium findings: Dashboard notification
+    medium:
+      channels:
+        - dashboard: true
+      message: "Security finding requires review and approval"
+
+    # Low findings: Weekly digest
+    low:
+      channels:
+        - dashboard: true
+      digest: weekly
+      message: "Low severity findings tracked for future remediation"
+
+  # Security Dashboard configuration
+  dashboard:
+    enabled: true
+    retention_days: 90  # Keep vulnerability history for 90 days
+
+    # Auto-remediation suggestions
+    auto_fix_suggestions: true
+
+    # Vulnerability trending
+    trend_analysis: true
+    trend_period_days: 30
+
+  # Policy enforcement settings
+  enforcement:
+    # Allow security team to override blocking policies
+    allow_security_override: true
+    override_requires_mfa: true
+
+    # Grace period for existing vulnerabilities (migration)
+    grace_period_days: 0  # No grace period - enforce immediately
+
+    # Pipeline behavior when scanner fails
+    scanner_failure_action: warn  # Don't block if scanner times out or errors
+
+# ==============================================================================
+# Risk Acceptance Workflow (T078)
+# ==============================================================================
+# Purpose: Document process for accepting security risks when patching is not immediately feasible
+#
+# Process:
+# 1. Developer identifies finding that cannot be immediately fixed:
+#    - CVE with no available patch
+#    - Breaking change in dependency upgrade
+#    - SAST finding in third-party code
+#    - Performance-critical code requiring refactoring
+#
+# 2. Create security exception ticket:
+#    - Ticket ID: SEC-XXXX
+#    - Finding: CVE ID, CWE ID, or scanner finding ID
+#    - Severity: Critical, High, Medium, Low
+#    - Justification: Business reason for accepting risk
+#    - Mitigation: Compensating controls (WAF, network isolation, input validation)
+#    - Expiration: 30-90 days recommended (never permanent for Critical/High)
+#
+# 3. Security team review:
+#    - Assess exploitability and impact
+#    - Verify compensating controls
+#    - Approve or deny with feedback
+#    - Set expiration based on severity:
+#      - Critical: Max 30 days
+#      - High: Max 60 days
+#      - Medium: Max 90 days
+#      - Low: Can be permanent with justification
+#
+# 4. Add exemption to appropriate policy section above
+#    - Include all required fields: cve/finding_id, reason, approved_by, expires, ticket
+#
+# 5. Track and review:
+#    - Security team monitors expiring exemptions
+#    - Developer notified 7 days before expiration
+#    - Must re-justify or remediate before expiration
+#    - Expired exemptions automatically removed, MRs blocked again
+#
+# Example:
+# exemptions:
+#   - cve: "CVE-2024-12345"
+#     package: "critical-lib"
+#     version: "1.0.0"
+#     reason: "No patch available, isolated in DMZ with WAF rules"
+#     mitigation: "ModSecurity WAF rules block all exploit attempts, network isolated"
+#     approved_by: "security-lead@example.com"
+#     expires: "2025-12-05"  # 30 days from approval
+#     ticket: "SEC-9876"
+#     review_notes: "Vendor notified, patch ETA 4-6 weeks"
+# ==============================================================================
+
+# ==============================================================================
+# Exemption Expiration Handling (T079)
+# ==============================================================================
+# Purpose: Document automated handling of expired risk acceptances
+#
+# Expiration Monitoring:
+# - Automated daily scan of all exemptions
+# - Notifications sent 7 days, 3 days, and 1 day before expiration
+# - Expired exemptions are automatically disabled (not deleted)
+#
+# Notification Schedule:
+# - T-7 days: Email to approved_by and developer
+# - T-3 days: Email + Slack notification
+# - T-1 day: Urgent notification to security team
+# - T-0 (expired): Exemption disabled, merge blocked
+#
+# Post-Expiration:
+# - Developer has 3 options:
+#   1. Fix the vulnerability (recommended)
+#   2. Re-justify and request extension (requires security approval)
+#   3. Permanently accept risk (requires VP approval for Critical/High)
+#
+# - Expired exemptions remain in file with status: expired
+# - Can be reactivated with new approval and expiration date
+# - Historical record maintained for audit purposes
+#
+# Example Expired Exemption:
+# exemptions:
+#   - cve: "CVE-2024-12345"
+#     status: expired  # Automatically added on expiration
+#     original_expires: "2025-11-05"
+#     reason: "No patch available"
+#     history:
+#       - approved: "2025-10-01"
+#         approved_by: "security@example.com"
+#         expires: "2025-11-05"
+#       - expired: "2025-11-05"
+#         action: "Exemption disabled, merge blocked"
+#     next_action: "Fix vulnerability or request extension via SEC-9876"
+# ==============================================================================

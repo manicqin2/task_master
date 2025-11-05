@@ -163,28 +163,28 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 ### Security Policy Configuration
 
-- [ ] T056 [P] Create .gitlab/security-policies.yml with schema_version and structure
-- [ ] T057 [P] Configure secret_detection_policy in .gitlab/security-policies.yml (critical/high block, medium/low warn)
-- [ ] T058 [P] Configure dependency_scanning_policy in .gitlab/security-policies.yml (critical/high block, medium require approval)
-- [ ] T059 [P] Configure sast_policy in .gitlab/security-policies.yml (critical/high require approval, medium/low warn)
-- [ ] T060 Configure global_settings in .gitlab/security-policies.yml (protected branches, notification settings)
+- [X] T056 [P] Create .gitlab/security-policies.yml with schema_version and structure
+- [X] T057 [P] Configure secret_detection_policy in .gitlab/security-policies.yml (critical/high block, medium/low warn)
+- [X] T058 [P] Configure dependency_scanning_policy in .gitlab/security-policies.yml (critical/high block, medium require approval)
+- [X] T059 [P] Configure sast_policy in .gitlab/security-policies.yml (critical/high require approval, medium/low warn)
+- [X] T060 Configure global_settings in .gitlab/security-policies.yml (protected branches, notification settings)
 
 ### Report Schema Validation
 
-- [ ] T061 [P] Validate secret-detection report against GitLab schema v15.0.0 using contracts/security-report-schema.json
-- [ ] T062 [P] Validate dependency-scanning report against GitLab schema v15.0.0
-- [ ] T063 [P] Validate sast report against GitLab schema v15.0.0
-- [ ] T064 Verify all reports have required fields (version, scan, vulnerabilities)
+- [X] T061 [P] Validate secret-detection report against GitLab schema v15.0.0 using contracts/security-report-schema.json
+- [X] T062 [P] Validate dependency-scanning report against GitLab schema v15.0.0
+- [X] T063 [P] Validate sast report against GitLab schema v15.0.0
+- [X] T064 Verify all reports have required fields (version, scan, vulnerabilities)
 
 ### Dashboard Integration Testing
 
-- [ ] T065 Create test merge request with secret to verify pipeline failure
-- [ ] T066 Verify Security Dashboard ingests secret-detection findings
-- [ ] T067 Verify merge request blocked by policy for critical secret
-- [ ] T068 Create test merge request with vulnerable dependency to verify CVE reporting
-- [ ] T069 Verify Security Dashboard ingests dependency-scanning findings
-- [ ] T070 Create test merge request with SAST finding to verify warning-only behavior
-- [ ] T071 Verify Security Dashboard shows all scan types and severity levels
+- [X] T065 Create test merge request with secret to verify pipeline failure
+- [X] T066 Verify Security Dashboard ingests secret-detection findings
+- [X] T067 Verify merge request blocked by policy for critical secret
+- [X] T068 Create test merge request with vulnerable dependency to verify CVE reporting
+- [X] T069 Verify Security Dashboard ingests dependency-scanning findings
+- [X] T070 Create test merge request with SAST finding to verify warning-only behavior
+- [X] T071 Verify Security Dashboard shows all scan types and severity levels
 
 **Checkpoint**: Security Dashboard integrated - All scanners report to dashboard, policies enforce blocking rules
 
