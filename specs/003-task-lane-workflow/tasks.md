@@ -210,29 +210,29 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### RED Phase - Write Failing Backend Tests First
 
-- [ ] T086 [P] [US3] Write contract test: POST /api/tasks/:id/retry returns 200 with task in backend/tests/contract/test_task_api.py
-- [ ] T087 [P] [US3] Write contract test: POST /api/tasks/:id/retry returns 404 for non-existent task in backend/tests/contract/test_task_api.py
-- [ ] T088 [P] [US3] Write integration test: Retry endpoint re-enqueues task to enrichment queue in backend/tests/integration/test_task_retry.py
-- [ ] T089 [P] [US3] Write integration test: Retry endpoint resets task status to 'pending' in backend/tests/integration/test_task_retry.py
-- [ ] T090 [P] [US3] Write integration test: Retry endpoint is idempotent (multiple retries safe) in backend/tests/integration/test_task_retry.py
+- [X] T086 [P] [US3] Write contract test: POST /api/tasks/:id/retry returns 200 with task in backend/tests/contract/test_task_api.py
+- [X] T087 [P] [US3] Write contract test: POST /api/tasks/:id/retry returns 404 for non-existent task in backend/tests/contract/test_task_api.py
+- [X] T088 [P] [US3] Write integration test: Retry endpoint re-enqueues task to enrichment queue in backend/tests/integration/test_task_retry.py
+- [X] T089 [P] [US3] Write integration test: Retry endpoint resets task status to 'pending' in backend/tests/integration/test_task_retry.py
+- [X] T090 [P] [US3] Write integration test: Retry endpoint is idempotent (multiple retries safe) in backend/tests/integration/test_task_retry.py
 
 **Verify**: Run backend tests with `pytest` - NEW tests should FAIL (RED phase complete)
 
 ### GREEN Phase - Minimal Backend Implementation
 
-- [ ] T091 [US3] Implement POST /api/tasks/:id/retry endpoint in backend/src/api/tasks.py
-- [ ] T092 [US3] Add retry logic to re-enqueue task to enrichment queue in backend/src/api/tasks.py
-- [ ] T093 [US3] Add retry logic to reset task status to 'pending' in backend/src/api/tasks.py
-- [ ] T094 [US3] Add error handling for non-existent task (404 response) in backend/src/api/tasks.py
-- [ ] T095 [US3] Add idempotency check to retry endpoint in backend/src/api/tasks.py
+- [X] T091 [US3] Implement POST /api/tasks/:id/retry endpoint in backend/src/api/tasks.py
+- [X] T092 [US3] Add retry logic to re-enqueue task to enrichment queue in backend/src/api/tasks.py
+- [X] T093 [US3] Add retry logic to reset task status to 'pending' in backend/src/api/tasks.py
+- [X] T094 [US3] Add error handling for non-existent task (404 response) in backend/src/api/tasks.py
+- [X] T095 [US3] Add idempotency check to retry endpoint in backend/src/api/tasks.py
 
 **Verify**: Run backend tests with `pytest` - ALL tests should PASS (GREEN phase complete)
 
 ### REFACTOR Phase - Optimize Backend Code
 
-- [ ] T096 [US3] Extract retry logic to TaskService.retry_task method in backend/src/services/task_service.py
-- [ ] T097 [US3] Add logging for retry operations in backend/src/api/tasks.py
-- [ ] T098 [US3] Add retry endpoint to OpenAPI documentation in backend/src/api/tasks.py
+- [X] T096 [US3] Extract retry logic to TaskService.retry_task method in backend/src/services/task_service.py
+- [X] T097 [US3] Add logging for retry operations in backend/src/api/tasks.py
+- [X] T098 [US3] Add retry endpoint to OpenAPI documentation in backend/src/api/tasks.py
 
 ---
 
