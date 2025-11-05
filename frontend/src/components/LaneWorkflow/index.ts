@@ -7,6 +7,7 @@
 export { LaneWorkflow } from './LaneWorkflow'
 export { Lane } from './Lane'
 export { TaskCard } from './TaskCard'
+export { TaskCardErrorBoundary } from './TaskCardErrorBoundary'
 
 export type { LaneWorkflowProps } from './LaneWorkflow'
 export type { LaneProps } from './Lane'

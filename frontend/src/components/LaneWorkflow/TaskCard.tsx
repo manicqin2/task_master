@@ -61,7 +61,10 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.3 }}
+      transition={{
+        duration: 0.18, // Optimized to <200ms for cancel action
+        ease: 'easeOut' // Smoother easing for better perceived performance
+      }}
       className={`p-3 bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}
     >
       {/* Task Title */}

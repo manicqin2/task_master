@@ -13,6 +13,7 @@ import { AnimatePresence } from 'framer-motion'
 import { TaskWithLane, LaneConfig } from '@/types/task'
 import { TaskCard } from './TaskCard'
 import { LaneHeader } from './LaneHeader'
+import { TaskCardErrorBoundary } from './TaskCardErrorBoundary'
 
 export interface LaneProps {
   /**
@@ -64,11 +65,12 @@ export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, clas
         ) : (
           <AnimatePresence mode="popLayout">
             {tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onAction={(action) => onTaskAction(task.id, action)}
-              />
+              <TaskCardErrorBoundary key={task.id} taskId={task.id}>
+                <TaskCard
+                  task={task}
+                  onAction={(action) => onTaskAction(task.id, action)}
+                />
+              </TaskCardErrorBoundary>
             ))}
           </AnimatePresence>
         )}

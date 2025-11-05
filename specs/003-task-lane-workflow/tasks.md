@@ -28,14 +28,14 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 **Purpose**: Project initialization and basic structure for lane workflow feature
 
-- [ ] T001 Install framer-motion dependency in frontend/package.json (^10.0.0)
-- [ ] T002 [P] Create directory structure frontend/src/components/LaneWorkflow/
-- [ ] T003 [P] Create directory structure frontend/src/hooks/ (if not exists)
-- [ ] T004 [P] Create directory structure frontend/tests/e2e/ (if not exists)
-- [ ] T005 [P] Create TypeScript types file frontend/src/types/task.ts for TaskWithLane interface
-- [ ] T006 [P] Configure Playwright E2E test environment in frontend/playwright.config.ts (if not exists)
-- [ ] T007 [P] Create test directory frontend/src/components/LaneWorkflow/__tests__/
-- [ ] T008 [P] Create test directory frontend/src/hooks/__tests__/
+- [X] T001 Install framer-motion dependency in frontend/package.json (^10.0.0)
+- [X] T002 [P] Create directory structure frontend/src/components/LaneWorkflow/
+- [X] T003 [P] Create directory structure frontend/src/hooks/ (if not exists)
+- [X] T004 [P] Create directory structure frontend/tests/e2e/ (if not exists)
+- [X] T005 [P] Create TypeScript types file frontend/src/types/task.ts for TaskWithLane interface
+- [X] T006 [P] Configure Playwright E2E test environment in frontend/playwright.config.ts (if not exists)
+- [X] T007 [P] Create test directory frontend/src/components/LaneWorkflow/__tests__/
+- [X] T008 [P] Create test directory frontend/src/hooks/__tests__/
 
 ---
 
@@ -47,21 +47,21 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Types and Constants
 
-- [ ] T009 Define TaskWithLane interface extending Task in frontend/src/types/task.ts
-- [ ] T010 [P] Define LaneType union type ('pending' | 'error' | 'finished') in frontend/src/types/task.ts
-- [ ] T011 [P] Define ActionEmblemType union type ('cancel' | 'retry' | 'confirm' | 'expand') in frontend/src/types/task.ts
-- [ ] T012 Create LANE_CONFIGS constant in frontend/src/lib/laneConfigs.ts with lane metadata (labels, colors, order)
-- [ ] T013 [P] Create ACTION_EMBLEM_CONFIGS constant in frontend/src/lib/actionEmblemConfigs.ts with emblem metadata (icons, tooltips, colors)
+- [X] T009 Define TaskWithLane interface extending Task in frontend/src/types/task.ts
+- [X] T010 [P] Define LaneType union type ('pending' | 'error' | 'finished') in frontend/src/types/task.ts
+- [X] T011 [P] Define ActionEmblemType union type ('cancel' | 'retry' | 'confirm' | 'expand') in frontend/src/types/task.ts
+- [X] T012 Create LANE_CONFIGS constant in frontend/src/lib/laneConfigs.ts with lane metadata (labels, colors, order)
+- [X] T013 [P] Create ACTION_EMBLEM_CONFIGS constant in frontend/src/lib/actionEmblemConfigs.ts with emblem metadata (icons, tooltips, colors)
 
 ### API Client Extension
 
-- [ ] T014 Add retry method to taskApi service in frontend/src/services/taskApi.ts for POST /api/tasks/:id/retry
+- [X] T014 Add retry method to taskApi service in frontend/src/services/taskApi.ts for POST /api/tasks/:id/retry
 
 ### Base Hook Infrastructure
 
-- [ ] T015 Create empty useLaneWorkflow.ts hook file in frontend/src/hooks/useLaneWorkflow.ts
-- [ ] T016 [P] Create empty useTaskActions.ts hook file in frontend/src/hooks/useTaskActions.ts
-- [ ] T017 [P] Create empty useTimeoutDetection.ts hook file in frontend/src/hooks/useTimeoutDetection.ts
+- [X] T015 Create empty useLaneWorkflow.ts hook file in frontend/src/hooks/useLaneWorkflow.ts
+- [X] T016 [P] Create empty useTaskActions.ts hook file in frontend/src/hooks/useTaskActions.ts
+- [X] T017 [P] Create empty useTimeoutDetection.ts hook file in frontend/src/hooks/useTimeoutDetection.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -75,41 +75,41 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### RED Phase - Write Failing Tests First (US1)
 
-- [ ] T018 [P] [US1] Write test: LaneWorkflow renders three lanes with correct labels in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
-- [ ] T019 [P] [US1] Write test: Lane component displays tasks passed as props in frontend/src/components/LaneWorkflow/__tests__/Lane.test.tsx
-- [ ] T020 [P] [US1] Write test: TaskCard renders task title and status in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T021 [P] [US1] Write test: useLaneWorkflow hook derives lanes from task status in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
-- [ ] T022 [P] [US1] Write test: Tasks with status 'pending' appear in Pending lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
-- [ ] T023 [P] [US1] Write test: Tasks with status 'error' appear in Error/More Info lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
-- [ ] T024 [P] [US1] Write test: Tasks with status 'completed' appear in Finished lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
-- [ ] T025 [P] [US1] Write test: Tasks within each lane ordered chronologically (newest first) in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
-- [ ] T026 [P] [US1] Write test: LaneWorkflow uses CSS Grid layout for three columns in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
+- [X] T018 [P] [US1] Write test: LaneWorkflow renders three lanes with correct labels in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
+- [X] T019 [P] [US1] Write test: Lane component displays tasks passed as props in frontend/src/components/LaneWorkflow/__tests__/Lane.test.tsx
+- [X] T020 [P] [US1] Write test: TaskCard renders task title and status in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T021 [P] [US1] Write test: useLaneWorkflow hook derives lanes from task status in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
+- [X] T022 [P] [US1] Write test: Tasks with status 'pending' appear in Pending lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
+- [X] T023 [P] [US1] Write test: Tasks with status 'error' appear in Error/More Info lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
+- [X] T024 [P] [US1] Write test: Tasks with status 'completed' appear in Finished lane in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
+- [X] T025 [P] [US1] Write test: Tasks within each lane ordered chronologically (newest first) in frontend/src/hooks/__tests__/useLaneWorkflow.test.ts
+- [X] T026 [P] [US1] Write test: LaneWorkflow uses CSS Grid layout for three columns in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
 
 **Verify**: Run tests with `npm test` - ALL tests should FAIL (RED phase complete)
 
 ### GREEN Phase - Minimal Implementation (US1)
 
-- [ ] T027 [US1] Implement LaneWorkflow component with CSS Grid layout in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
-- [ ] T028 [US1] Implement Lane component with basic task list rendering in frontend/src/components/LaneWorkflow/Lane.tsx
-- [ ] T029 [US1] Implement TaskCard component with basic task display (no emblems yet) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T030 [US1] Implement useLaneWorkflow hook with lane derivation logic in frontend/src/hooks/useLaneWorkflow.ts
-- [ ] T031 [US1] Add chronological sorting (newest first) to useLaneWorkflow hook in frontend/src/hooks/useLaneWorkflow.ts
-- [ ] T032 [US1] Wire up LaneWorkflow in TasksPage.tsx to replace TaskList component in frontend/src/pages/TasksPage.tsx
-- [ ] T033 [US1] Add Framer Motion AnimatePresence wrapper to LaneWorkflow in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
-- [ ] T034 [US1] Add Framer Motion layout animation to TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T035 [US1] Create index.ts barrel export for LaneWorkflow components in frontend/src/components/LaneWorkflow/index.ts
+- [X] T027 [US1] Implement LaneWorkflow component with CSS Grid layout in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
+- [X] T028 [US1] Implement Lane component with basic task list rendering in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T029 [US1] Implement TaskCard component with basic task display (no emblems yet) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T030 [US1] Implement useLaneWorkflow hook with lane derivation logic in frontend/src/hooks/useLaneWorkflow.ts
+- [X] T031 [US1] Add chronological sorting (newest first) to useLaneWorkflow hook in frontend/src/hooks/useLaneWorkflow.ts
+- [X] T032 [US1] Wire up LaneWorkflow in TasksPage.tsx to replace TaskList component in frontend/src/pages/TasksPage.tsx
+- [X] T033 [US1] Add Framer Motion AnimatePresence wrapper to LaneWorkflow in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
+- [X] T034 [US1] Add Framer Motion layout animation to TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T035 [US1] Create index.ts barrel export for LaneWorkflow components in frontend/src/components/LaneWorkflow/index.ts
 
 **Verify**: Run tests with `npm test` - ALL tests should PASS (GREEN phase complete)
 
 ### REFACTOR Phase - Optimize and Extract (US1)
 
-- [ ] T036 [US1] Extract LaneHeader subcomponent from Lane component in frontend/src/components/LaneWorkflow/LaneHeader.tsx
-- [ ] T037 [US1] Apply React.memo to TaskCard component for render optimization in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T038 [US1] Apply React.memo to Lane component for render optimization in frontend/src/components/LaneWorkflow/Lane.tsx
-- [ ] T039 [US1] Extract useLaneTransition animation hook from LaneWorkflow in frontend/src/hooks/useLaneTransition.ts
-- [ ] T040 [US1] Optimize Framer Motion animation performance (target <300ms) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T041 [US1] Add ARIA labels for accessibility to Lane component in frontend/src/components/LaneWorkflow/Lane.tsx
-- [ ] T042 [US1] Add ARIA labels for accessibility to LaneWorkflow component in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
+- [X] T036 [US1] Extract LaneHeader subcomponent from Lane component in frontend/src/components/LaneWorkflow/LaneHeader.tsx
+- [X] T037 [US1] Apply React.memo to TaskCard component for render optimization in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T038 [US1] Apply React.memo to Lane component for render optimization in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T039 [US1] Extract useLaneTransition animation hook from LaneWorkflow in frontend/src/hooks/useLaneTransition.ts
+- [X] T040 [US1] Optimize Framer Motion animation performance (target <300ms) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T041 [US1] Add ARIA labels for accessibility to Lane component in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T042 [US1] Add ARIA labels for accessibility to LaneWorkflow component in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
 
 **Checkpoint**: User Story 1 complete and independently testable. Users can now visualize tasks in lanes.
 
@@ -123,36 +123,36 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### RED Phase - Write Failing Tests First (US2)
 
-- [ ] T043 [P] [US2] Write test: ActionEmblem component renders button with icon in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
-- [ ] T044 [P] [US2] Write test: ActionEmblem shows tooltip on hover in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
-- [ ] T045 [P] [US2] Write test: ActionEmblem calls onClick handler when clicked in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
-- [ ] T046 [P] [US2] Write test: Cancel emblem appears in TaskCard when lane is 'pending' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T047 [P] [US2] Write test: Cancel emblem does NOT appear in TaskCard when lane is 'error' or 'finished' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T048 [P] [US2] Write test: useTaskActions hook has cancel mutation in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T049 [P] [US2] Write test: Cancel mutation performs optimistic update (removes task from UI) in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T050 [P] [US2] Write test: Cancel mutation does NOT call backend API in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T051 [P] [US2] Write test: Clicking cancel emblem removes task from Pending lane in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
+- [X] T043 [P] [US2] Write test: ActionEmblem component renders button with icon in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
+- [X] T044 [P] [US2] Write test: ActionEmblem shows tooltip on hover in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
+- [X] T045 [P] [US2] Write test: ActionEmblem calls onClick handler when clicked in frontend/src/components/LaneWorkflow/__tests__/ActionEmblem.test.tsx
+- [X] T046 [P] [US2] Write test: Cancel emblem appears in TaskCard when lane is 'pending' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T047 [P] [US2] Write test: Cancel emblem does NOT appear in TaskCard when lane is 'error' or 'finished' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T048 [P] [US2] Write test: useTaskActions hook has cancel mutation in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T049 [P] [US2] Write test: Cancel mutation performs optimistic update (removes task from UI) in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T050 [P] [US2] Write test: Cancel mutation does NOT call backend API in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T051 [P] [US2] Write test: Clicking cancel emblem removes task from Pending lane in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
 
 **Verify**: Run tests with `npm test` - NEW tests should FAIL (RED phase complete)
 
 ### GREEN Phase - Minimal Implementation (US2)
 
-- [ ] T052 [US2] Implement ActionEmblem component with Button and Tooltip in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
-- [ ] T053 [US2] Add cancel emblem rendering to TaskCard (Pending lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T054 [US2] Implement useTaskActions hook with cancel mutation using TanStack Query in frontend/src/hooks/useTaskActions.ts
-- [ ] T055 [US2] Configure optimistic update in cancel mutation (remove from cache) in frontend/src/hooks/useTaskActions.ts
-- [ ] T056 [US2] Wire up cancel emblem onClick to useTaskActions.cancel in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T057 [US2] Add Framer Motion exit animation to TaskCard when removed in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T058 [US2] Configure AnimatePresence in Lane component to handle task removal in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T052 [US2] Implement ActionEmblem component with Button and Tooltip in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T053 [US2] Add cancel emblem rendering to TaskCard (Pending lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T054 [US2] Implement useTaskActions hook with cancel mutation using TanStack Query in frontend/src/hooks/useTaskActions.ts
+- [X] T055 [US2] Configure optimistic update in cancel mutation (remove from cache) in frontend/src/hooks/useTaskActions.ts
+- [X] T056 [US2] Wire up cancel emblem onClick to useTaskActions.cancel in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T057 [US2] Add Framer Motion exit animation to TaskCard when removed in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T058 [US2] Configure AnimatePresence in Lane component to handle task removal in frontend/src/components/LaneWorkflow/Lane.tsx
 
 **Verify**: Run tests with `npm test` - ALL tests should PASS (GREEN phase complete)
 
 ### REFACTOR Phase - Optimize and Extract (US2)
 
-- [ ] T059 [US2] Extract getEmblemsForLane utility function in frontend/src/lib/emblemUtils.ts
-- [ ] T060 [US2] Extract useEmblemVisibility hook from TaskCard in frontend/src/hooks/useEmblemVisibility.ts
-- [ ] T061 [US2] Optimize cancel animation performance (target <200ms) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T062 [US2] Add error boundary for cancel action failures in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T059 [US2] Extract getEmblemsForLane utility function in frontend/src/lib/emblemUtils.ts
+- [X] T060 [US2] Extract useEmblemVisibility hook from TaskCard in frontend/src/hooks/useEmblemVisibility.ts
+- [X] T061 [US2] Optimize cancel animation performance (target <200ms) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T062 [US2] Add error boundary for cancel action failures in frontend/src/components/LaneWorkflow/TaskCard.tsx
 
 **Checkpoint**: User Story 2 complete. Users can now cancel tasks in Pending lane.
 
