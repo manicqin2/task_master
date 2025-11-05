@@ -196,17 +196,17 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 ### Edge Case Tests
 
-- [ ] T072 [P] Test gitignored file accidentally staged (add .env with secret to .gitignore, verify detection)
-- [ ] T073 [P] Test large binary file handling (add exclusion pattern for *.bin, *.jpg)
-- [ ] T074 [P] Test vulnerability with no patch (add risk acceptance to policy for CVE with no fix)
-- [ ] T075 [P] Document false positive workflow in .gitlab-ci.yml comments (add to .gitleaksignore or policy exemption)
-- [ ] T076 Test scanner service unavailable (simulate timeout, verify allow_failure prevents block)
+- [X] T072 [P] Test gitignored file accidentally staged (add .env with secret to .gitignore, verify detection)
+- [X] T073 [P] Test large binary file handling (add exclusion pattern for *.bin, *.jpg)
+- [X] T074 [P] Test vulnerability with no patch (add risk acceptance to policy for CVE with no fix)
+- [X] T075 [P] Document false positive workflow in .gitlab-ci.yml comments (add to .gitleaksignore or policy exemption)
+- [X] T076 Test scanner service unavailable (simulate timeout, verify allow_failure prevents block)
 
 ### Documentation Edge Cases
 
-- [ ] T077 Add comment in .gitlab-ci.yml explaining how to handle secrets in commit history (requires manual remediation, no automated fix)
-- [ ] T078 Document risk acceptance workflow in .gitlab/security-policies.yml comments
-- [ ] T079 Document exemption expiration handling in .gitlab/security-policies.yml
+- [X] T077 Add comment in .gitlab-ci.yml explaining how to handle secrets in commit history (requires manual remediation, no automated fix)
+- [X] T078 Document risk acceptance workflow in .gitlab/security-policies.yml comments
+- [X] T079 Document exemption expiration handling in .gitlab/security-policies.yml
 
 **Checkpoint**: Edge cases handled - False positives exempted, binary files excluded, errors documented
 

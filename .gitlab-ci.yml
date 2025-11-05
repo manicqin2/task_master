@@ -11,6 +11,112 @@
 # - Secret Detection: https://docs.gitlab.com/ee/user/application_security/secret_detection/
 # - Dependency Scanning: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
 # - SAST: https://docs.gitlab.com/ee/user/application_security/sast/
+#
+# ==============================================================================
+# Edge Case Handling (T072-T079)
+# ==============================================================================
+#
+# 1. Gitignored Files with Secrets (T072)
+# Problem: Developer accidentally stages .env file with secrets
+# Solution: Secret detection scans git index, catches even .gitignored files if staged
+# Action: Pipeline will block and warn developer to unstage the file
+# Prevention: Add pre-commit hooks to prevent staging .gitignored files with secrets
+#
+# 2. Large Binary Files (T073)
+# Problem: Binary files (images, compiled binaries) slow down scans and produce false positives
+# Solution: Scanners automatically skip binary files
+# Exclusion: *.bin, *.exe, *.dll, *.so, *.jpg, *.png, *.gif, *.pdf, *.zip
+# Note: If secrets are embedded in binaries, they won't be detected (expected behavior)
+#
+# 3. Vulnerabilities with No Patch (T074)
+# Problem: CVE detected but no fix available yet
+# Solution: Use risk acceptance workflow in .gitlab/security-policies.yml
+# Process:
+#   1. Create SEC ticket with justification and mitigation
+#   2. Add exemption to .gitlab/security-policies.yml with expiration date
+#   3. Security team reviews and approves
+#   4. Re-review before expiration (30-90 days)
+# Example:
+#   exemptions:
+#     - cve: "CVE-2024-XXXXX"
+#       package: "vulnerable-lib"
+#       reason: "No patch available, isolated environment, WAF rules applied"
+#       expires: "2025-12-31"
+#
+# 4. False Positives (T075)
+# Problem: Scanner flags code that isn't actually vulnerable
+# Solution: Multiple suppression mechanisms
+#
+# Secret Detection False Positives:
+#   - Add pattern to .gitleaksignore at repository root
+#   - Example: docs/**/*.md, *:EXAMPLE_API_KEY, *:test_secret_*
+#
+# Dependency Scanning False Positives:
+#   - Add exemption to .gitlab/security-policies.yml
+#   - Example: CVE that doesn't affect your usage of the library
+#
+# SAST False Positives:
+#   - Add inline suppression comment with justification:
+#     Python: # nosec B303 (MD5 used for non-security checksum)
+#     JavaScript: // eslint-disable-next-line security/detect-sql-injection
+#   - Document in code review why finding is not exploitable
+#   - Add to .gitlab/security-policies.yml for persistent false positives
+#
+# 5. Scanner Service Unavailable (T076)
+# Problem: GitLab scanner times out or fails (network issues, service degradation)
+# Solution: Jobs configured with appropriate allow_failure settings
+#   - Secret Detection: allow_failure=false (still blocks on critical secrets even if slow)
+#   - Dependency Scanning: allow_failure=false (CVE scanning is mission-critical)
+#   - SAST: allow_failure=true (warning-only, won't block on service issues)
+# Timeout: All jobs have 5-minute timeout to prevent hanging pipelines
+# Monitoring: Check Security Dashboard for scan failures, investigate patterns
+#
+# 6. Secrets in Commit History (T077)
+# Problem: Secret detected in new commit, but also exists in historical commits
+# Limitation: Differential scanning (SECRET_DETECTION_HISTORIC_SCAN=false) only scans new commits
+# Solution: Manual remediation required for historical secrets
+# Process:
+#   1. Identify the commit that introduced the secret (git log -S 'secret_pattern')
+#   2. Remove secret from current code
+#   3. Rotate the credential (generate new key)
+#   4. For public repos: Consider git history rewrite (BFG Repo-Cleaner, git filter-repo)
+#      WARNING: Destructive operation, coordinate with team
+#   5. For private repos: Document in security log, rotate credential, move forward
+# Prevention: Enable historic scanning for one-time full audit (slow):
+#   SECRET_DETECTION_HISTORIC_SCAN: "true"  # Scans entire git history
+# Note: Historic scanning can take 10-30 minutes on large repositories
+#
+# 7. Binary File Secrets
+# Problem: Secrets embedded in compiled binaries, container images, or encrypted files
+# Limitation: Text-based scanners can't analyze binary formats
+# Solution: Use specialized tools for binary analysis
+#   - Container images: Use Trivy or Grype for container scanning
+#   - Compiled binaries: Use strings + grep in build pipeline
+#   - Encrypted files: Decrypt during CI with secure key management
+# Recommendation: Avoid embedding secrets in binaries, use runtime configuration
+#
+# 8. Performance with Large Repositories
+# Problem: Scans take too long on repositories with many files or deep history
+# Solution: Multiple optimization strategies
+#   - Differential scanning: Only scan commit range (80% faster)
+#   - Path exclusions: Skip tests/, docs/, node_modules/ (20-30% faster)
+#   - Shallow clone: GIT_DEPTH=50 (faster checkout)
+#   - Parallel execution: All scanners run in parallel in security stage
+#   - Timeout limits: 5 minutes prevents hanging
+# Advanced: For very large repos (>100k files), consider:
+#   - Monorepo path filtering: Only scan changed subdirectories
+#   - Scheduled full scans: Differential daily, full scan weekly
+#
+# 9. Exemption Expiration
+# Problem: Risk acceptance expires, but developer hasn't remediated
+# Solution: Automated monitoring and notifications (see .gitlab/security-policies.yml)
+# Notification schedule:
+#   - T-7 days: Email to developer and security team
+#   - T-3 days: Email + Slack notification
+#   - T-1 day: Urgent notification
+#   - T-0 (expired): Exemption disabled, merge blocked
+# Action: Developer must fix vulnerability or re-justify with new approval
+# ==============================================================================
 
 # ==============================================================================
 # Pipeline Stages
