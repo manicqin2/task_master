@@ -242,27 +242,27 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Integration Tests (Frontend-Backend)
 
-- [ ] T099 [P] Write integration test: Full lane workflow (create → pending → error → retry → finished) in frontend/tests/integration/lane-workflow-integration.test.ts
-- [ ] T100 [P] Write integration test: Timeout detection moves task to Error lane after 30s in frontend/tests/integration/timeout-detection.test.ts
-- [ ] T101 [P] Write integration test: Polling updates task status after backend changes in frontend/tests/integration/polling-integration.test.ts
-- [ ] T102 [P] Write integration test: Cancel in Pending lane works with polling in frontend/tests/integration/cancel-pending-integration.test.ts
-- [ ] T103 [P] Write integration test: Retry mutation invalidates TanStack Query cache correctly in frontend/tests/integration/retry-cache-integration.test.ts
+- [X] T099 [P] Write integration test: Full lane workflow (create → pending → error → retry → finished) in frontend/tests/integration/lane-workflow-integration.test.ts
+- [X] T100 [P] Write integration test: Timeout detection moves task to Error lane after 30s in frontend/tests/integration/timeout-detection.test.ts
+- [X] T101 [P] Write integration test: Polling updates task status after backend changes in frontend/tests/integration/polling-integration.test.ts
+- [X] T102 [P] Write integration test: Cancel in Pending lane works with polling in frontend/tests/integration/cancel-pending-integration.test.ts
+- [X] T103 [P] Write integration test: Retry mutation invalidates TanStack Query cache correctly in frontend/tests/integration/retry-cache-integration.test.ts
 
 ### E2E Tests (Full User Journeys)
 
-- [ ] T104 [P] Write E2E test: User creates task → sees in Pending → task completes → sees in Finished in frontend/tests/e2e/lane-workflow.spec.ts
-- [ ] T105 [P] Write E2E test: User creates task → clicks cancel in Pending → task disappears in frontend/tests/e2e/cancel-pending.spec.ts
-- [ ] T106 [P] Write E2E test: User creates task → task fails → sees in Error lane → clicks retry → task succeeds in frontend/tests/e2e/retry-workflow.spec.ts
-- [ ] T107 [P] Write E2E test: User creates task → backend unavailable → timeout after 30s → task moves to Error lane in frontend/tests/e2e/timeout-scenario.spec.ts
-- [ ] T108 [P] Write E2E test: User clicks retry → task fails again → sees updated error message in frontend/tests/e2e/retry-failure.spec.ts
-- [ ] T109 [P] Write E2E test: User clicks cancel in Error lane → task disappears in frontend/tests/e2e/cancel-error.spec.ts
+- [X] T104 [P] Write E2E test: User creates task → sees in Pending → task completes → sees in Finished in frontend/tests/e2e/lane-workflow.spec.ts
+- [X] T105 [P] Write E2E test: User creates task → clicks cancel in Pending → task disappears in frontend/tests/e2e/cancel-pending.spec.ts
+- [X] T106 [P] Write E2E test: User creates task → task fails → sees in Error lane → clicks retry → task succeeds in frontend/tests/e2e/retry-workflow.spec.ts
+- [X] T107 [P] Write E2E test: User creates task → backend unavailable → timeout after 30s → task moves to Error lane in frontend/tests/e2e/timeout-scenario.spec.ts
+- [X] T108 [P] Write E2E test: User clicks retry → task fails again → sees updated error message in frontend/tests/e2e/retry-failure.spec.ts
+- [X] T109 [P] Write E2E test: User clicks cancel in Error lane → task disappears in frontend/tests/e2e/cancel-error.spec.ts
 
 ### Performance Validation Tests
 
-- [ ] T110 [P] Write E2E test: Lane transition animation completes in <300ms in frontend/tests/e2e/animation-performance.spec.ts
-- [ ] T111 [P] Write E2E test: Cancel action responds in <200ms in frontend/tests/e2e/cancel-performance.spec.ts
-- [ ] T112 [P] Write E2E test: Retry action responds in <500ms in frontend/tests/e2e/retry-performance.spec.ts
-- [ ] T113 [P] Write E2E test: UI remains responsive with 100 tasks per lane in frontend/tests/e2e/large-dataset-performance.spec.ts
+- [X] T110 [P] Write E2E test: Lane transition animation completes in <300ms in frontend/tests/e2e/animation-performance.spec.ts
+- [X] T111 [P] Write E2E test: Cancel action responds in <200ms in frontend/tests/e2e/cancel-performance.spec.ts
+- [X] T112 [P] Write E2E test: Retry action responds in <500ms in frontend/tests/e2e/retry-performance.spec.ts
+- [X] T113 [P] Write E2E test: UI remains responsive with 100 tasks per lane in frontend/tests/e2e/large-dataset-performance.spec.ts
 
 ---
 
