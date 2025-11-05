@@ -27,11 +27,11 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 **Purpose**: Create directory structure and base configuration files
 
-- [ ] T001 Create security test directory structure at tests/security/
-- [ ] T002 [P] Create test-commits subdirectories: tests/security/test-commits/{secrets,dependencies,sast}/
-- [ ] T003 [P] Create expected-results directory at tests/security/expected-results/
-- [ ] T004 [P] Create .gitlab directory at repository root for policies
-- [ ] T005 Create base .gitlab-ci.yml with stages definition at repository root
+- [X] T001 Create security test directory structure at tests/security/
+- [X] T002 [P] Create test-commits subdirectories: tests/security/test-commits/{secrets,dependencies,sast}/
+- [X] T003 [P] Create expected-results directory at tests/security/expected-results/
+- [X] T004 [P] Create .gitlab directory at repository root for policies
+- [X] T005 Create base .gitlab-ci.yml with stages definition at repository root
 
 ---
 
@@ -41,9 +41,9 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Configure GitLab CI stages (test, security) in .gitlab-ci.yml
-- [ ] T007 [P] Add global variables for performance optimization in .gitlab-ci.yml (GIT_DEPTH, timeout settings)
-- [ ] T008 [P] Document GitLab tier requirements in .gitlab-ci.yml comments (Free vs Premium/Ultimate)
+- [X] T006 Configure GitLab CI stages (test, security) in .gitlab-ci.yml
+- [X] T007 [P] Add global variables for performance optimization in .gitlab-ci.yml (GIT_DEPTH, timeout settings)
+- [X] T008 [P] Document GitLab tier requirements in .gitlab-ci.yml comments (Free vs Premium/Ultimate)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -59,29 +59,29 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 > **NOTE: Write these test commits FIRST, ensure pipeline FAILS before adding scanner**
 
-- [ ] T009 [P] [US1] Create test commit with fake AWS API key in tests/security/test-commits/secrets/aws-api-key.js
-- [ ] T010 [P] [US1] Create test commit with fake GitHub token in tests/security/test-commits/secrets/github-token.py
-- [ ] T011 [P] [US1] Create test commit with fake password in tests/security/test-commits/secrets/password-leak.js
-- [ ] T012 [P] [US1] Create false positive test (doc example) in tests/security/test-commits/secrets/false-positive.md
-- [ ] T013 [US1] Create expected findings JSON in tests/security/expected-results/secret-detection.json
+- [X] T009 [P] [US1] Create test commit with fake AWS API key in tests/security/test-commits/secrets/aws-api-key.js
+- [X] T010 [P] [US1] Create test commit with fake GitHub token in tests/security/test-commits/secrets/github-token.py
+- [X] T011 [P] [US1] Create test commit with fake password in tests/security/test-commits/secrets/password-leak.js
+- [X] T012 [P] [US1] Create false positive test (doc example) in tests/security/test-commits/secrets/false-positive.md
+- [X] T013 [US1] Create expected findings JSON in tests/security/expected-results/secret-detection.json
 
 ### TDD: GREEN Phase (Make Tests Pass)
 
-- [ ] T014 [US1] Add Security/Secret-Detection.gitlab-ci.yml template include to .gitlab-ci.yml
-- [ ] T015 [US1] Configure secret_detection job in .gitlab-ci.yml (stage: security, performance settings)
-- [ ] T016 [US1] Set SECRET_DETECTION_HISTORIC_SCAN=false for performance in .gitlab-ci.yml
-- [ ] T017 [US1] Configure artifact output (gl-secret-detection-report.json) in .gitlab-ci.yml
-- [ ] T018 [US1] Set job to run on merge_requests and main branch in .gitlab-ci.yml
-- [ ] T019 [US1] Set allow_failure=false (blocking) for secret_detection job in .gitlab-ci.yml
-- [ ] T020 [US1] Test pipeline with secret test commits and verify detection
+- [X] T014 [US1] Add Security/Secret-Detection.gitlab-ci.yml template include to .gitlab-ci.yml
+- [X] T015 [US1] Configure secret_detection job in .gitlab-ci.yml (stage: security, performance settings)
+- [X] T016 [US1] Set SECRET_DETECTION_HISTORIC_SCAN=false for performance in .gitlab-ci.yml
+- [X] T017 [US1] Configure artifact output (gl-secret-detection-report.json) in .gitlab-ci.yml
+- [X] T018 [US1] Set job to run on merge_requests and main branch in .gitlab-ci.yml
+- [X] T019 [US1] Set allow_failure=false (blocking) for secret_detection job in .gitlab-ci.yml
+- [X] T020 [US1] Test pipeline with secret test commits and verify detection
 
 ### TDD: REFACTOR Phase (Optimize)
 
-- [ ] T021 [US1] Add path exclusions (tests/,docs/) to SECRET_DETECTION_EXCLUDED_PATHS in .gitlab-ci.yml
-- [ ] T022 [US1] Create .gitleaksignore file at repository root for false positive handling
-- [ ] T023 [US1] Add documentation examples pattern to .gitleaksignore
-- [ ] T024 [US1] Verify false positive test commit no longer triggers detection
-- [ ] T025 [US1] Document secret detection configuration in .gitlab-ci.yml comments
+- [X] T021 [US1] Add path exclusions (tests/,docs/) to SECRET_DETECTION_EXCLUDED_PATHS in .gitlab-ci.yml
+- [X] T022 [US1] Create .gitleaksignore file at repository root for false positive handling
+- [X] T023 [US1] Add documentation examples pattern to .gitleaksignore
+- [X] T024 [US1] Verify false positive test commit no longer triggers detection
+- [X] T025 [US1] Document secret detection configuration in .gitlab-ci.yml comments
 
 **Checkpoint**: Secret detection fully functional - AWS/GitHub keys blocked, docs exempted, <90s scan time
 

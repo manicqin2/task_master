@@ -1,0 +1,60 @@
+# Gitleaks Ignore File
+# Feature: 002-gitlab-security-pipeline
+# Purpose: Exclude false positives from secret detection
+#
+# This file tells Gitleaks to ignore specific files or patterns that contain
+# example/placeholder secrets in documentation or test files.
+#
+# Documentation: https://github.com/gitleaks/gitleaks#gitleaksignore
+
+# ==============================================================================
+# Documentation Examples (T023)
+# ==============================================================================
+# Documentation files often contain example API keys for illustration
+# These are safe to ignore as they're clearly marked as examples
+
+# Markdown documentation files with example keys
+docs/**/*.md
+*.md:EXAMPLE_API_KEY
+*.md:AKIAIOSFODNN7EXAMPLE
+
+# README files with placeholder credentials
+README.md
+CONTRIBUTING.md
+
+# ==============================================================================
+# Test Files
+# ==============================================================================
+# Test files intentionally contain fake secrets for validating the scanner
+# These should be excluded from blocking the pipeline
+
+# Test commit files (used for TDD validation)
+tests/security/test-commits/**/*
+
+# Expected results JSON files
+tests/security/expected-results/**/*.json
+
+# ==============================================================================
+# Configuration Examples
+# ==============================================================================
+# Configuration template files often show example values
+
+*.example
+*.template
+.env.example
+.env.template
+config.example.*
+config.template.*
+
+# ==============================================================================
+# False Positive Patterns
+# ==============================================================================
+# Specific patterns that are known false positives
+
+# Lines containing "EXAMPLE" in the secret (documentation placeholders)
+*:*EXAMPLE*
+
+# Lines explicitly marked as examples or placeholders
+*:# Example:*
+*:// Example:*
+*:<!-- Example:*
