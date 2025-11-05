@@ -348,10 +348,10 @@ secret_detection:
     when: always  # Preserve report even if job fails
 
   # T018: Run on merge requests and main branch
-  only:
-    - merge_requests
-    - main
-    - master
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "master"
 
   # T019: Block merge if secrets detected (critical security issue)
   allow_failure: false
@@ -421,10 +421,10 @@ dependency_scanning:
     when: always  # Preserve report even if job fails
 
   # T033: Run on merge requests and main branch
-  only:
-    - merge_requests
-    - main
-    - master
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "master"
 
   # T034: Block merge if high/critical CVEs detected
   allow_failure: false
@@ -510,10 +510,10 @@ sast:
     when: always  # Preserve report even if job fails
 
   # Run on merge requests and main branch
-  only:
-    - merge_requests
-    - main
-    - master
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "master"
 
   # T051: Warning-only mode (don't block merge)
   # SAST findings are informational and should be reviewed but not block deployment
