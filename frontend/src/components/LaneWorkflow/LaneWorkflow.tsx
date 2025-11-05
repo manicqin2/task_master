@@ -70,10 +70,10 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
   return (
     <AnimatePresence>
       <div
-        className={`grid grid-cols-3 gap-4 h-full ${className}`}
+        className={`grid grid-cols-3 gap-4 h-full w-full ${className}`}
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
         }}
         role="main"
         aria-label="Task workflow board with three lanes"

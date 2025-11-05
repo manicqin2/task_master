@@ -45,7 +45,7 @@ export interface LaneProps {
 export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, className = '' }: LaneProps) {
   return (
     <div
-      className={`flex flex-col h-full border rounded-lg p-4 ${config.bgColor} ${config.borderColor} ${className}`}
+      className={`flex flex-col h-full min-w-0 border rounded-lg p-4 ${config.bgColor} ${config.borderColor} ${className}`}
       role="region"
       aria-label={`${config.title} lane with ${tasks.length} tasks`}
       aria-live="polite"
@@ -59,7 +59,7 @@ export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, clas
       />
 
       {/* Task List or Empty State */}
-      <div className="flex-1 overflow-y-auto space-y-2">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 min-h-0 pr-1">
         {tasks.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             {config.emptyMessage}
