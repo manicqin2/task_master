@@ -162,17 +162,22 @@ export const ActionEmblem: React.FC<ActionEmblemProps> = ({
   return (
     <button
       type="button"
-      className={`${variantStyles} ${sizeStyles} ${className}`}
+      className={`${variantStyles} ${sizeStyles} ${className} group relative`}
       onClick={onClick}
       disabled={disabled || loading}
       aria-label={ariaLabel || tooltip}
-      title={tooltip}
+      title={tooltip} // Fallback for browsers without CSS hover
+      data-tooltip={tooltip}
     >
       <Icon
         className={`${size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'} ${
           loading ? 'animate-spin' : ''
         }`}
       />
+      {/* CSS-based tooltip with consistent styling (T123) and 500ms delay (T125) */}
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 delay-500 whitespace-nowrap z-50">
+        {tooltip}
+      </span>
     </button>
   )
 }

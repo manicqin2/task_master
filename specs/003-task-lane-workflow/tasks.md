@@ -297,9 +297,9 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Tooltip Refinements
 
-- [ ] T123 [P] Ensure all action emblems have consistent tooltip styling in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
-- [ ] T124 [P] Add keyboard navigation support to tooltips (Escape to close) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
-- [ ] T125 [P] Optimize tooltip rendering performance (delay 500ms) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T123 [P] Ensure all action emblems have consistent tooltip styling in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T124 [P] Add keyboard navigation support to tooltips (Escape to close) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T125 [P] Optimize tooltip rendering performance (delay 500ms) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
 
 ### Animation Tuning
 
