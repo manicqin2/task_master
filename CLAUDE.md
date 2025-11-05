@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2025-11-04
 
 ## Active Technologies
+- GitLab CI/CD YAML (v1), Python 3.11+ (for backend), Node.js 18+ (for frontend) + GitLab CI Templates (Secret-Detection, Dependency-Scanning, SAST), Gitleaks (secret detection), Gemnasium (dependency scanning), Semgrep (SAST) (002-gitlab-security-pipeline)
+- GitLab Security Dashboard (native), Artifact storage for security reports (JSON) (002-gitlab-security-pipeline)
 
 ### Feature: 001-chat-task-entry
 
@@ -105,6 +107,7 @@ docker compose exec frontend npm test
 - shadcn/ui component conventions
 
 ## Recent Changes
+- 002-gitlab-security-pipeline: Added GitLab CI/CD YAML (v1), Python 3.11+ (for backend), Node.js 18+ (for frontend) + GitLab CI Templates (Secret-Detection, Dependency-Scanning, SAST), Gitleaks (secret detection), Gemnasium (dependency scanning), Semgrep (SAST)
 
 - 001-chat-task-entry: Added
 

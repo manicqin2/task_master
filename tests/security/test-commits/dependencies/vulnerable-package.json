@@ -1,0 +1,35 @@
+{
+  "name": "test-vulnerable-dependencies",
+  "version": "1.0.0",
+  "description": "Test file for Dependency Scanning: Vulnerable npm packages",
+  "private": true,
+  "dependencies": {
+    "lodash": "4.17.20",
+    "minimist": "1.2.5",
+    "axios": "0.21.1"
+  },
+  "devDependencies": {},
+  "expectedFindings": {
+    "lodash": {
+      "version": "4.17.20",
+      "cve": "CVE-2020-8203",
+      "severity": "high",
+      "description": "Prototype Pollution vulnerability",
+      "fix": "Upgrade to lodash@4.17.21 or later"
+    },
+    "minimist": {
+      "version": "1.2.5",
+      "cve": "CVE-2021-44906",
+      "severity": "critical",
+      "description": "Prototype Pollution vulnerability",
+      "fix": "Upgrade to minimist@1.2.6 or later"
+    },
+    "axios": {
+      "version": "0.21.1",
+      "cve": "CVE-2021-3749",
+      "severity": "high",
+      "description": "Server-Side Request Forgery (SSRF) vulnerability",
+      "fix": "Upgrade to axios@0.21.2 or later"
+    }
+  }
+}

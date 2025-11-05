@@ -1,0 +1,313 @@
+# GitLab Merge Request Approval Policy Contract
+# Feature: 002-gitlab-security-pipeline
+# Purpose: Define security policy configuration structure
+
+# This contract documents the expected structure of .gitlab/security-policies.yml
+# for configuring merge request blocking behavior based on security scan results.
+
+# ==============================================================================
+# Policy Configuration Contract
+# ==============================================================================
+
+# File location: .gitlab/security-policies.yml (repository root)
+# Format: YAML
+# GitLab tier requirement: Premium/Ultimate (Free tier has limited policy support)
+
+---
+# Policy schema version
+schema_version: "1.0"
+
+# ==============================================================================
+# Secret Detection Policy
+# ==============================================================================
+
+secret_detection_policy:
+  enabled: true
+  name: "Block Critical Secrets"
+  description: "Prevent any secrets from being merged to protected branches"
+
+  # Blocking rules
+  rules:
+    - severity: critical
+      action: block_merge
+      message: "Critical secret detected. Merge blocked until resolved."
+
+    - severity: high
+      action: block_merge
+      message: "High severity secret detected. Merge blocked until resolved."
+
+    - severity: medium
+      action: require_approval
+      required_approvals: 1
+      approver_groups: ["security-team"]
+      message: "Medium severity secret requires security team approval."
+
+    - severity: low
+      action: warn_only
+      message: "Low severity secret detected. Review recommended."
+
+  # Exemptions (allowlist)
+  exemptions:
+    - finding_id: "550e8400-e29b-41d4-a716-446655440000"
+      reason: "False positive: Test API key in documentation example"
+      approved_by: "security-team"
+      approved_date: "2025-11-05"
+      expiration: "2025-12-31"
+
+    - pattern: "EXAMPLE_API_KEY"
+      file_pattern: "docs/**/*.md"
+      reason: "Documentation examples allowed to contain placeholder keys"
+      approved_by: "security-team"
+      approved_date: "2025-11-05"
+      expiration: null  # No expiration
+
+  # Performance settings
+  scan_settings:
+    historic_scan: false  # Only scan commit range, not full history
+    excluded_paths:
+      - "tests/**"
+      - "docs/**"
+      - "**/*.md"
+    timeout: 300  # 5 minutes
+
+# ==============================================================================
+# Dependency Scanning Policy
+# ==============================================================================
+
+dependency_scanning_policy:
+  enabled: true
+  name: "Block High/Critical CVEs"
+  description: "Prevent vulnerable dependencies from being merged"
+
+  # Blocking rules
+  rules:
+    - severity: critical
+      action: block_merge
+      message: "Critical CVE detected. Merge blocked. Update dependency immediately."
+
+    - severity: high
+      action: block_merge
+      message: "High severity CVE detected. Merge blocked. Update or mitigate."
+
+    - severity: medium
+      action: require_approval
+      required_approvals: 1
+      approver_groups: ["security-team", "tech-leads"]
+      message: "Medium severity CVE requires approval. Risk acceptance or mitigation plan needed."
+
+    - severity: low
+      action: warn_only
+      message: "Low severity CVE detected. Update recommended during next maintenance cycle."
+
+  # Risk acceptance (temporary exemptions)
+  risk_acceptances:
+    - cve_id: "CVE-2023-1234"
+      package: "lodash"
+      version: "4.17.20"
+      reason: "No patch available. Mitigation: Input validation ensures safe usage."
+      approved_by: "security-team"
+      approved_date: "2025-11-05"
+      expiration: "2025-12-31"
+      review_reminder: "2025-11-30"  # Reminder to re-evaluate
+
+  # Performance settings
+  scan_settings:
+    excluded_paths:
+      - "tests/**"
+      - "docs/**"
+    excluded_analyzers: []  # All analyzers enabled
+    timeout: 300  # 5 minutes
+
+# ==============================================================================
+# SAST Policy
+# ==============================================================================
+
+sast_policy:
+  enabled: true
+  name: "SAST Advisory Warnings"
+  description: "Static analysis findings require human review but don't block"
+
+  # Warning-only rules (no automatic blocking)
+  rules:
+    - severity: critical
+      action: require_approval
+      required_approvals: 2
+      approver_groups: ["security-team", "tech-leads"]
+      message: "Critical SAST finding. Two approvals required."
+
+    - severity: high
+      action: require_approval
+      required_approvals: 1
+      approver_groups: ["security-team", "tech-leads"]
+      message: "High severity SAST finding. Security review required."
+
+    - severity: medium
+      action: warn_only
+      message: "Medium severity SAST finding. Review recommended."
+
+    - severity: low
+      action: warn_only
+      message: "Low severity SAST finding detected."
+
+  # False positive management
+  exemptions:
+    - finding_id: "770fa611-g40d-63f6-c938-668877662222"
+      reason: "False positive: ORM parameterization prevents SQL injection"
+      approved_by: "security-team"
+      approved_date: "2025-11-05"
+      expiration: null
+
+    - cwe_id: "CWE-79"  # XSS
+      file_pattern: "frontend/src/components/Markdown*.tsx"
+      reason: "Markdown rendering uses DOMPurify sanitization"
+      approved_by: "security-team"
+      approved_date: "2025-11-05"
+      expiration: null
+
+  # Performance settings
+  scan_settings:
+    confidence_level: 2  # Medium confidence (1=low, 2=medium, 3=high)
+    excluded_paths:
+      - "tests/**"
+      - "docs/**"
+      - "migrations/**"
+    excluded_analyzers: []
+    timeout: 300  # 5 minutes
+
+# ==============================================================================
+# Global Policy Settings
+# ==============================================================================
+
+global_settings:
+  # Protected branches where policies apply
+  protected_branches:
+    - main
+    - master
+    - production
+
+  # Merge request settings
+  merge_request:
+    require_pipeline_success: true  # MR can't merge if pipeline fails
+    dismiss_stale_approvals: true   # Re-approval needed after new commits
+    approval_timeout: 7  # Days before approval expires (for risk acceptances)
+
+  # Notification settings
+  notifications:
+    notify_on_block: true
+    notify_groups: ["security-team"]
+    notification_channels:
+      - email
+      - slack  # Requires GitLab Slack integration
+
+  # Audit settings
+  audit:
+    log_all_decisions: true
+    retention_days: 365
+
+# ==============================================================================
+# Policy Evaluation Flow
+# ==============================================================================
+
+# Expected evaluation order:
+# 1. Pipeline runs security scans (secret_detection, dependency_scanning, sast)
+# 2. Each scan produces JSON report artifact
+# 3. GitLab ingests reports into Security Dashboard
+# 4. Policy evaluator runs for each merge request:
+#    a. Check if MR targets protected branch
+#    b. Retrieve all vulnerabilities from Security Dashboard
+#    c. Apply exemptions/risk acceptances
+#    d. Evaluate remaining findings against policy rules
+#    e. Determine action: block_merge, require_approval, or warn_only
+# 5. MR status updated accordingly:
+#    - block_merge: Pipeline marked as failed, MR blocked
+#    - require_approval: Approval rules added to MR
+#    - warn_only: Warning comment added to MR, no blocking
+
+# ==============================================================================
+# Action Types
+# ==============================================================================
+
+# block_merge:
+#   - Pipeline fails
+#   - MR cannot be merged until issue is resolved
+#   - Developer must fix the security issue and push new commit
+#   - No approval override possible
+
+# require_approval:
+#   - Pipeline passes with warning
+#   - MR requires N approvals from specified groups
+#   - Approvers can override with justification
+#   - Approval is logged in audit trail
+
+# warn_only:
+#   - Pipeline passes
+#   - Warning comment added to MR
+#   - No blocking, purely informational
+#   - Developer can merge without additional approvals
+
+# ==============================================================================
+# Exemption Management
+# ==============================================================================
+
+# Exemption types:
+# 1. By finding_id: Specific UUID from security report
+# 2. By pattern: Regular expression matching (for secrets)
+# 3. By CVE/CWE: Identifier-based exemption
+# 4. By file_pattern: Path-based exemption (glob pattern)
+
+# Exemption lifecycle:
+# - approved_by: Required (user/group identifier)
+# - approved_date: Required (ISO 8601 date)
+# - expiration: Optional (null = permanent, date = temporary)
+# - review_reminder: Optional (date to re-evaluate exemption)
+
+# Exemption validation:
+# - Expired exemptions are automatically removed
+# - Permanent exemptions (expiration: null) require annual review
+# - All exemptions logged in audit trail
+
+# ==============================================================================
+# Versioning and Compatibility
+# ==============================================================================
+
+# Schema version: 1.0
+# GitLab version: 15.0+
+# Breaking changes: Major version bump (2.0, 3.0, etc.)
+# Backward compatibility: Maintained within major version
+
+# Upgrade path:
+# - Schema v1.0 → v1.x: Backward compatible (new fields optional)
+# - Schema v1.x → v2.0: Breaking changes (migration guide provided)
+
+# ==============================================================================
+# Validation
+# ==============================================================================
+
+# Policy validation occurs on:
+# - File commit (syntax validation via GitLab API)
+# - Pipeline execution (semantic validation)
+# - Manual validation: gitlab-ci-lint command
+
+# Validation errors:
+# - Syntax errors: Policy file rejected, pipeline fails
+# - Semantic errors: Logged as warnings, default-safe behavior applied
+# - Missing fields: Defaults used (documented in GitLab docs)
+
+# ==============================================================================
+# Testing
+# ==============================================================================
+
+# Policy testing approach:
+# 1. Create test MR with known security issues
+# 2. Verify expected action taken (block, require approval, warn)
+# 3. Test exemptions (verify exempted findings don't trigger actions)
+# 4. Test expiration (expired exemptions should trigger actions)
+# 5. Test approval workflow (verify approvers can override)
+
+# Test scenarios:
+# - Test commit with critical secret → Expect block_merge
+# - Test commit with exempted secret → Expect pass
+# - Test commit with high CVE → Expect block_merge
+# - Test commit with risk-accepted CVE → Expect require_approval
+# - Test commit with medium SAST finding → Expect warn_only
+# - Test commit with exempted SAST finding → Expect pass

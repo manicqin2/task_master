@@ -1,0 +1,220 @@
+# GitLab CI Pipeline Configuration Contract
+# Feature: 002-gitlab-security-pipeline
+# Purpose: Define the structure and expectations for security scanning pipeline jobs
+
+# This contract documents the expected structure of .gitlab-ci.yml for security scanning.
+# It serves as a reference for implementation and validation.
+
+---
+# Pipeline Structure Contract
+
+stages:
+  - test        # Standard test stage
+  - security    # Dedicated security scanning stage
+
+# ==============================================================================
+# Secret Detection Job Contract
+# ==============================================================================
+
+secret_detection:
+  stage: security
+  extends: .secret_detection  # GitLab template extension point
+
+  # Expected inputs
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: "false"  # Only scan commit range (performance)
+    SECRET_DETECTION_EXCLUDED_PATHS: "tests/,docs/"  # Paths to exclude
+
+  # Expected outputs
+  artifacts:
+    reports:
+      secret_detection: gl-secret-detection-report.json
+    paths:
+      - gl-secret-detection-report.json
+    expire_in: 30 days
+    when: always  # Preserve report even if job fails
+
+  # Execution constraints
+  only:
+    - merge_requests  # Run on MRs only
+    - main            # Run on protected branch
+
+  # Performance expectations
+  timeout: 5 minutes
+
+  # Failure behavior
+  allow_failure: false  # Block on secret detection
+
+# ==============================================================================
+# Dependency Scanning Job Contract
+# ==============================================================================
+
+dependency_scanning:
+  stage: security
+  extends: .dependency_scanning  # GitLab template extension point
+
+  # Expected inputs
+  variables:
+    DS_EXCLUDED_PATHS: "tests/,docs/"
+    DS_EXCLUDED_ANALYZERS: ""  # All analyzers enabled by default
+
+  # Expected outputs
+  artifacts:
+    reports:
+      dependency_scanning: gl-dependency-scanning-report.json
+    paths:
+      - gl-dependency-scanning-report.json
+    expire_in: 30 days
+    when: always
+
+  # Execution constraints
+  only:
+    - merge_requests
+    - main
+
+  # Performance expectations
+  timeout: 5 minutes
+
+  # Failure behavior
+  allow_failure: false  # Block on high/critical vulnerabilities
+
+# ==============================================================================
+# SAST (Static Application Security Testing) Job Contract
+# ==============================================================================
+
+sast:
+  stage: security
+  extends: .sast  # GitLab template extension point
+
+  # Expected inputs
+  variables:
+    SAST_EXCLUDED_PATHS: "tests/,docs/,migrations/"
+    SAST_EXCLUDED_ANALYZERS: ""  # Semgrep for JS/TS/Python by default
+    SAST_CONFIDENCE_LEVEL: "2"   # Medium confidence threshold (1=low, 2=medium, 3=high)
+
+  # Expected outputs
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
+    paths:
+      - gl-sast-report.json
+    expire_in: 30 days
+    when: always
+
+  # Execution constraints
+  only:
+    - merge_requests
+    - main
+
+  # Performance expectations
+  timeout: 5 minutes
+
+  # Failure behavior
+  allow_failure: true  # Warning-only (human review required)
+
+# ==============================================================================
+# Template Inclusion Contract
+# ==============================================================================
+
+# Required template includes at top of .gitlab-ci.yml
+include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
+# ==============================================================================
+# Job Dependencies and Parallelization
+# ==============================================================================
+
+# Contract expectations:
+# - All security jobs run in parallel (no dependencies between them)
+# - Security stage runs after test stage (if present)
+# - Security jobs have no side effects on each other
+# - Each job produces independent artifacts
+
+# Dependency graph:
+#   test stage → security stage (sequential)
+#   secret_detection ∥ dependency_scanning ∥ sast (parallel)
+
+# ==============================================================================
+# Performance Contract
+# ==============================================================================
+
+# Timing expectations for typical project (mixed Python/JavaScript, ~10k LOC):
+# - Secret Detection: 30-90 seconds (file content scanning)
+# - Dependency Scanning: 60-120 seconds (CVE database lookups)
+# - SAST: 90-180 seconds (static analysis, highest complexity)
+# - Total (parallel): ~2-3 minutes (within 5-minute requirement)
+
+# Optimization strategies required:
+# - Commit range limiting (avoid full history scans)
+# - Path exclusions (skip tests/, docs/, migrations/)
+# - Parallel execution (all jobs run simultaneously)
+# - Cached dependencies (scanner Docker images pre-pulled)
+
+# ==============================================================================
+# Failure Behavior Contract
+# ==============================================================================
+
+# Expected pipeline outcomes:
+# - Secret detected → Pipeline FAILS (allow_failure: false)
+# - High/Critical CVE detected → Pipeline FAILS (allow_failure: false)
+# - SAST finding detected → Pipeline WARNS (allow_failure: true)
+# - Scanner error (e.g., timeout) → Pipeline FAILS (fail fast on errors)
+
+# Merge request blocking:
+# - Failed secret_detection → MR blocked
+# - Failed dependency_scanning → MR blocked
+# - Failed sast → MR not blocked (warning only)
+# - Scanner unavailable → MR blocked (require manual approval)
+
+# ==============================================================================
+# Artifact Schema Contract
+# ==============================================================================
+
+# All security reports must conform to GitLab Security Report Schema v15.0.0
+# Reference: https://gitlab.com/gitlab-org/security-products/security-report-schemas
+
+# Required fields in all reports:
+# - version: "15.0.0"
+# - scan: {type, status, start_time, end_time, scanner}
+# - vulnerabilities: [{id, category, severity, location, solution}]
+
+# Schema validation:
+# - Performed automatically by GitLab CI
+# - Invalid reports cause job failure
+# - Dashboard ingestion fails for non-conforming reports
+
+# ==============================================================================
+# Environment Variables Contract
+# ==============================================================================
+
+# GitLab automatically provides:
+# - CI_COMMIT_SHA: Commit being scanned
+# - CI_MERGE_REQUEST_IID: Merge request number
+# - CI_PROJECT_DIR: Project root directory
+# - CI_PIPELINE_ID: Pipeline identifier
+# - CI_JOB_ID: Job identifier
+
+# Security scanner behavior:
+# - Scanners read files from CI_PROJECT_DIR
+# - Reports include CI_COMMIT_SHA for traceability
+# - Artifacts uploaded to CI_PIPELINE_ID/CI_JOB_ID
+
+# ==============================================================================
+# Versioning and Compatibility
+# ==============================================================================
+
+# GitLab version requirements:
+# - Minimum: GitLab 15.0 (Security Report Schema v15.0.0)
+# - Recommended: GitLab 16.0+ (latest scanner versions)
+
+# Scanner version stability:
+# - Gitleaks: v8.x (semantic versioning, backward compatible)
+# - Gemnasium: v3.x (GitLab-maintained, stable)
+# - Semgrep: v1.x (frequent updates, may introduce new rules)
+
+# Breaking changes:
+# - Security Report Schema updates require pipeline updates
+# - Scanner major version changes may require configuration adjustments
+# - Template updates are backward compatible (GitLab policy)

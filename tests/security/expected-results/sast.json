@@ -1,0 +1,316 @@
+{
+  "version": "15.0.0",
+  "scan": {
+    "type": "sast",
+    "status": "success",
+    "scanner": {
+      "id": "semgrep",
+      "name": "Semgrep"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "category": "sast",
+      "name": "SQL Injection via String Concatenation",
+      "message": "User input is concatenated directly into SQL query without parameterization",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/sql-injection.js",
+        "start_line": 14,
+        "end_line": 14
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-89",
+          "value": "CWE-89",
+          "url": "https://cwe.mitre.org/data/definitions/89.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "javascript.express.security.audit.express-sql-injection",
+          "value": "javascript.express.security.audit.express-sql-injection"
+        }
+      ],
+      "solution": "Use parameterized queries or prepared statements instead of string concatenation. Example: db.get('SELECT * FROM users WHERE id = ?', [userId], callback)"
+    },
+    {
+      "category": "sast",
+      "name": "SQL Injection via Template Literal",
+      "message": "User input is embedded in SQL query via template literal without sanitization",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/sql-injection.js",
+        "start_line": 26,
+        "end_line": 26
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-89",
+          "value": "CWE-89"
+        }
+      ],
+      "solution": "Use parameterized queries with placeholders"
+    },
+    {
+      "category": "sast",
+      "name": "Cross-Site Scripting (XSS) via dangerouslySetInnerHTML",
+      "message": "User-controlled HTML is rendered without sanitization using dangerouslySetInnerHTML",
+      "severity": "high",
+      "confidence": "medium",
+      "location": {
+        "file": "tests/security/test-commits/sast/xss-vulnerability.jsx",
+        "start_line": 23,
+        "end_line": 23
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-79",
+          "value": "CWE-79",
+          "url": "https://cwe.mitre.org/data/definitions/79.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "javascript.react.security.audit.react-dangerouslysetinnerhtml",
+          "value": "javascript.react.security.audit.react-dangerouslysetinnerhtml"
+        }
+      ],
+      "solution": "Sanitize HTML using DOMPurify before rendering, or use textContent instead of innerHTML"
+    },
+    {
+      "category": "sast",
+      "name": "Code Injection via eval()",
+      "message": "User input is passed to eval() which can execute arbitrary JavaScript code",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/xss-vulnerability.jsx",
+        "start_line": 37,
+        "end_line": 37
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-95",
+          "value": "CWE-95",
+          "url": "https://cwe.mitre.org/data/definitions/95.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "javascript.lang.security.audit.eval-detected",
+          "value": "javascript.lang.security.audit.eval-detected"
+        }
+      ],
+      "solution": "Never use eval() with user input. Use safe alternatives like Function constructor with validation or dedicated math parser libraries"
+    },
+    {
+      "category": "sast",
+      "name": "DOM-based XSS via innerHTML",
+      "message": "User-controlled content is assigned to innerHTML without sanitization",
+      "severity": "high",
+      "confidence": "medium",
+      "location": {
+        "file": "tests/security/test-commits/sast/xss-vulnerability.jsx",
+        "start_line": 53,
+        "end_line": 53
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-79",
+          "value": "CWE-79"
+        }
+      ],
+      "solution": "Use textContent instead of innerHTML, or sanitize with DOMPurify"
+    },
+    {
+      "category": "sast",
+      "name": "Weak Hash Function - MD5",
+      "message": "MD5 is cryptographically broken and should not be used for security purposes",
+      "severity": "medium",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 16,
+        "end_line": 16
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-327",
+          "value": "CWE-327",
+          "url": "https://cwe.mitre.org/data/definitions/327.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "python.lang.security.audit.insecure-hash-function",
+          "value": "python.lang.security.audit.insecure-hash-function"
+        }
+      ],
+      "solution": "Use bcrypt, scrypt, or Argon2 for password hashing with automatic salt generation"
+    },
+    {
+      "category": "sast",
+      "name": "Weak Hash Function - SHA1",
+      "message": "SHA1 is deprecated and vulnerable to collision attacks",
+      "severity": "medium",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 25,
+        "end_line": 25
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-327",
+          "value": "CWE-327"
+        }
+      ],
+      "solution": "Use SHA-256 or SHA-3 for integrity checks, bcrypt for password hashing"
+    },
+    {
+      "category": "sast",
+      "name": "Weak Encryption Algorithm - DES",
+      "message": "DES uses 56-bit keys and is easily broken by modern hardware",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 37,
+        "end_line": 37
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-327",
+          "value": "CWE-327"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "python.lang.security.audit.insecure-cipher-algorithm",
+          "value": "python.lang.security.audit.insecure-cipher-algorithm"
+        }
+      ],
+      "solution": "Use AES-256 in GCM mode for authenticated encryption"
+    },
+    {
+      "category": "sast",
+      "name": "Weak Encryption Algorithm - RC4",
+      "message": "RC4 has known biases and vulnerabilities, prohibited by RFC 7465",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 47,
+        "end_line": 47
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-327",
+          "value": "CWE-327"
+        }
+      ],
+      "solution": "Use AES-256 in GCM or ChaCha20-Poly1305"
+    },
+    {
+      "category": "sast",
+      "name": "Insecure Random Number Generator",
+      "message": "The random module is not cryptographically secure and should not be used for security tokens",
+      "severity": "medium",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 57,
+        "end_line": 57
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-330",
+          "value": "CWE-330",
+          "url": "https://cwe.mitre.org/data/definitions/330.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "python.lang.security.audit.insecure-random",
+          "value": "python.lang.security.audit.insecure-random"
+        }
+      ],
+      "solution": "Use secrets.token_urlsafe() or secrets.token_hex() for cryptographically secure random tokens"
+    },
+    {
+      "category": "sast",
+      "name": "Hardcoded Secret - Encryption Key",
+      "message": "Hardcoded encryption key found in source code",
+      "severity": "high",
+      "confidence": "medium",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 62,
+        "end_line": 62
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-798",
+          "value": "CWE-798",
+          "url": "https://cwe.mitre.org/data/definitions/798.html"
+        },
+        {
+          "type": "semgrep_id",
+          "name": "python.lang.security.audit.hardcoded-password",
+          "value": "python.lang.security.audit.hardcoded-password"
+        }
+      ],
+      "solution": "Load secrets from environment variables or use a key management system like AWS KMS or HashiCorp Vault"
+    },
+    {
+      "category": "sast",
+      "name": "Hardcoded Secret - API Token",
+      "message": "Hardcoded API token found in source code",
+      "severity": "high",
+      "confidence": "high",
+      "location": {
+        "file": "tests/security/test-commits/sast/insecure-crypto.py",
+        "start_line": 63,
+        "end_line": 63
+      },
+      "identifiers": [
+        {
+          "type": "cwe",
+          "name": "CWE-798",
+          "value": "CWE-798"
+        }
+      ],
+      "solution": "Store API tokens in environment variables or secure credential storage"
+    }
+  ],
+  "expected_behavior": {
+    "sql-injection.js": "MUST detect 2 SQL injection vulnerabilities (string concatenation + template literal)",
+    "xss-vulnerability.jsx": "MUST detect 3 XSS vulnerabilities (dangerouslySetInnerHTML, eval, innerHTML)",
+    "insecure-crypto.py": "MUST detect 7 cryptographic vulnerabilities (MD5, SHA1, DES, RC4, weak random, 2 hardcoded secrets)",
+    "secure-example.py": "SHOULD PASS with no vulnerabilities detected (uses bcrypt, AES-256-GCM, secrets module)"
+  },
+  "summary": {
+    "total_vulnerabilities": 12,
+    "by_severity": {
+      "critical": 0,
+      "high": 7,
+      "medium": 5,
+      "low": 0
+    },
+    "by_category": {
+      "sql_injection": 2,
+      "xss": 3,
+      "weak_crypto": 4,
+      "insecure_random": 1,
+      "hardcoded_secrets": 2
+    }
+  }
+}
