@@ -1,0 +1,337 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GitLab Security Report Schema Contract",
+  "description": "Contract for security scanning reports (Secret Detection, Dependency Scanning, SAST). Based on GitLab Security Report Schema v15.0.0",
+  "version": "15.0.0",
+  "type": "object",
+  "required": ["version", "scan", "vulnerabilities"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "const": "15.0.0"
+    },
+    "scan": {
+      "type": "object",
+      "description": "Metadata about the security scan execution",
+      "required": ["type", "status", "start_time", "end_time", "scanner"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of security scan performed",
+          "enum": ["secret_detection", "dependency_scanning", "sast"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Overall scan execution status",
+          "enum": ["success", "failed", "error"]
+        },
+        "start_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when scan started"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when scan completed"
+        },
+        "scanner": {
+          "type": "object",
+          "description": "Information about the scanning tool",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique scanner identifier",
+              "examples": ["gitleaks", "gemnasium", "semgrep"]
+            },
+            "name": {
+              "type": "string",
+              "description": "Human-readable scanner name",
+              "examples": ["Gitleaks", "Gemnasium", "Semgrep"]
+            },
+            "version": {
+              "type": "string",
+              "description": "Scanner version",
+              "examples": ["8.18.0", "3.2.0", "1.45.0"]
+            },
+            "vendor": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Vendor name",
+                  "examples": ["GitLab", "Semgrep Inc"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "description": "List of detected security findings",
+      "items": {
+        "$ref": "#/definitions/vulnerability"
+      }
+    },
+    "remediations": {
+      "type": "array",
+      "description": "Optional automated remediation suggestions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fixes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cve": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "summary": {
+            "type": "string"
+          },
+          "diff": {
+            "type": "string",
+            "description": "Unified diff format patch"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "vulnerability": {
+      "type": "object",
+      "description": "A single security finding",
+      "required": ["id", "category", "name", "severity", "location", "scanner"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier (UUID) for this finding",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "category": {
+          "type": "string",
+          "description": "Scanner category",
+          "enum": ["secret_detection", "dependency_scanning", "sast"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable finding name",
+          "examples": ["AWS Access Key", "SQL Injection", "CVE-2023-1234"]
+        },
+        "message": {
+          "type": "string",
+          "description": "Detailed description of the security issue"
+        },
+        "description": {
+          "type": "string",
+          "description": "Extended explanation (optional, legacy field)"
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity rating",
+          "enum": ["critical", "high", "medium", "low", "info", "unknown"]
+        },
+        "confidence": {
+          "type": "string",
+          "description": "Confidence level of the finding",
+          "enum": ["high", "medium", "low", "experimental", "unknown"]
+        },
+        "location": {
+          "type": "object",
+          "description": "Where the vulnerability was found",
+          "oneOf": [
+            {"$ref": "#/definitions/file_location"},
+            {"$ref": "#/definitions/dependency_location"}
+          ]
+        },
+        "identifiers": {
+          "type": "array",
+          "description": "External references (CVE, CWE, etc.)",
+          "items": {
+            "$ref": "#/definitions/identifier"
+          }
+        },
+        "links": {
+          "type": "array",
+          "description": "Additional reference URLs",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "solution": {
+          "type": "string",
+          "description": "Remediation guidance"
+        },
+        "scanner": {
+          "type": "object",
+          "description": "Scanner that detected this vulnerability",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "file_location": {
+      "type": "object",
+      "description": "Location in source code (for secret_detection and sast)",
+      "required": ["file"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Relative path from project root"
+        },
+        "start_line": {
+          "type": "integer",
+          "description": "Starting line number (1-indexed)"
+        },
+        "end_line": {
+          "type": "integer",
+          "description": "Ending line number (1-indexed)"
+        },
+        "class": {
+          "type": "string",
+          "description": "Class name (if applicable)"
+        },
+        "method": {
+          "type": "string",
+          "description": "Method/function name (if applicable)"
+        }
+      }
+    },
+    "dependency_location": {
+      "type": "object",
+      "description": "Location in dependency manifest (for dependency_scanning)",
+      "required": ["file", "dependency"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Dependency manifest file",
+          "examples": ["package.json", "package-lock.json", "pyproject.toml", "requirements.txt"]
+        },
+        "dependency": {
+          "type": "object",
+          "required": ["package"],
+          "properties": {
+            "package": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Package name"
+                }
+              }
+            },
+            "version": {
+              "type": "string",
+              "description": "Installed version"
+            },
+            "iid": {
+              "type": "integer",
+              "description": "Internal identifier"
+            },
+            "direct": {
+              "type": "boolean",
+              "description": "True if direct dependency, false if transitive"
+            }
+          }
+        }
+      }
+    },
+    "identifier": {
+      "type": "object",
+      "description": "External identifier (CVE, CWE, etc.)",
+      "required": ["type", "name", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Identifier type",
+          "examples": ["cve", "cwe", "gitleaks_rule_id", "semgrep_id"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Identifier name",
+          "examples": ["CVE-2023-1234", "CWE-89"]
+        },
+        "value": {
+          "type": "string",
+          "description": "Identifier value"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Reference URL"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "15.0.0",
+      "scan": {
+        "type": "secret_detection",
+        "status": "success",
+        "start_time": "2025-11-05T14:30:00Z",
+        "end_time": "2025-11-05T14:32:15Z",
+        "scanner": {
+          "id": "gitleaks",
+          "name": "Gitleaks",
+          "version": "8.18.0",
+          "vendor": {
+            "name": "GitLab"
+          }
+        }
+      },
+      "vulnerabilities": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "category": "secret_detection",
+          "name": "AWS Access Key",
+          "message": "Hardcoded AWS access key detected",
+          "severity": "critical",
+          "confidence": "high",
+          "location": {
+            "file": "backend/src/config.py",
+            "start_line": 42,
+            "end_line": 42
+          },
+          "identifiers": [
+            {
+              "type": "gitleaks_rule_id",
+              "name": "aws-access-token",
+              "value": "aws-access-token"
+            }
+          ],
+          "solution": "Remove hardcoded AWS credentials. Use environment variables or AWS IAM roles instead.",
+          "scanner": {
+            "id": "gitleaks",
+            "name": "Gitleaks"
+          }
+        }
+      ]
+    }
+  ],
+  "additionalProperties": true
+}
