@@ -1,10 +1,13 @@
 /**
  * TaskEntryPage - Main page for task entry with chat interface
+ *
+ * Updated for Feature 003: Multi-Lane Task Workflow
+ * Replaced TaskList with LaneWorkflow for kanban-style visualization
  */
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChatInput } from '@/components/ChatInput';
-import { TaskList } from '@/components/TaskList';
+import { LaneWorkflow } from '@/components/LaneWorkflow';
 import { useTaskPolling } from '@/services/useTaskPolling';
 import { createTask } from '@/services/api';
 import { Card } from '@/components/ui/card';
@@ -53,9 +56,15 @@ export function TaskEntryPage() {
         </div>
       )}
 
-      {/* Task List */}
-      <div className="flex-1 overflow-hidden">
-        <TaskList tasks={tasks} isLoading={isLoading} />
+      {/* Lane Workflow (Feature 003) */}
+      <div className="flex-1 overflow-hidden p-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Loading tasks...</p>
+          </div>
+        ) : (
+          <LaneWorkflow />
+        )}
       </div>
 
       {/* Chat Input */}

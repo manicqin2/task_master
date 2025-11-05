@@ -1,0 +1,152 @@
+/**
+ * ActionEmblem Component
+ *
+ * Reusable button component for task actions (cancel, retry, confirm, expand).
+ * Displays an icon button with tooltip support.
+ *
+ * @feature 003-task-lane-workflow
+ * @phase Phase 4 - User Story 2 (Cancel Action in Pending Lane)
+ */
+
+import React from 'react'
+import { X, RotateCw, Check, ChevronDown } from 'lucide-react'
+import { ActionEmblem as ActionEmblemType } from '@/types/task'
+
+export interface ActionEmblemProps {
+  /**
+   * The type of action this emblem represents
+   */
+  type: ActionEmblemType
+
+  /**
+   * Tooltip text to show on hover
+   */
+  tooltip: string
+
+  /**
+   * Callback fired when the emblem is clicked
+   */
+  onClick: () => void
+
+  /**
+   * Visual variant of the button
+   */
+  variant?: 'default' | 'ghost' | 'destructive' | 'outline' | 'secondary'
+
+  /**
+   * Size of the emblem
+   */
+  size?: 'sm' | 'md' | 'lg'
+
+  /**
+   * Whether the emblem is disabled
+   */
+  disabled?: boolean
+
+  /**
+   * Additional CSS classes
+   */
+  className?: string
+
+  /**
+   * Accessible label for screen readers
+   */
+  ariaLabel?: string
+
+  /**
+   * Loading state (shows spinner)
+   */
+  loading?: boolean
+}
+
+/**
+ * Get the icon component for the action type
+ */
+function getIcon(type: ActionEmblemType) {
+  switch (type) {
+    case 'cancel':
+      return X
+    case 'retry':
+      return RotateCw
+    case 'confirm':
+      return Check
+    case 'expand':
+      return ChevronDown
+    default:
+      return X
+  }
+}
+
+/**
+ * Get the button variant styles
+ */
+function getVariantStyles(variant: string = 'ghost') {
+  const base = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50'
+
+  switch (variant) {
+    case 'default':
+      return `${base} bg-blue-600 text-white hover:bg-blue-700`
+    case 'destructive':
+      return `${base} bg-red-600 text-white hover:bg-red-700`
+    case 'outline':
+      return `${base} border border-gray-300 bg-transparent hover:bg-gray-100`
+    case 'secondary':
+      return `${base} bg-gray-200 text-gray-900 hover:bg-gray-300`
+    case 'ghost':
+    default:
+      return `${base} hover:bg-gray-100 hover:text-gray-900`
+  }
+}
+
+/**
+ * Get the size styles
+ */
+function getSizeStyles(size: string = 'sm') {
+  switch (size) {
+    case 'lg':
+      return 'h-10 w-10'
+    case 'md':
+      return 'h-8 w-8'
+    case 'sm':
+    default:
+      return 'h-6 w-6 p-1'
+  }
+}
+
+/**
+ * ActionEmblem component
+ */
+export const ActionEmblem: React.FC<ActionEmblemProps> = ({
+  type,
+  tooltip,
+  onClick,
+  variant = 'ghost',
+  size = 'sm',
+  disabled = false,
+  className = '',
+  ariaLabel,
+  loading = false,
+}) => {
+  const Icon = getIcon(type)
+  const variantStyles = getVariantStyles(variant)
+  const sizeStyles = getSizeStyles(size)
+
+  return (
+    <button
+      type="button"
+      className={`${variantStyles} ${sizeStyles} ${className}`}
+      onClick={onClick}
+      disabled={disabled || loading}
+      aria-label={ariaLabel || tooltip}
+      title={tooltip}
+    >
+      <Icon
+        className={`${size === 'sm' ? 'h-4 w-4' : size === 'md' ? 'h-5 w-5' : 'h-6 w-6'} ${
+          loading ? 'animate-spin' : ''
+        }`}
+      />
+    </button>
+  )
+}
+
+ActionEmblem.displayName = 'ActionEmblem'
