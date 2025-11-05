@@ -23,23 +23,27 @@ const TIMEOUT_THRESHOLD_MS = 30000 // 30 seconds
 /**
  * Hook for detecting timed-out tasks
  *
- * Implementation will be added in Phase 5 (User Story 3)
+ * Monitors tasks and triggers timeout callback after 30 seconds
  */
-export function useTimeoutDetection(tasks: TaskWithLane[]) {
-  const [timedOutTaskIds, setTimedOutTaskIds] = useState<Set<string>>(new Set())
-
-  // TODO: Implement timeout detection logic in Phase 5 (T081-T083)
-  // - Track last update timestamp for each pending task
-  // - Check every 1 second if any task has exceeded 30s threshold
-  // - Mark timed-out tasks with hasTimeout flag
-  // - Move to Error lane with "Backend unavailable - retry when online" message
-
+export function useTimeoutDetection(
+  taskId: string,
+  status: 'pending' | 'processing' | 'failed' | 'completed' | 'error' | 'finished',
+  onTimeout: (taskId: string) => void
+) {
   useEffect(() => {
-    // TODO: Implement in Phase 5
-  }, [tasks])
+    // Only monitor pending/processing tasks
+    if (status !== 'pending' && status !== 'processing') {
+      return
+    }
 
-  return {
-    isTimedOut: (taskId: string) => timedOutTaskIds.has(taskId),
-    timedOutTaskIds: Array.from(timedOutTaskIds),
-  }
+    // Set timeout for 30 seconds
+    const timeoutId = setTimeout(() => {
+      onTimeout(taskId)
+    }, TIMEOUT_THRESHOLD_MS)
+
+    // Cleanup timeout on unmount or status change
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [taskId, status, onTimeout])
 }

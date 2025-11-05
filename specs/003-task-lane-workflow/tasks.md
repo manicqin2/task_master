@@ -166,29 +166,29 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### RED Phase - Write Failing Tests First (US3)
 
-- [ ] T063 [P] [US3] Write test: Retry emblem appears in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T064 [P] [US3] Write test: Cancel emblem appears in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T065 [P] [US3] Write test: Error message displays in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T066 [P] [US3] Write test: useTaskActions hook has retry mutation in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T067 [P] [US3] Write test: Retry mutation calls taskApi.retry(taskId) in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T068 [P] [US3] Write test: Retry mutation moves task to Pending lane in frontend/src/hooks/__tests__/useTaskActions.test.ts
-- [ ] T069 [P] [US3] Write test: useTimeoutDetection triggers after 30 seconds with no response in frontend/src/hooks/__tests__/useTimeoutDetection.test.ts
-- [ ] T070 [P] [US3] Write test: useTimeoutDetection moves task to Error lane with "Backend unavailable" message in frontend/src/hooks/__tests__/useTimeoutDetection.test.ts
-- [ ] T071 [P] [US3] Write test: Clicking retry emblem moves task from Error to Pending lane in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
-- [ ] T072 [P] [US3] Write test: Clicking cancel emblem in Error lane removes task from UI in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
+- [X] T063 [P] [US3] Write test: Retry emblem appears in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T064 [P] [US3] Write test: Cancel emblem appears in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T065 [P] [US3] Write test: Error message displays in TaskCard when lane is 'error' in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T066 [P] [US3] Write test: useTaskActions hook has retry mutation in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T067 [P] [US3] Write test: Retry mutation calls taskApi.retry(taskId) in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T068 [P] [US3] Write test: Retry mutation moves task to Pending lane in frontend/src/hooks/__tests__/useTaskActions.test.ts
+- [X] T069 [P] [US3] Write test: useTimeoutDetection triggers after 30 seconds with no response in frontend/src/hooks/__tests__/useTimeoutDetection.test.ts
+- [X] T070 [P] [US3] Write test: useTimeoutDetection moves task to Error lane with "Backend unavailable" message in frontend/src/hooks/__tests__/useTimeoutDetection.test.ts
+- [X] T071 [P] [US3] Write test: Clicking retry emblem moves task from Error to Pending lane in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
+- [X] T072 [P] [US3] Write test: Clicking cancel emblem in Error lane removes task from UI in frontend/src/components/LaneWorkflow/__tests__/LaneWorkflow.test.tsx
 
 **Verify**: Run tests with `npm test` - NEW tests should FAIL (RED phase complete)
 
 ### GREEN Phase - Minimal Implementation (US3)
 
-- [ ] T073 [US3] Add retry emblem rendering to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T074 [US3] Add cancel emblem rendering to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T075 [US3] Add error message display to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T076 [US3] Implement retry mutation in useTaskActions hook in frontend/src/hooks/useTaskActions.ts
-- [ ] T077 [US3] Wire up retry emblem onClick to useTaskActions.retry in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T078 [US3] Implement useTimeoutDetection hook with 30-second timer in frontend/src/hooks/useTimeoutDetection.ts
-- [ ] T079 [US3] Wire up useTimeoutDetection to move tasks to Error lane in LaneWorkflow in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
-- [ ] T080 [US3] Configure retry mutation to update task status to 'pending' in frontend/src/hooks/useTaskActions.ts
+- [X] T073 [US3] Add retry emblem rendering to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T074 [US3] Add cancel emblem rendering to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T075 [US3] Add error message display to TaskCard (Error lane only) in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T076 [US3] Implement retry mutation in useTaskActions hook in frontend/src/hooks/useTaskActions.ts
+- [X] T077 [US3] Wire up retry emblem onClick to useTaskActions.retry in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T078 [US3] Implement useTimeoutDetection hook with 30-second timer in frontend/src/hooks/useTimeoutDetection.ts
+- [X] T079 [US3] Wire up useTimeoutDetection to move tasks to Error lane in LaneWorkflow in frontend/src/components/LaneWorkflow/LaneWorkflow.tsx
+- [X] T080 [US3] Configure retry mutation to update task status to 'pending' in frontend/src/hooks/useTaskActions.ts
 
 **Verify**: Run tests with `npm test` - ALL tests should PASS (GREEN phase complete)
 

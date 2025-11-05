@@ -142,4 +142,54 @@ describe('TaskCard Component', () => {
     expect(buttons).toHaveLength(1)
     expect(buttons[0]).toHaveAccessibleName(/cancel/i)
   })
+
+  // T063: Write test: Retry emblem appears in TaskCard when lane is 'error'
+  it('should show retry emblem when task is in error lane', () => {
+    const errorTask: TaskWithLane = {
+      ...mockTask,
+      enrichment_status: EnrichmentStatus.FAILED,
+      error_message: 'Processing failed',
+      lane: 'error',
+      emblems: ['retry', 'cancel'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={errorTask} onAction={mockOnAction} />)
+
+    const retryButton = screen.getByRole('button', { name: /retry/i })
+    expect(retryButton).toBeInTheDocument()
+  })
+
+  // T064: Write test: Cancel emblem appears in TaskCard when lane is 'error'
+  it('should show cancel emblem when task is in error lane', () => {
+    const errorTask: TaskWithLane = {
+      ...mockTask,
+      enrichment_status: EnrichmentStatus.FAILED,
+      error_message: 'Processing failed',
+      lane: 'error',
+      emblems: ['retry', 'cancel'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={errorTask} onAction={mockOnAction} />)
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i })
+    expect(cancelButton).toBeInTheDocument()
+  })
+
+  // T065: Write test: Error message displays in TaskCard when lane is 'error'
+  it('should display error message when task has error', () => {
+    const errorTask: TaskWithLane = {
+      ...mockTask,
+      enrichment_status: EnrichmentStatus.FAILED,
+      error_message: 'Backend service unavailable',
+      lane: 'error',
+      emblems: ['retry', 'cancel'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={errorTask} onAction={mockOnAction} />)
+
+    expect(screen.getByText('Backend service unavailable')).toBeInTheDocument()
+  })
 })
