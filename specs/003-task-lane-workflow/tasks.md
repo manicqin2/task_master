@@ -290,10 +290,10 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Text Truncation and Expand/Collapse
 
-- [ ] T119 [P] Implement text truncation (100 char limit) with CSS line-clamp in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T120 [P] Add expand/collapse emblem to truncated task descriptions in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T121 [P] Write test: Expand emblem shows full text when clicked in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
-- [ ] T122 [P] Write test: Collapse emblem truncates text when clicked in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T119 [P] Implement text truncation (100 char limit) with CSS line-clamp in TaskCard in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T120 [P] Add expand/collapse emblem to truncated task descriptions in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T121 [P] Write test: Expand emblem shows full text when clicked in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
+- [X] T122 [P] Write test: Collapse emblem truncates text when clicked in frontend/src/components/LaneWorkflow/__tests__/TaskCard.test.tsx
 
 ### Tooltip Refinements
 

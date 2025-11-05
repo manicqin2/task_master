@@ -9,7 +9,7 @@
  */
 
 import React from 'react'
-import { X, RotateCw, Check, ChevronDown } from 'lucide-react'
+import { X, RotateCw, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { ActionEmblem as ActionEmblemType } from '@/types/task'
 
 export interface ActionEmblemProps {
@@ -57,6 +57,32 @@ export interface ActionEmblemProps {
    * Loading state (shows spinner)
    */
   loading?: boolean
+
+  /**
+   * Optional custom icon name (overrides default icon for type)
+   * Supported: 'X', 'RotateCw', 'Check', 'ChevronDown', 'ChevronUp'
+   */
+  icon?: string
+}
+
+/**
+ * Get the icon component by name
+ */
+function getIconByName(iconName: string) {
+  switch (iconName) {
+    case 'X':
+      return X
+    case 'RotateCw':
+      return RotateCw
+    case 'Check':
+      return Check
+    case 'ChevronDown':
+      return ChevronDown
+    case 'ChevronUp':
+      return ChevronUp
+    default:
+      return X
+  }
 }
 
 /**
@@ -126,8 +152,10 @@ export const ActionEmblem: React.FC<ActionEmblemProps> = ({
   className = '',
   ariaLabel,
   loading = false,
+  icon,
 }) => {
-  const Icon = getIcon(type)
+  // Use custom icon if provided, otherwise use default for type
+  const Icon = icon ? getIconByName(icon) : getIcon(type)
   const variantStyles = getVariantStyles(variant)
   const sizeStyles = getSizeStyles(size)
 

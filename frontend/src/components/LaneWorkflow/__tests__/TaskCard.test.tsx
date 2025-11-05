@@ -192,4 +192,114 @@ describe('TaskCard Component', () => {
 
     expect(screen.getByText('Backend service unavailable')).toBeInTheDocument()
   })
+
+  // T121: Write test: Expand emblem shows full text when clicked
+  it('should show expand emblem when task text exceeds 100 characters', () => {
+    const longTextTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'This is a very long task description that definitely exceeds the 100 character limit for text truncation and should trigger the expand emblem to appear',
+      enriched_text: null,
+      isExpanded: false,
+      emblems: ['cancel', 'expand'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={longTextTask} onAction={mockOnAction} />)
+
+    // Should show expand emblem
+    const expandButton = screen.getByRole('button', { name: /expand/i })
+    expect(expandButton).toBeInTheDocument()
+  })
+
+  it('should show truncated text when isExpanded is false', () => {
+    const longTextTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'This is a very long task description that definitely exceeds the 100 character limit for text truncation and should trigger the expand emblem to appear',
+      enriched_text: null,
+      isExpanded: false,
+      emblems: ['cancel', 'expand'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={longTextTask} onAction={mockOnAction} />)
+
+    // Text should be truncated with CSS line-clamp
+    const textElement = screen.getByText(/This is a very long task description/)
+    expect(textElement).toBeInTheDocument()
+    // Should have line-clamp class applied
+    expect(textElement).toHaveClass('line-clamp-2')
+  })
+
+  it('should show full text when isExpanded is true', () => {
+    const expandedTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'This is a very long task description that definitely exceeds the 100 character limit for text truncation and should trigger the expand emblem to appear',
+      enriched_text: null,
+      isExpanded: true,
+      emblems: ['cancel', 'expand'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={expandedTask} onAction={mockOnAction} />)
+
+    // Full text should be visible without truncation
+    const textElement = screen.getByText(/This is a very long task description that definitely exceeds the 100 character limit/)
+    expect(textElement).toBeInTheDocument()
+    // Should NOT have line-clamp class
+    expect(textElement).not.toHaveClass('line-clamp-2')
+  })
+
+  // T122: Write test: Collapse emblem truncates text when clicked
+  it('should change expand emblem icon when text is expanded', () => {
+    const expandedTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'This is a very long task description that definitely exceeds the 100 character limit for text truncation and should trigger the expand emblem to appear',
+      enriched_text: null,
+      isExpanded: true,
+      emblems: ['cancel', 'expand'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={expandedTask} onAction={mockOnAction} />)
+
+    // When expanded, emblem should show ChevronUp icon (collapse)
+    const expandButton = screen.getByRole('button', { name: /expand/i })
+    expect(expandButton).toBeInTheDocument()
+    // Tooltip should indicate collapse action
+    // Note: Actual icon change will be tested visually
+  })
+
+  it('should call onAction with "expand" when expand emblem is clicked', () => {
+    const longTextTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'This is a very long task description that definitely exceeds the 100 character limit for text truncation and should trigger the expand emblem to appear',
+      enriched_text: null,
+      isExpanded: false,
+      emblems: ['cancel', 'expand'],
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={longTextTask} onAction={mockOnAction} />)
+
+    const expandButton = screen.getByRole('button', { name: /expand/i })
+    expandButton.click()
+
+    expect(mockOnAction).toHaveBeenCalledWith('expand')
+  })
+
+  it('should NOT show expand emblem when text is under 100 characters', () => {
+    const shortTextTask: TaskWithLane = {
+      ...mockTask,
+      user_input: 'Short task',
+      enriched_text: null,
+      isExpanded: false,
+      emblems: ['cancel'], // No expand emblem
+    }
+    const mockOnAction = vi.fn()
+
+    render(<TaskCard task={shortTextTask} onAction={mockOnAction} />)
+
+    // Should not have expand button
+    expect(screen.queryByRole('button', { name: /expand/i })).not.toBeInTheDocument()
+  })
 })

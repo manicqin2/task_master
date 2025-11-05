@@ -10,7 +10,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS } from '@/types/task'
+import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS, needsTruncation } from '@/types/task'
 import { ActionEmblem } from './ActionEmblem'
 import { ErrorMessage } from './ErrorMessage'
 
@@ -39,6 +39,14 @@ export interface TaskCardProps {
 export const TaskCard = React.memo(function TaskCard({ task, onAction, className = '' }: TaskCardProps) {
   // Get display text (enriched_text if available, otherwise user_input)
   const displayText = getTaskDisplayText(task)
+
+  // Check if text needs truncation
+  const shouldTruncate = needsTruncation(displayText)
+
+  // Build emblem list: include expand emblem if text is truncated (avoid duplicates)
+  const emblems = shouldTruncate && !task.emblems.includes('expand')
+    ? [...task.emblems, 'expand' as const]
+    : task.emblems
 
   // Determine status badge color based on enrichment status
   const getStatusColor = () => {
@@ -70,7 +78,13 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
     >
       {/* Task Title */}
       <div className="mb-2">
-        <p className="text-sm font-medium">{displayText}</p>
+        <p
+          className={`text-sm font-medium ${
+            shouldTruncate && !task.isExpanded ? 'line-clamp-2' : ''
+          }`}
+        >
+          {displayText}
+        </p>
       </div>
 
       {/* Status Badge */}
@@ -86,18 +100,27 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
       {task.error_message && <ErrorMessage message={task.error_message} />}
 
       {/* Action Emblems */}
-      {task.emblems.length > 0 && (
+      {emblems.length > 0 && (
         <div className="mt-2 flex items-center gap-1">
-          {task.emblems.map((emblemType) => {
+          {emblems.map((emblemType) => {
             const emblemConfig = ACTION_EMBLEM_CONFIGS[emblemType]
+
+            // For expand emblem, customize icon and tooltip based on expanded state
+            const isExpandEmblem = emblemType === 'expand'
+            const customIcon = isExpandEmblem && task.isExpanded ? 'ChevronUp' : emblemConfig.icon
+            const customTooltip = isExpandEmblem && task.isExpanded
+              ? 'Collapse task details'
+              : emblemConfig.tooltip
+
             return (
               <ActionEmblem
                 key={emblemType}
                 type={emblemType}
-                tooltip={emblemConfig.tooltip}
+                tooltip={customTooltip}
                 onClick={() => onAction(emblemType)}
                 variant={emblemConfig.variant}
                 size="sm"
+                icon={customIcon}
               />
             )
           })}

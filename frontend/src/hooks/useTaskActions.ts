@@ -12,7 +12,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { retryTask } from '@/services/api'
-import { ListTasksResponse } from '@/lib/types'
+import { ListTasksResponse, Task } from '@/lib/types'
 
 /**
  * Hook for task action handlers
@@ -76,6 +76,50 @@ export function useTaskActions() {
     },
   })
 
+  /**
+   * Expand mutation - frontend-only, optimistic update
+   * Toggles isExpanded state for a task in React Query cache
+   */
+  const expandMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      // Frontend-only - no API call
+      return { taskId }
+    },
+    onMutate: async (taskId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+
+      // Snapshot previous value
+      const previousTasks = queryClient.getQueryData<ListTasksResponse>(['tasks'])
+
+      // Optimistically toggle isExpanded for the task
+      queryClient.setQueryData<ListTasksResponse>(['tasks'], (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          tasks: old.tasks.map((task: Task) => {
+            if (task.id === taskId) {
+              // Toggle isExpanded state
+              return {
+                ...task,
+                isExpanded: !(task as any).isExpanded, // Toggle boolean
+              }
+            }
+            return task
+          }),
+        }
+      })
+
+      return { previousTasks }
+    },
+    onError: (err, taskId, context) => {
+      // Rollback on error
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks)
+      }
+    },
+  })
+
   return {
     handleCancel: (taskId: string) => {
       cancelMutation.mutate(taskId)
@@ -88,8 +132,11 @@ export function useTaskActions() {
       console.log('Confirm action deferred to P4:', taskId)
     },
     handleExpand: (taskId: string) => {
-      // TODO: Implement expand/collapse toggle
-      console.log('Expand action not yet implemented:', taskId)
+      expandMutation.mutate(taskId)
     },
+    // Expose mutations for testing
+    cancelMutation,
+    retryMutation,
+    expandMutation,
   }
 }
