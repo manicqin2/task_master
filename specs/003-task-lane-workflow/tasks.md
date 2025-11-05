@@ -309,11 +309,11 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### Accessibility Improvements
 
-- [ ] T129 [P] Add ARIA live regions for lane updates (screen reader announcements) in frontend/src/components/LaneWorkflow/Lane.tsx
-- [ ] T130 [P] Add keyboard navigation support to action emblems (Tab, Enter, Space) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
-- [ ] T131 [P] Add focus indicators for action emblems in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
-- [ ] T132 [P] Add semantic HTML roles to Lane components (role="region") in frontend/src/components/LaneWorkflow/Lane.tsx
-- [ ] T133 [P] Validate color contrast for action emblems meets WCAG AA standards in frontend/src/lib/actionEmblemConfigs.ts
+- [X] T129 [P] Add ARIA live regions for lane updates (screen reader announcements) in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T130 [P] Add keyboard navigation support to action emblems (Tab, Enter, Space) in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T131 [P] Add focus indicators for action emblems in frontend/src/components/LaneWorkflow/ActionEmblem.tsx
+- [X] T132 [P] Add semantic HTML roles to Lane components (role="region") in frontend/src/components/LaneWorkflow/Lane.tsx
+- [X] T133 [P] Validate color contrast for action emblems meets WCAG AA standards in frontend/src/lib/actionEmblemConfigs.ts
 
 ### Error Handling
 

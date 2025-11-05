@@ -48,6 +48,8 @@ export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, clas
       className={`flex flex-col h-full border rounded-lg p-4 ${config.bgColor} ${config.borderColor} ${className}`}
       role="region"
       aria-label={`${config.title} lane with ${tasks.length} tasks`}
+      aria-live="polite"
+      aria-atomic="false"
     >
       {/* Lane Header */}
       <LaneHeader
