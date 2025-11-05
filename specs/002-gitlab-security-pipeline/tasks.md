@@ -241,24 +241,24 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 ### Documentation
 
-- [ ] T089 [P] Review and update quickstart.md with actual configuration details
-- [ ] T090 [P] Validate architecture.md diagrams match implemented configuration
-- [ ] T091 [P] Add troubleshooting section to .gitlab-ci.yml with common issues
-- [ ] T092 [P] Document GitLab tier requirements clearly (Free: Secret Detection + SAST, Ultimate: Dependency Scanning)
+- [X] T089 [P] Review and update quickstart.md with actual configuration details
+- [X] T090 [P] Validate architecture.md diagrams match implemented configuration
+- [X] T091 [P] Add troubleshooting section to .gitlab-ci.yml with common issues
+- [X] T092 [P] Document GitLab tier requirements clearly (Free: Secret Detection + SAST, Ultimate: Dependency Scanning)
 
 ### Validation
 
-- [ ] T093 Validate .gitlab-ci.yml syntax using gitlab-ci-lint command
-- [ ] T094 Verify all job dependencies are correct (security stage runs after test stage if present)
-- [ ] T095 Verify artifact retention settings (30 days default)
-- [ ] T096 Run complete pipeline end-to-end with all test commits
+- [X] T093 Validate .gitlab-ci.yml syntax using gitlab-ci-lint command
+- [X] T094 Verify all job dependencies are correct (security stage runs after test stage if present)
+- [X] T095 Verify artifact retention settings (30 days default)
+- [X] T096 Run complete pipeline end-to-end with all test commits
 
 ### Final Improvements
 
-- [ ] T097 Add job retry logic for transient scanner errors (retry: 2)
-- [ ] T098 Configure artifact expiration appropriately (expire_in: 30 days)
-- [ ] T099 Verify pipeline passes with clean code (no test commits)
-- [ ] T100 Run quickstart.md validation (follow steps 1-7, verify all work)
+- [X] T097 Add job retry logic for transient scanner errors (retry: 2)
+- [X] T098 Configure artifact expiration appropriately (expire_in: 30 days)
+- [X] T099 Verify pipeline passes with clean code (no test commits)
+- [X] T100 Run quickstart.md validation (follow steps 1-7, verify all work)
 
 **Checkpoint**: Feature complete and documented - Ready for production deployment
 

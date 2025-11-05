@@ -178,6 +178,91 @@
 # ==============================================================================
 
 # ==============================================================================
+# Troubleshooting Common Issues (T091)
+# ==============================================================================
+#
+# 1. "Job failed: exit code 1" - Scanner found vulnerabilities
+#    - Check job logs for specific findings
+#    - For Secret Detection: Remove hardcoded secrets, add to .gitleaksignore if false positive
+#    - For Dependency Scanning: Update vulnerable packages
+#    - For SAST: Fix code issues or add inline suppression with justification
+#
+# 2. "Job failed: timeout" - Scanner exceeded 5-minute limit
+#    - Enable differential scanning: SECRET_DETECTION_HISTORIC_SCAN=false
+#    - Add more path exclusions: SECRET_DETECTION_EXCLUDED_PATHS="tests/,docs/,node_modules/"
+#    - Check repository size: Very large repos (>100k files) may need monorepo filtering
+#    - Consider scheduled full scans instead of per-commit
+#
+# 3. "No runner available" - No GitLab Runner to execute job
+#    - Enable shared runners: Settings → CI/CD → Runners → Enable shared runners
+#    - Or register project-specific runner: gitlab-runner register
+#    - Check runner tags match job requirements
+#
+# 4. "Dependency Scanning not working" - Scanner not detecting dependencies
+#    - Verify GitLab tier: Dependency Scanning requires ULTIMATE license
+#    - Check package files exist: package.json (npm), requirements.txt (Python)
+#    - Ensure lock files present: package-lock.json, yarn.lock, or poetry.lock
+#    - Review job logs for specific errors
+#
+# 5. "SAST not detecting language" - No analyzer available for your language
+#    - Verify language support: JS/TS/Python supported out-of-box
+#    - For other languages: May need additional analyzer configuration
+#    - Check SAST_EXCLUDED_ANALYZERS doesn't exclude your language
+#    - Review job logs for "No supported files found"
+#
+# 6. "False positives blocking pipeline" - Scanner flagging non-issues
+#    - Secret Detection: Add patterns to .gitleaksignore
+#    - Dependency Scanning: Add exemption to .gitlab/security-policies.yml
+#    - SAST: Add inline suppression (# nosec B303) with justification
+#    - Update path exclusions to skip test files and documentation
+#
+# 7. "Pipeline too slow (>5 minutes)" - Scans taking too long
+#    - Enable differential scanning (already enabled by default)
+#    - Add path exclusions for large directories (tests/, docs/, node_modules/)
+#    - Use shallow clone: GIT_DEPTH=50 (already enabled)
+#    - Consider monorepo path filtering for very large repos
+#    - Review parallel execution is working (all jobs run simultaneously)
+#
+# 8. "Secret in git history" - Old commits contain secrets
+#    - Secret Detection only scans new commits (differential mode)
+#    - For historical secrets:
+#      a) Remove from current code
+#      b) Rotate the credential immediately
+#      c) Consider git history rewrite (BFG Repo-Cleaner) for public repos
+#      d) Document in security log for private repos
+#    - One-time historic scan: Set SECRET_DETECTION_HISTORIC_SCAN="true" (slow)
+#
+# 9. "Vulnerability with no patch available" - CVE detected but no fix
+#    - Use risk acceptance workflow in .gitlab/security-policies.yml
+#    - Create SEC ticket with justification and mitigation
+#    - Add exemption with expiration date (30-90 days)
+#    - Implement compensating controls (WAF rules, network isolation)
+#    - Re-review before expiration
+#
+# 10. "Scanner service unavailable" - GitLab scanner timeout or error
+#     - Check GitLab status page: https://status.gitlab.com
+#     - Jobs configured with appropriate allow_failure settings:
+#       - Secret Detection / Dependency Scanning: allow_failure=false (blocks on critical)
+#       - SAST: allow_failure=true (warning-only, graceful degradation)
+#     - Retry the pipeline if transient network issue
+#     - Contact GitLab support if persistent scanner failures
+#
+# Debugging Tips:
+# - Review job logs: CI/CD → Pipelines → Select job → View logs
+# - Download artifacts: CI/CD → Pipelines → Job → Browse artifacts
+# - Validate .gitlab-ci.yml: Use gitlab-ci-lint or CI/CD → Editor → Validate
+# - Check Security Dashboard: Security & Compliance → Vulnerability Report
+# - Monitor job duration: CI/CD → Analytics → Repository analytics
+#
+# Support Resources:
+# - GitLab Security Docs: https://docs.gitlab.com/ee/user/application_security/
+# - Secret Detection: https://docs.gitlab.com/ee/user/application_security/secret_detection/
+# - Dependency Scanning: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/
+# - SAST: https://docs.gitlab.com/ee/user/application_security/sast/
+# - GitLab Community Forum: https://forum.gitlab.com/
+# ==============================================================================
+
+# ==============================================================================
 # Pipeline Stages
 # ==============================================================================
 
