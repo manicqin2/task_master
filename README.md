@@ -1,93 +1,197 @@
-# task_master
+# Mission Statement: Task Master
 
+## Project Overview
 
+**Project Name:** Task Master
 
-## Getting started
+**Vision:**
+A local-first, intelligent task management web application that transforms casual notes and quick thoughts into structured, actionable tasks through AI-powered enrichment and contextual understanding.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+**Core Purpose:**
+Enable users to capture fleeting thoughts and reminders in natural language, which are automatically enriched with context, categorization, and relationships—eliminating the mental overhead of manual task organization.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Key Capabilities
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### 1. Natural Language Input Processing
+- Accept raw, unstructured messages in conversational form
+- Parse context clues (dates, names, project identifiers, urgency)
+- Preserve original input alongside enriched version
 
+### 2. Intelligent Task Enrichment
+- Extract and structure metadata (projects, people, deadlines, tags)
+- Reformat messages into clear, actionable statements
+- Identify task type, priority, and relationships automatically
+
+### 3. Context-Aware RAG System
+- Maintain searchable vector database of historical tasks
+- Surface similar past tasks for pattern recognition
+- Use task history to improve classification accuracy over time
+
+### 4. Interactive Clarification
+- LLM can ask follow-up questions when context is ambiguous
+- Conversational refinement of task details
+- Learn user patterns and preferences through interaction
+
+### 5. Local-First Architecture
+- All data stored locally for privacy and speed
+- No external dependencies for core functionality
+- Offline-capable with optional cloud sync
+
+---
+
+## Example Transformations
+
+### Example 1: Personal Task
+**Input:**
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/manicqin/task_master.git
-git branch -M main
-git push -uf origin main
+"call mom talk trip tomorrow"
 ```
 
-## Integrate with your tools
+**Output:**
+```json
+{
+  "project": "personal",
+  "persons": ["mom"],
+  "deadline": "2025-11-05",
+  "original": "call mom talk trip tomorrow",
+  "formatted": "Call mom to discuss trip plans",
+  "taskType": "communication",
+  "priority": "medium"
+}
+```
 
-- [ ] [Set up project integrations](https://gitlab.com/manicqin/task_master/-/settings/integrations)
+### Example 2: Development Task
+**Input:**
+```
+"napp-2511 refactor manager class"
+```
 
-## Collaborate with your team
+**Output:**
+```json
+{
+  "project": "napp-2511",
+  "persons": [],
+  "deadline": null,
+  "original": "napp-2511 refactor manager class",
+  "formatted": "Refactor Manager class in NAPP-2511 project",
+  "taskType": "development",
+  "priority": "normal"
+}
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## Success Criteria
 
-Use the built-in continuous integration in GitLab.
+- **Speed:** Reduce task entry time from 2-3 minutes to under 10 seconds
+- **Accuracy:** Achieve 90%+ accuracy in context extraction without clarification
+- **Flow:** Enable quick capture without breaking user flow or concentration
+- **Intelligence:** Build searchable task history that improves insights over time
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+## Technical Documentation
 
-# Editing this README
+- **Technology Stack**: See [docs/tech-stack.md](docs/tech-stack.md) for complete technical stack details
+- **Constitution**: See [.specify/memory/constitution.md](.specify/memory/constitution.md) for development principles and standards
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+---
 
-## Suggestions for a good README
+## Implementation Status
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### ✅ Feature 001: Chat-Based Task Entry (COMPLETE)
 
-## Name
-Choose a self-explaining name for your project.
+The first feature has been fully implemented! This provides:
+- **Chat-style task input** with automatic enrichment
+- **Async background processing** using Ollama LLM
+- **Real-time polling** for enrichment status updates
+- **Persistent task storage** with SQLite
+- **Docker deployment** for cross-platform compatibility
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+**Quick Start:**
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+# Navigate to project root
+cd task_master
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# Start all services with Docker Compose
+docker compose -f docker/docker-compose.yml up
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Access the application
+open http://localhost:3000
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+**Note:** On first run, Docker will automatically pull the `llama3.2` model (2GB). This may take a few minutes depending on your internet connection. The backend won't start until the model is ready.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**What's Working:**
+- Type informal tasks like "call mom tmrw"
+- Watch them get enriched to "Call Mom tomorrow to discuss weekend plans"
+- Submit multiple tasks without waiting
+- Tasks persist across page refreshes
+- Failed enrichments show error messages
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**Documentation:**
+- Feature Spec: `specs/001-chat-task-entry/spec.md`
+- Implementation Plan: `specs/001-chat-task-entry/plan.md`
+- Quick Start Guide: `specs/001-chat-task-entry/quickstart.md`
+- API Docs: http://localhost:8000/docs (when running)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### 🚧 Next Features
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Future features will build on this foundation to add:
+- Metadata extraction (dates, people, projects)
+- RAG-based task search and recommendations
+- Interactive LLM clarification
+- Task relationships and dependencies
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Development
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Quick Start
 
-## License
-For open source projects, say how it is licensed.
+**Docker (Recommended):**
+```bash
+docker compose -f docker/docker-compose.yml up
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+**Local Development with mise + uv:**
+```bash
+# Install mise (manages Python/Node versions automatically)
+brew install mise  # macOS
+# or: curl https://mise.run | sh
+
+# Install uv (10-100x faster than pip)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Navigate to project (mise auto-activates!)
+cd task_master
+
+# Option 1: Use Make (built-in)
+make install      # Install all dependencies
+make dev-backend  # Run backend
+make dev-frontend # Run frontend (in new terminal)
+make test         # Run all tests
+
+# Option 2: Use Just (install: brew install just)
+just install      # Install all dependencies
+just dev-backend  # Run backend
+just dev-frontend # Run frontend (in new terminal)
+just test         # Run all tests
+
+# Option 3: Manual
+cd backend && uv pip install -e .[dev]
+uvicorn src.main:app --reload
+```
+
+**Why mise + uv?**
+- ✅ **mise**: Automatic Python/Node version management + venv activation
+- ✅ **uv**: 10-100x faster Python package installation
+- ✅ No manual venv activation needed
+- ✅ Reproducible development environments
+
+### Documentation
+
+- **Local Development Guide**: `docs/local-development.md` (mise + uv setup)
+- **Quick Start**: `specs/001-chat-task-entry/quickstart.md` (Docker)
+- **API Documentation**: http://localhost:8000/docs (when running)
