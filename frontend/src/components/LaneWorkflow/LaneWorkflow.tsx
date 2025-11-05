@@ -74,6 +74,7 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          gridTemplateRows: 'minmax(0, 1fr)',
         }}
         role="main"
         aria-label="Task workflow board with three lanes"
