@@ -12,6 +12,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS } from '@/types/task'
 import { ActionEmblem } from './ActionEmblem'
+import { ErrorMessage } from './ErrorMessage'
 
 export interface TaskCardProps {
   /**
@@ -82,11 +83,7 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
       </div>
 
       {/* Error Message (if applicable) */}
-      {task.error_message && (
-        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
-          <p className="text-xs text-red-800">{task.error_message}</p>
-        </div>
-      )}
+      {task.error_message && <ErrorMessage message={task.error_message} />}
 
       {/* Action Emblems */}
       {task.emblems.length > 0 && (

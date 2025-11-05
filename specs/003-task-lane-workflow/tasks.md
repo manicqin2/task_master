@@ -194,11 +194,11 @@ description: "Implementation tasks for Feature 003: Multi-Lane Task Workflow wit
 
 ### REFACTOR Phase - Optimize and Extract (US3)
 
-- [ ] T081 [US3] Extract ErrorMessage subcomponent from TaskCard in frontend/src/components/LaneWorkflow/ErrorMessage.tsx
-- [ ] T082 [US3] Extract timeout detection logic to separate utility in frontend/src/lib/timeoutUtils.ts
-- [ ] T083 [US3] Optimize timeout detection to avoid memory leaks on unmount in frontend/src/hooks/useTimeoutDetection.ts
-- [ ] T084 [US3] Add retry count tracking to TaskCard (display "Retry attempt #N") in frontend/src/components/LaneWorkflow/TaskCard.tsx
-- [ ] T085 [US3] Optimize polling integration to avoid conflicts with mutations in frontend/src/hooks/useTaskActions.ts
+- [X] T081 [US3] Extract ErrorMessage subcomponent from TaskCard in frontend/src/components/LaneWorkflow/ErrorMessage.tsx
+- [X] T082 [US3] Extract timeout detection logic to separate utility in frontend/src/lib/timeoutUtils.ts
+- [X] T083 [US3] Optimize timeout detection to avoid memory leaks on unmount in frontend/src/hooks/useTimeoutDetection.ts
+- [X] T084 [US3] Add retry count tracking to TaskCard (display "Retry attempt #N") in frontend/src/components/LaneWorkflow/TaskCard.tsx
+- [X] T085 [US3] Optimize polling integration to avoid conflicts with mutations in frontend/src/hooks/useTaskActions.ts
 
 **Checkpoint**: User Story 3 complete. Users can now retry or cancel tasks in Error lane.
 
