@@ -325,8 +325,6 @@ include:
 # ==============================================================================
 
 secret_detection:
-  stage: security  # T015: Configure job in security stage
-
   variables:
     # T016: Enable differential scanning (only scan commit range, not full history)
     # This dramatically improves performance: 80% faster on large repos
@@ -338,26 +336,11 @@ secret_detection:
     # This improves scan speed by ~20-30% and reduces false positive rate
     SECRET_DETECTION_EXCLUDED_PATHS: "tests/,docs/"
 
-  # T017: Configure artifact output (JSON report for GitLab Security Dashboard)
-  artifacts:
-    reports:
-      secret_detection: gl-secret-detection-report.json
-    paths:
-      - gl-secret-detection-report.json
-    expire_in: 30 days
-    when: always  # Preserve report even if job fails
-
-  # T018: Run on merge requests and main branch
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "master"
-
-  # T019: Block merge if secrets detected (critical security issue)
-  allow_failure: false
-
-  # Job timeout (within 5-minute performance requirement)
-  timeout: 5 minutes
+  # Note: The Security/Secret-Detection.gitlab-ci.yml template handles:
+  # - Job stage (security)
+  # - Artifact collection (gl-secret-detection-report.json)
+  # - Execution rules (merge requests, default branch)
+  # - Failure behavior (allow_failure: false by default)
 
 # ==============================================================================
 # Dependency Scanning Job (User Story 2 - P2) 📦
@@ -403,34 +386,18 @@ secret_detection:
 # ==============================================================================
 
 dependency_scanning:
-  stage: security  # T031: Configure job in security stage
-
   variables:
     # T036: Exclude paths from scanning (performance optimization)
     # - tests/: Test files often have intentionally vulnerable dependencies
     # - docs/: Documentation doesn't need dependency scanning
     DS_EXCLUDED_PATHS: "tests/,docs/"
 
-  # T032: Configure artifact output (JSON report for GitLab Security Dashboard)
-  artifacts:
-    reports:
-      dependency_scanning: gl-dependency-scanning-report.json
-    paths:
-      - gl-dependency-scanning-report.json
-    expire_in: 30 days
-    when: always  # Preserve report even if job fails
-
-  # T033: Run on merge requests and main branch
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "master"
-
-  # T034: Block merge if high/critical CVEs detected
-  allow_failure: false
-
-  # Job timeout (within 5-minute performance requirement)
-  timeout: 5 minutes
+  # Note: The Security/Dependency-Scanning.gitlab-ci.yml template handles:
+  # - Job stage (security)
+  # - Artifact collection (gl-dependency-scanning-report.json)
+  # - Execution rules (merge requests, default branch)
+  # - Failure behavior (allow_failure: false by default)
+  # - Requires GitLab ULTIMATE tier
 
 # ==============================================================================
 # SAST Job (User Story 3 - P3) 🔍
@@ -487,8 +454,6 @@ dependency_scanning:
 # ==============================================================================
 
 sast:
-  stage: security  # T047: Configure job in security stage
-
   variables:
     # T049: Set confidence level to HIGH to reduce false positives
     # Options: HIGH (recommended), MEDIUM, LOW
@@ -500,25 +465,9 @@ sast:
     # - docs/: Documentation contains code examples that may trigger false positives
     SAST_EXCLUDED_PATHS: "tests/,docs/"
 
-  # T048: Configure artifact output (JSON report for GitLab Security Dashboard)
-  artifacts:
-    reports:
-      sast: gl-sast-report.json
-    paths:
-      - gl-sast-report.json
-    expire_in: 30 days
-    when: always  # Preserve report even if job fails
-
-  # Run on merge requests and main branch
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "master"
-
-  # T051: Warning-only mode (don't block merge)
-  # SAST findings are informational and should be reviewed but not block deployment
-  # This allows teams to gradually improve security posture without disrupting workflow
-  allow_failure: true
-
-  # Job timeout (within 5-minute performance requirement)
-  timeout: 5 minutes
+  # Note: The Security/SAST.gitlab-ci.yml template handles:
+  # - Job stage (security)
+  # - Artifact collection (gl-sast-report.json)
+  # - Execution rules (merge requests, default branch)
+  # - Failure behavior (allow_failure: true by default for most analyzers)
+  # - Multi-language support (JavaScript, Python, TypeScript, Go, Java, etc.)
