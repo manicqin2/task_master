@@ -166,3 +166,58 @@ class TestGetTask:
         """Test that getting nonexistent task returns 404 Not Found."""
         response = await client.get("/api/v1/tasks/nonexistent-id")
         assert response.status_code == 404
+
+
+class TestRetryTask:
+    """Test POST /api/v1/tasks/:id/retry endpoint contract.
+
+    Feature 003: Multi-Lane Task Workflow - Phase 6
+    """
+
+    @pytest.mark.asyncio
+    async def test_retry_task_returns_200(self, client: AsyncClient):
+        """T086: Test that retrying a task returns 200 OK with task."""
+        # Create a task first
+        create_response = await client.post(
+            "/api/v1/tasks",
+            json={"user_input": "test task for retry"},
+        )
+        task_id = create_response.json()["id"]
+
+        # Retry the task
+        response = await client.post(f"/api/v1/tasks/{task_id}/retry")
+        assert response.status_code == 200
+
+        # Verify response contains task
+        data = response.json()
+        assert "id" in data
+        assert data["id"] == task_id
+        assert "enrichment_status" in data
+
+    @pytest.mark.asyncio
+    async def test_retry_task_nonexistent_returns_404(self, client: AsyncClient):
+        """T087: Test that retrying nonexistent task returns 404 Not Found."""
+        response = await client.post("/api/v1/tasks/nonexistent-id/retry")
+        assert response.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_retry_task_returns_task_schema(self, client: AsyncClient):
+        """Test that retry response matches Task schema."""
+        # Create task
+        create_response = await client.post(
+            "/api/v1/tasks",
+            json={"user_input": "test retry schema"},
+        )
+        task_id = create_response.json()["id"]
+
+        # Retry task
+        response = await client.post(f"/api/v1/tasks/{task_id}/retry")
+        data = response.json()
+
+        # Verify schema
+        assert "id" in data
+        assert "user_input" in data
+        assert "enrichment_status" in data
+        assert "status" in data
+        assert "created_at" in data
+        assert "updated_at" in data

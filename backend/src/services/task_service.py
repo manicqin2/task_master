@@ -113,3 +113,29 @@ class TaskService:
         await self.db.refresh(task)
 
         return task
+
+    async def retry_task(self, task_id: str) -> Task:
+        """Retry a task by resetting its enrichment status to pending.
+
+        Feature 003: Multi-Lane Task Workflow - Phase 6 (T096)
+
+        Args:
+            task_id: Task UUID to retry.
+
+        Returns:
+            Updated task with pending enrichment status.
+
+        Raises:
+            Exception: If task not found.
+        """
+        task = await self.get_by_id(task_id)
+
+        # Reset enrichment status to pending
+        task.enrichment_status = EnrichmentStatus.PENDING
+        task.error_message = None
+        task.updated_at = datetime.now(timezone.utc)
+
+        await self.db.commit()
+        await self.db.refresh(task)
+
+        return task
