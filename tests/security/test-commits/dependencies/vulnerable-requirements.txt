@@ -1,0 +1,16 @@
+# Test file for Dependency Scanning: Vulnerable Python packages
+# These packages have known CVEs and should be detected by Gemnasium
+
+# Django with known vulnerability
+Django==3.1.0  # CVE-2021-33203, CVE-2021-33571 (Critical)
+
+# Pillow with known vulnerability
+Pillow==8.1.0  # CVE-2021-25287, CVE-2021-25288 (High)
+
+# urllib3 with known vulnerability
+urllib3==1.26.4  # CVE-2021-33503 (High)
+
+# Expected findings:
+# - Django 3.1.0: Critical severity, upgrade to 3.1.13+
+# - Pillow 8.1.0: High severity, upgrade to 8.2.0+
+# - urllib3 1.26.4: High severity, upgrade to 1.26.5+

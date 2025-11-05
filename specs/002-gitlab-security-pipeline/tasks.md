@@ -95,26 +95,26 @@ This is an infrastructure feature adding GitLab CI/CD configuration to the exist
 
 ### TDD: RED Phase (Create Failing Tests)
 
-- [ ] T026 [P] [US2] Create vulnerable package.json with lodash@4.17.20 (CVE-2020-8203) in tests/security/test-commits/dependencies/vulnerable-package.json
-- [ ] T027 [P] [US2] Create vulnerable requirements.txt with known Python CVE in tests/security/test-commits/dependencies/vulnerable-requirements.txt
-- [ ] T028 [P] [US2] Create clean package.json (up-to-date dependencies) in tests/security/test-commits/dependencies/clean-package.json
-- [ ] T029 [US2] Create expected findings JSON in tests/security/expected-results/dependency-scanning.json
+- [X] T026 [P] [US2] Create vulnerable package.json with lodash@4.17.20 (CVE-2020-8203) in tests/security/test-commits/dependencies/vulnerable-package.json
+- [X] T027 [P] [US2] Create vulnerable requirements.txt with known Python CVE in tests/security/test-commits/dependencies/vulnerable-requirements.txt
+- [X] T028 [P] [US2] Create clean package.json (up-to-date dependencies) in tests/security/test-commits/dependencies/clean-package.json
+- [X] T029 [US2] Create expected findings JSON in tests/security/expected-results/dependency-scanning.json
 
 ### TDD: GREEN Phase (Make Tests Pass)
 
-- [ ] T030 [US2] Add Security/Dependency-Scanning.gitlab-ci.yml template include to .gitlab-ci.yml
-- [ ] T031 [US2] Configure dependency_scanning job in .gitlab-ci.yml (stage: security)
-- [ ] T032 [US2] Configure artifact output (gl-dependency-scanning-report.json) in .gitlab-ci.yml
-- [ ] T033 [US2] Set job to run on merge_requests and main branch in .gitlab-ci.yml
-- [ ] T034 [US2] Set allow_failure=false (blocking) for dependency_scanning job in .gitlab-ci.yml
-- [ ] T035 [US2] Test pipeline with vulnerable test commits and verify CVE detection
+- [X] T030 [US2] Add Security/Dependency-Scanning.gitlab-ci.yml template include to .gitlab-ci.yml
+- [X] T031 [US2] Configure dependency_scanning job in .gitlab-ci.yml (stage: security)
+- [X] T032 [US2] Configure artifact output (gl-dependency-scanning-report.json) in .gitlab-ci.yml
+- [X] T033 [US2] Set job to run on merge_requests and main branch in .gitlab-ci.yml
+- [X] T034 [US2] Set allow_failure=false (blocking) for dependency_scanning job in .gitlab-ci.yml
+- [X] T035 [US2] Test pipeline with vulnerable test commits and verify CVE detection
 
 ### TDD: REFACTOR Phase (Optimize)
 
-- [ ] T036 [US2] Add path exclusions to DS_EXCLUDED_PATHS in .gitlab-ci.yml
-- [ ] T037 [US2] Configure timeout for dependency_scanning job (5 minutes) in .gitlab-ci.yml
-- [ ] T038 [US2] Verify clean dependencies test passes without blocking
-- [ ] T039 [US2] Document dependency scanning configuration and limitations (requires Ultimate) in .gitlab-ci.yml comments
+- [X] T036 [US2] Add path exclusions to DS_EXCLUDED_PATHS in .gitlab-ci.yml
+- [X] T037 [US2] Configure timeout for dependency_scanning job (5 minutes) in .gitlab-ci.yml
+- [X] T038 [US2] Verify clean dependencies test passes without blocking
+- [X] T039 [US2] Document dependency scanning configuration and limitations (requires Ultimate) in .gitlab-ci.yml comments
 
 **Checkpoint**: Dependency scanning functional - CVEs detected in npm/Python, clean deps pass, <120s scan time
 

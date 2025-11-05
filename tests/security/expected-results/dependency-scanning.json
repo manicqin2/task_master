@@ -1,0 +1,143 @@
+{
+  "version": "15.0.0",
+  "scan": {
+    "type": "dependency_scanning",
+    "status": "success",
+    "scanner": {
+      "id": "gemnasium",
+      "name": "Gemnasium"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "category": "dependency_scanning",
+      "name": "Prototype Pollution in lodash",
+      "message": "The package lodash before 4.17.21 is vulnerable to Prototype Pollution",
+      "severity": "high",
+      "location": {
+        "file": "tests/security/test-commits/dependencies/vulnerable-package.json",
+        "dependency": {
+          "package": {
+            "name": "lodash"
+          },
+          "version": "4.17.20"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2020-8203",
+          "value": "CVE-2020-8203"
+        }
+      ],
+      "solution": "Upgrade lodash to version 4.17.21 or later"
+    },
+    {
+      "category": "dependency_scanning",
+      "name": "Prototype Pollution in minimist",
+      "message": "The package minimist before 1.2.6 is vulnerable to Prototype Pollution",
+      "severity": "critical",
+      "location": {
+        "file": "tests/security/test-commits/dependencies/vulnerable-package.json",
+        "dependency": {
+          "package": {
+            "name": "minimist"
+          },
+          "version": "1.2.5"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-44906",
+          "value": "CVE-2021-44906"
+        }
+      ],
+      "solution": "Upgrade minimist to version 1.2.6 or later"
+    },
+    {
+      "category": "dependency_scanning",
+      "name": "SSRF in axios",
+      "message": "Server-Side Request Forgery vulnerability in axios",
+      "severity": "high",
+      "location": {
+        "file": "tests/security/test-commits/dependencies/vulnerable-package.json",
+        "dependency": {
+          "package": {
+            "name": "axios"
+          },
+          "version": "0.21.1"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-3749",
+          "value": "CVE-2021-3749"
+        }
+      ],
+      "solution": "Upgrade axios to version 0.21.2 or later"
+    },
+    {
+      "category": "dependency_scanning",
+      "name": "Multiple vulnerabilities in Django",
+      "message": "Django 3.1.0 has multiple critical vulnerabilities",
+      "severity": "critical",
+      "location": {
+        "file": "tests/security/test-commits/dependencies/vulnerable-requirements.txt",
+        "dependency": {
+          "package": {
+            "name": "Django"
+          },
+          "version": "3.1.0"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-33203",
+          "value": "CVE-2021-33203"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2021-33571",
+          "value": "CVE-2021-33571"
+        }
+      ],
+      "solution": "Upgrade Django to version 3.1.13 or later"
+    },
+    {
+      "category": "dependency_scanning",
+      "name": "Multiple vulnerabilities in Pillow",
+      "message": "Pillow 8.1.0 has multiple high-severity vulnerabilities",
+      "severity": "high",
+      "location": {
+        "file": "tests/security/test-commits/dependencies/vulnerable-requirements.txt",
+        "dependency": {
+          "package": {
+            "name": "Pillow"
+          },
+          "version": "8.1.0"
+        }
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2021-25287",
+          "value": "CVE-2021-25287"
+        },
+        {
+          "type": "cve",
+          "name": "CVE-2021-25288",
+          "value": "CVE-2021-25288"
+        }
+      ],
+      "solution": "Upgrade Pillow to version 8.2.0 or later"
+    }
+  ],
+  "expected_behavior": {
+    "vulnerable-package.json": "MUST detect CVEs in lodash, minimist, axios",
+    "vulnerable-requirements.txt": "MUST detect CVEs in Django, Pillow, urllib3",
+    "clean-package.json": "SHOULD PASS with no vulnerabilities detected"
+  }
+}
