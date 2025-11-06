@@ -1,4 +1,6 @@
-"""Background task queue for async enrichment."""
+"""Background task queue for async enrichment and metadata extraction."""
+import json
+from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .enrichment_service import EnrichmentService
@@ -11,19 +13,23 @@ async def enrich_task_background(
     db: AsyncSession,
     enrichment_service: EnrichmentService,
 ) -> None:
-    """Background worker for task enrichment.
+    """Background worker for task enrichment and metadata extraction.
 
-    This function runs asynchronously in the background to enrich tasks.
+    This function runs asynchronously in the background to enrich tasks and extract metadata.
     It handles the complete enrichment workflow:
     1. Update status to PROCESSING
-    2. Call EnrichmentService
-    3. Update status to COMPLETED or FAILED
-    4. Store enriched text or error message
+    2. Call EnrichmentService for text enrichment
+    3. Extract metadata using MetadataExtractor
+    4. Parse deadline and populate fields based on confidence threshold
+    5. Update status to COMPLETED or FAILED
+    6. Store enriched text, metadata, or error message
+
+    Feature 004: Task Metadata Extraction - Phase 3 User Story 1 (T025)
 
     Args:
         task_id: Task UUID to enrich.
         db: Database session.
-        enrichment_service: Service for enriching tasks.
+        enrichment_service: Service for enriching tasks and extracting metadata.
     """
     task_service = TaskService(db)
 
@@ -37,8 +43,61 @@ async def enrich_task_background(
             status=EnrichmentStatus.PROCESSING,
         )
 
-        # Enrich task
+        # Enrich task text
         enriched_text = await enrichment_service.enrich(task.user_input)
+
+        # Extract metadata (T025)
+        metadata_response = await enrichment_service.extract_metadata(
+            task.user_input,
+            reference_time=datetime.now(timezone.utc),
+        )
+
+        # Apply confidence threshold filtering (T021)
+        # Only populate fields with confidence >= 0.7
+        extractor = enrichment_service.metadata_extractor
+
+        # Store full extraction response as JSON for frontend suggestions
+        task.metadata_suggestions = enrichment_service.serialize_metadata_suggestions(
+            metadata_response
+        )
+
+        # Populate high-confidence fields
+        if extractor.should_populate_field(metadata_response.project_confidence):
+            task.project = metadata_response.project
+
+        if extractor.should_populate_field(metadata_response.persons_confidence):
+            task.persons = json.dumps(metadata_response.persons)
+
+        if extractor.should_populate_field(metadata_response.task_type_confidence):
+            task.task_type = metadata_response.task_type
+
+        if extractor.should_populate_field(metadata_response.priority_confidence):
+            task.priority = metadata_response.priority
+
+        if extractor.should_populate_field(metadata_response.deadline_confidence):
+            task.deadline_text = metadata_response.deadline
+            # Parse deadline text to datetime
+            if metadata_response.deadline:
+                parsed_deadline = enrichment_service.parse_deadline_from_text(
+                    metadata_response.deadline,
+                    reference_time=datetime.now(timezone.utc),
+                )
+                task.deadline_parsed = parsed_deadline
+
+        if extractor.should_populate_field(metadata_response.effort_confidence):
+            task.effort_estimate = metadata_response.effort_estimate
+
+        if extractor.should_populate_field(metadata_response.dependencies_confidence):
+            task.dependencies = json.dumps(metadata_response.dependencies)
+
+        if extractor.should_populate_field(metadata_response.tags_confidence):
+            task.tags = json.dumps(metadata_response.tags)
+
+        # Set extracted_at timestamp
+        task.extracted_at = datetime.now(timezone.utc)
+
+        # Set requires_attention flag based on confidence scores (T016)
+        task.requires_attention = extractor.requires_attention(metadata_response)
 
         # Update to completed
         await task_service.update_enrichment(
@@ -48,7 +107,7 @@ async def enrich_task_background(
         )
 
     except Exception as e:
-        # Handle enrichment failure (FR-018)
+        # Handle enrichment/extraction failure (FR-018)
         error_message = str(e)
 
         # Update to failed with error message

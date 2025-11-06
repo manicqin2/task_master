@@ -1,6 +1,7 @@
 """API routes for task management."""
+import json
 import logging
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -8,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...lib.database import get_db
 from ...models.task import Task as TaskModel
-from ...models.enums import EnrichmentStatus, TaskStatus
+from ...models.enums import EnrichmentStatus, Priority, TaskStatus, TaskType
+from ...models.task_metadata import TaskMetadataResponse, TaskMetadataUpdate
 from ...services.task_service import TaskService
 from ...services.enrichment_service import EnrichmentService
 from ...services.task_queue import enrich_task_background
@@ -38,6 +40,7 @@ class TaskResponse(BaseModel):
     created_at: str
     updated_at: str
     error_message: str | None
+    metadata: Optional[TaskMetadataResponse] = None
 
     class Config:
         from_attributes = True
@@ -48,6 +51,51 @@ class ListTasksResponse(BaseModel):
 
     tasks: List[TaskResponse]
     count: int
+
+
+# Helper functions
+def task_to_response(task: TaskModel) -> TaskResponse:
+    """Convert Task model to TaskResponse with metadata.
+
+    Args:
+        task: Task model instance
+
+    Returns:
+        TaskResponse with metadata if available
+    """
+    # Parse metadata if extracted
+    metadata = None
+    if task.extracted_at is not None:
+        # Parse persons, dependencies, tags from JSON strings
+        persons = json.loads(task.persons) if task.persons else []
+        dependencies = json.loads(task.dependencies) if task.dependencies else []
+        tags = json.loads(task.tags) if task.tags else []
+
+        metadata = TaskMetadataResponse(
+            project=task.project,
+            persons=persons,
+            task_type=task.task_type,
+            priority=task.priority,
+            deadline_text=task.deadline_text,
+            deadline_parsed=task.deadline_parsed,
+            effort_estimate=task.effort_estimate,
+            dependencies=dependencies,
+            tags=tags,
+            extracted_at=task.extracted_at,
+            requires_attention=task.requires_attention,
+        )
+
+    return TaskResponse(
+        id=task.id,
+        user_input=task.user_input,
+        enriched_text=task.enriched_text,
+        status=task.status,
+        enrichment_status=task.enrichment_status,
+        created_at=task.created_at.isoformat(),
+        updated_at=task.updated_at.isoformat(),
+        error_message=task.error_message,
+        metadata=metadata,
+    )
 
 
 # Endpoints
@@ -92,16 +140,7 @@ async def create_task(
         )
 
         # Convert to response
-        return TaskResponse(
-            id=task.id,
-            user_input=task.user_input,
-            enriched_text=task.enriched_text,
-            status=task.status,
-            enrichment_status=task.enrichment_status,
-            created_at=task.created_at.isoformat(),
-            updated_at=task.updated_at.isoformat(),
-            error_message=task.error_message,
-        )
+        return task_to_response(task)
 
     except ValueError as e:
         # Validation error
@@ -132,19 +171,7 @@ async def list_tasks(db: AsyncSession = Depends(get_db)):
         tasks = await task_service.list()
 
         return ListTasksResponse(
-            tasks=[
-                TaskResponse(
-                    id=task.id,
-                    user_input=task.user_input,
-                    enriched_text=task.enriched_text,
-                    status=task.status,
-                    enrichment_status=task.enrichment_status,
-                    created_at=task.created_at.isoformat(),
-                    updated_at=task.updated_at.isoformat(),
-                    error_message=task.error_message,
-                )
-                for task in tasks
-            ],
+            tasks=[task_to_response(task) for task in tasks],
             count=len(tasks),
         )
 
@@ -173,16 +200,7 @@ async def get_task(task_id: str, db: AsyncSession = Depends(get_db)):
         task_service = TaskService(db)
         task = await task_service.get_by_id(task_id)
 
-        return TaskResponse(
-            id=task.id,
-            user_input=task.user_input,
-            enriched_text=task.enriched_text,
-            status=task.status,
-            enrichment_status=task.enrichment_status,
-            created_at=task.created_at.isoformat(),
-            updated_at=task.updated_at.isoformat(),
-            error_message=task.error_message,
-        )
+        return task_to_response(task)
 
     except Exception as e:
         if "not found" in str(e).lower():
@@ -292,16 +310,7 @@ async def retry_task(
             f"Task {task_id} retry successful - reset to pending and re-enqueued"
         )
 
-        return TaskResponse(
-            id=task.id,
-            user_input=task.user_input,
-            enriched_text=task.enriched_text,
-            status=task.status,
-            enrichment_status=task.enrichment_status,
-            created_at=task.created_at.isoformat(),
-            updated_at=task.updated_at.isoformat(),
-            error_message=task.error_message,
-        )
+        return task_to_response(task)
 
     except Exception as e:
         # T094: Return 404 for non-existent task
@@ -314,6 +323,128 @@ async def retry_task(
             )
         # T097: Log internal error
         logger.error(f"Error retrying task {task_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )
+
+
+@router.patch("/{task_id}/metadata", response_model=TaskResponse)
+async def update_task_metadata(
+    task_id: str,
+    metadata_update: TaskMetadataUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Update task metadata manually (T024).
+
+    This endpoint allows users to confirm or edit metadata extracted from task descriptions.
+    Used primarily for tasks in the "Need Attention" lane with low-confidence extractions.
+
+    Feature 004: Task Metadata Extraction - Phase 3 User Story 1
+
+    Args:
+        task_id: Task UUID to update.
+        metadata_update: Metadata fields to update (partial update allowed).
+        db: Database session.
+
+    Returns:
+        Updated task with new metadata.
+
+    Raises:
+        HTTPException: 404 if task not found.
+    """
+    try:
+        logger.info(f"Updating metadata for task {task_id}")
+
+        # Get task
+        task_service = TaskService(db)
+        task = await task_service.get_by_id(task_id)
+
+        # Update metadata fields (partial update)
+        if metadata_update.project is not None:
+            task.project = metadata_update.project
+
+        if metadata_update.persons is not None:
+            task.persons = json.dumps(metadata_update.persons)
+
+        if metadata_update.task_type is not None:
+            task.task_type = metadata_update.task_type
+
+        if metadata_update.priority is not None:
+            task.priority = metadata_update.priority
+
+        if metadata_update.deadline_text is not None:
+            task.deadline_text = metadata_update.deadline_text
+
+        if metadata_update.deadline_parsed is not None:
+            task.deadline_parsed = metadata_update.deadline_parsed
+
+        if metadata_update.effort_estimate is not None:
+            task.effort_estimate = metadata_update.effort_estimate
+
+        if metadata_update.dependencies is not None:
+            task.dependencies = json.dumps(metadata_update.dependencies)
+
+        if metadata_update.tags is not None:
+            task.tags = json.dumps(metadata_update.tags)
+
+        # Clear requires_attention flag when user manually updates
+        task.requires_attention = False
+
+        # Commit changes
+        await db.commit()
+        await db.refresh(task)
+
+        logger.info(f"Metadata updated successfully for task {task_id}")
+
+        return task_to_response(task)
+
+    except Exception as e:
+        if "not found" in str(e).lower():
+            logger.warning(f"Task {task_id} not found for metadata update")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Task {task_id} not found",
+            )
+        logger.error(f"Error updating metadata for task {task_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )
+
+
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_task(
+    task_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a task.
+
+    Used when canceling tasks from the error lane.
+
+    Args:
+        task_id: Task UUID to delete.
+        db: Database session.
+
+    Raises:
+        HTTPException: 404 if task not found.
+    """
+    try:
+        logger.info(f"Deleting task {task_id}")
+
+        task_service = TaskService(db)
+        await task_service.delete(task_id)
+
+        logger.info(f"Task {task_id} deleted successfully")
+
+    except Exception as e:
+        if "not found" in str(e).lower():
+            logger.warning(f"Task {task_id} not found for deletion")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Task {task_id} not found",
+            )
+        logger.error(f"Error deleting task {task_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}",

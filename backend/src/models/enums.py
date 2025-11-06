@@ -17,3 +17,25 @@ class EnrichmentStatus(str, Enum):
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
+
+
+class TaskType(str, Enum):
+    """Type of task based on content."""
+
+    MEETING = "meeting"
+    CALL = "call"
+    EMAIL = "email"
+    REVIEW = "review"
+    DEVELOPMENT = "development"
+    RESEARCH = "research"
+    ADMINISTRATIVE = "administrative"
+    OTHER = "other"
+
+
+class Priority(str, Enum):
+    """Task priority level."""
+
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    URGENT = "urgent"

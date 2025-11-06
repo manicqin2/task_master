@@ -32,6 +32,11 @@ export interface LaneProps {
   onTaskAction: (taskId: string, action: string) => void
 
   /**
+   * Callback fired when task metadata is updated
+   */
+  onUpdateMetadata?: (taskId: string, metadata: any) => void
+
+  /**
    * Additional CSS classes to apply to the lane container
    */
   className?: string
@@ -42,7 +47,7 @@ export interface LaneProps {
  *
  * Memoized to prevent unnecessary re-renders when sibling lanes update
  */
-export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, className = '' }: LaneProps) {
+export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, onUpdateMetadata, className = '' }: LaneProps) {
   return (
     <div
       className={`flex flex-col h-full min-w-0 border rounded-lg p-4 ${config.bgColor} ${config.borderColor} ${className}`}
@@ -71,6 +76,7 @@ export const Lane = React.memo(function Lane({ config, tasks, onTaskAction, clas
                 <TaskCard
                   task={task}
                   onAction={(action) => onTaskAction(task.id, action)}
+                  onUpdateMetadata={onUpdateMetadata}
                 />
               </TaskCardErrorBoundary>
             ))}

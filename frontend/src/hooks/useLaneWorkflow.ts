@@ -35,12 +35,12 @@ export function useLaneWorkflow(tasks: Task[]) {
     // Filter tasks into their respective lanes
     const pending = sortedTasks.filter((task) => task.lane === 'pending')
     const error = sortedTasks.filter((task) => task.lane === 'error')
-    const finished = sortedTasks.filter((task) => task.lane === 'finished')
+    const ready = sortedTasks.filter((task) => task.lane === 'ready')
 
     return {
       pendingTasks: pending,
       errorTasks: error,
-      finishedTasks: finished,
+      finishedTasks: ready, // Keep property name for backwards compatibility
     }
   }, [tasks])
 

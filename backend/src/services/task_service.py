@@ -139,3 +139,16 @@ class TaskService:
         await self.db.refresh(task)
 
         return task
+
+    async def delete(self, task_id: str) -> None:
+        """Delete a task.
+
+        Args:
+            task_id: Task UUID to delete.
+
+        Raises:
+            Exception: If task not found.
+        """
+        task = await self.get_by_id(task_id)
+        await self.db.delete(task)
+        await self.db.commit()

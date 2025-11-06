@@ -3,16 +3,22 @@
  *
  * Displays a single task within a lane. Shows task title (enriched_text or user_input),
  * status indicator, error message (if applicable), and action emblems based on lane.
+ * Feature 004: Extended with metadata display (project, persons, deadline, type, priority)
  *
- * @feature 003-task-lane-workflow
- * @phase Phase 3 - User Story 1 (Basic Lane Visualization)
+ * @feature 003-task-lane-workflow, 004-task-metadata-extraction
+ * @phase Phase 3 - User Story 1 (Basic Lane Visualization + Metadata Display)
  */
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS, needsTruncation } from '@/types/task'
 import { ActionEmblem } from './ActionEmblem'
 import { ErrorMessage } from './ErrorMessage'
+import { MetadataBadges } from '../TaskCard/MetadataBadges'
+import { PersonAvatars } from '../TaskCard/PersonAvatars'
+import { DeadlineIndicator } from '../TaskCard/DeadlineIndicator'
+import { MetadataEditor } from '../TaskCard/MetadataEditor'
+import { TaskMetadata } from '@/lib/types'
 
 /**
  * Detect user's reduced-motion preference
@@ -33,6 +39,11 @@ export interface TaskCardProps {
   onAction: (action: string) => void
 
   /**
+   * Callback fired when task metadata is updated
+   */
+  onUpdateMetadata?: (taskId: string, metadata: any) => void
+
+  /**
    * Additional CSS classes to apply to the card
    */
   className?: string
@@ -43,32 +54,27 @@ export interface TaskCardProps {
  *
  * Memoized to prevent unnecessary re-renders when parent updates
  */
-export const TaskCard = React.memo(function TaskCard({ task, onAction, className = '' }: TaskCardProps) {
+export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateMetadata, className = '' }: TaskCardProps) {
+  // Track updated metadata for More Info lane tasks
+  const [updatedMetadata, setUpdatedMetadata] = useState<Partial<TaskMetadata> | null>(null)
+
   // Get display text (enriched_text if available, otherwise user_input)
   const displayText = getTaskDisplayText(task)
 
   // Check if text needs truncation
   const shouldTruncate = needsTruncation(displayText)
 
-  // Build emblem list: include expand emblem if text is truncated (avoid duplicates)
-  const emblems = shouldTruncate && !task.emblems.includes('expand')
-    ? [...task.emblems, 'expand' as const]
-    : task.emblems
+  // Build emblem list: include expand emblem if text is truncated, add move-to-ready if in More Info lane
+  let emblems = [...task.emblems]
 
-  // Determine status badge color based on enrichment status
-  const getStatusColor = () => {
-    switch (task.enrichment_status) {
-      case 'pending':
-        return 'bg-blue-100 text-blue-800'
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'failed':
-        return 'bg-red-100 text-red-800'
-      case 'completed':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
+  if (shouldTruncate && !emblems.includes('expand')) {
+    emblems.push('expand' as const)
+  }
+
+  // Add "move to ready" emblem if task is in More Info lane (always visible, disabled if no project)
+  const hasProject = updatedMetadata?.project || task.metadata?.project
+  if (task.lane === 'error' && task.enrichment_status === 'completed' && !task.metadata?.project) {
+    emblems.push('confirm' as const)
   }
 
   return (
@@ -94,17 +100,25 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
         </p>
       </div>
 
-      {/* Status Badge */}
-      <div className="flex items-center justify-between">
-        <span
-          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${getStatusColor()}`}
-        >
-          {task.enrichment_status}
-        </span>
-      </div>
-
       {/* Error Message (if applicable) */}
       {task.error_message && <ErrorMessage message={task.error_message} />}
+
+      {/* Metadata Display (Feature 004) */}
+      {task.metadata && (
+        <div className="mt-2 space-y-1">
+          <MetadataBadges metadata={task.metadata} />
+          <PersonAvatars persons={task.metadata.persons} />
+          <DeadlineIndicator metadata={task.metadata} />
+        </div>
+      )}
+
+      {/* Metadata Editor (More Info lane only) */}
+      {task.lane === 'error' && task.enrichment_status === 'completed' && !task.metadata?.project && (
+        <MetadataEditor
+          currentMetadata={task.metadata}
+          onMetadataChange={(metadata) => setUpdatedMetadata(metadata)}
+        />
+      )}
 
       {/* Action Emblems */}
       {emblems.length > 0 && (
@@ -119,15 +133,31 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, className
               ? 'Collapse task details'
               : emblemConfig.tooltip
 
+            // For confirm emblem (move to ready), customize icon and action
+            const isConfirmEmblem = emblemType === 'confirm'
+            const finalIcon = isConfirmEmblem ? 'ArrowRight' : customIcon
+            const finalTooltip = isConfirmEmblem
+              ? (hasProject ? 'Move to Ready lane' : 'Select a project first')
+              : customTooltip
+            const isDisabled = isConfirmEmblem && !hasProject
+
             return (
               <ActionEmblem
                 key={emblemType}
                 type={emblemType}
-                tooltip={customTooltip}
-                onClick={() => onAction(emblemType)}
+                tooltip={finalTooltip}
+                onClick={() => {
+                  if (isConfirmEmblem && hasProject && onUpdateMetadata && updatedMetadata) {
+                    // Move to Ready: update task with all metadata
+                    onUpdateMetadata(task.id, updatedMetadata)
+                  } else if (!isConfirmEmblem) {
+                    onAction(emblemType)
+                  }
+                }}
                 variant={emblemConfig.variant}
                 size="sm"
-                icon={customIcon}
+                icon={finalIcon}
+                disabled={isDisabled}
               />
             )
           })}

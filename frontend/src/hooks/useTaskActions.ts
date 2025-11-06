@@ -2,7 +2,7 @@
  * Task Actions Hook
  *
  * Provides action handlers for task interactions:
- * - cancel: Remove task from pending lane (optimistic UI update, frontend-only)
+ * - cancel: Remove task from lane (deletes from backend if in error lane)
  * - retry: Re-queue failed task for processing (backend integration)
  * - confirm: Archive completed task (deferred to P4, frontend-only)
  * - expand: Toggle task card expansion for long titles
@@ -11,7 +11,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { retryTask } from '@/services/api'
+import { retryTask, deleteTask, updateTaskMetadata, UpdateMetadataRequest } from '@/services/api'
 import { ListTasksResponse, Task } from '@/lib/types'
 
 /**
@@ -24,15 +24,21 @@ export function useTaskActions() {
   const queryClient = useQueryClient()
 
   /**
-   * Cancel mutation - frontend-only, optimistic update
-   * Removes task from React Query cache without backend communication
+   * Cancel mutation
+   * - For More Info lane tasks (failed OR missing project): Deletes from backend
+   * - For other tasks: Frontend-only removal from cache
    */
   const cancelMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      // Frontend-only - no API call
+    mutationFn: async ({ taskId, shouldDelete }: { taskId: string; shouldDelete: boolean }) => {
+      if (shouldDelete) {
+        // Delete from backend for More Info lane tasks
+        await deleteTask(taskId)
+      }
+      // For other tasks, frontend-only (no API call needed)
+
       return { taskId }
     },
-    onMutate: async (taskId) => {
+    onMutate: async ({ taskId, shouldDelete }) => {
       // Cancel any outgoing refetches for tasks query
       await queryClient.cancelQueries({ queryKey: ['tasks'] })
 
@@ -52,7 +58,7 @@ export function useTaskActions() {
       // Return context with previous data for rollback if needed
       return { previousTasks }
     },
-    onError: (err, taskId, context) => {
+    onError: (err, { taskId }, context) => {
       // Rollback on error
       if (context?.previousTasks) {
         queryClient.setQueryData(['tasks'], context.previousTasks)
@@ -72,6 +78,20 @@ export function useTaskActions() {
     mutationFn: retryTask,
     onSuccess: () => {
       // Invalidate tasks query to refetch updated task status
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+
+  /**
+   * Update metadata mutation - backend integration
+   * Updates task metadata (e.g., project) and invalidates query
+   */
+  const updateMetadataMutation = useMutation({
+    mutationFn: async ({ taskId, metadata }: { taskId: string; metadata: UpdateMetadataRequest }) => {
+      return await updateTaskMetadata(taskId, metadata)
+    },
+    onSuccess: () => {
+      // Invalidate tasks query to refetch with updated metadata
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
   })
@@ -122,7 +142,18 @@ export function useTaskActions() {
 
   return {
     handleCancel: (taskId: string) => {
-      cancelMutation.mutate(taskId)
+      // Get task before mutation to determine if we should delete
+      const tasks = queryClient.getQueryData<ListTasksResponse>(['tasks'])
+      const task = tasks?.tasks.find((t) => t.id === taskId)
+
+      // Delete from backend if task is in More Info lane:
+      // - Failed enrichment, OR
+      // - Completed but missing required metadata (project)
+      const isInMoreInfoLane =
+        task?.enrichment_status === 'failed' ||
+        (task?.enrichment_status === 'completed' && !task?.metadata?.project)
+
+      cancelMutation.mutate({ taskId, shouldDelete: isInMoreInfoLane })
     },
     handleRetry: (taskId: string) => {
       retryMutation.mutate(taskId)
@@ -134,9 +165,13 @@ export function useTaskActions() {
     handleExpand: (taskId: string) => {
       expandMutation.mutate(taskId)
     },
+    handleUpdateMetadata: (taskId: string, metadata: UpdateMetadataRequest) => {
+      updateMetadataMutation.mutate({ taskId, metadata })
+    },
     // Expose mutations for testing
     cancelMutation,
     retryMutation,
     expandMutation,
+    updateMetadataMutation,
   }
 }

@@ -3,10 +3,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Column, DateTime, Enum as SQLEnum, String, Text
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .enums import EnrichmentStatus, TaskStatus
+from .enums import EnrichmentStatus, Priority, TaskStatus, TaskType
 from . import Base
 
 
@@ -36,6 +36,28 @@ class Task(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Metadata fields (Feature 004)
+    project: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    persons: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array as TEXT
+    task_type: Mapped[Optional[TaskType]] = mapped_column(
+        SQLEnum(TaskType), nullable=True
+    )
+    priority: Mapped[Optional[Priority]] = mapped_column(
+        SQLEnum(Priority), nullable=True
+    )
+    deadline_text: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    deadline_parsed: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    effort_estimate: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    dependencies: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array as TEXT
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array as TEXT
+    metadata_suggestions: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string
+    extracted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    requires_attention: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     def __repr__(self) -> str:
         return f"<Task(id={self.id}, status={self.status}, enrichment={self.enrichment_status})>"

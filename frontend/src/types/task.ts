@@ -8,9 +8,9 @@
 import { Task, EnrichmentStatus } from '@/lib/types'
 
 /**
- * Lane identifiers for workflow visualization
+ * Lane identifiers for Task Workbench (task creation workflow)
  */
-export type Lane = 'pending' | 'error' | 'finished'
+export type Lane = 'pending' | 'error' | 'ready'
 
 /**
  * Action emblem types for task interactions
@@ -23,10 +23,10 @@ export type ActionEmblem = 'cancel' | 'retry' | 'confirm' | 'expand'
  */
 export interface TaskWithLane extends Task {
   /**
-   * Computed lane assignment based on task status
+   * Computed lane assignment based on task status and metadata
    * - 'pending': status = 'pending' | 'processing'
-   * - 'error': status = 'failed'
-   * - 'finished': status = 'completed'
+   * - 'error': status = 'failed' OR missing required metadata (e.g., project)
+   * - 'ready': status = 'completed' AND has required metadata
    */
   lane: Lane
 
@@ -34,7 +34,7 @@ export interface TaskWithLane extends Task {
    * Available action emblems for this task based on lane
    * - pending: ['cancel']
    * - error: ['retry', 'cancel']
-   * - finished: ['confirm'] (deferred to P4)
+   * - ready: [] (tasks ready to enter todo list)
    */
   emblems: ActionEmblem[]
 
@@ -73,30 +73,30 @@ export interface ActionEmblemConfig {
 }
 
 /**
- * Constants for lane configurations
+ * Constants for lane configurations (Task Workbench)
  */
 export const LANE_CONFIGS: LaneConfig[] = [
   {
     id: 'pending',
     title: 'Pending',
-    description: 'Tasks waiting for processing',
+    description: 'Tasks being enriched',
     emptyMessage: 'No pending tasks',
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
   },
   {
     id: 'error',
-    title: 'Error / More Info',
-    description: 'Tasks that need attention',
-    emptyMessage: 'No tasks need attention',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
+    title: 'More Info',
+    description: 'Tasks needing attention',
+    emptyMessage: 'All tasks have required info',
+    bgColor: 'bg-yellow-50',
+    borderColor: 'border-yellow-200',
   },
   {
-    id: 'finished',
-    title: 'Finished',
-    description: 'Completed tasks',
-    emptyMessage: 'No finished tasks',
+    id: 'ready',
+    title: 'Ready',
+    description: 'Ready to enter todo list',
+    emptyMessage: 'No tasks ready',
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
   },
@@ -137,9 +137,10 @@ export const ACTION_EMBLEM_CONFIGS: Record<ActionEmblem, ActionEmblemConfig> = {
 }
 
 /**
- * Utility: Derive lane from task enrichment status
+ * Utility: Derive lane from task enrichment status and metadata
+ * Tasks without a project go to More Info lane even if enrichment completed
  */
-export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus): Lane {
+export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus, task: Task): Lane {
   switch (enrichmentStatus) {
     case EnrichmentStatus.PENDING:
     case EnrichmentStatus.PROCESSING:
@@ -147,7 +148,11 @@ export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus): Lane {
     case EnrichmentStatus.FAILED:
       return 'error'
     case EnrichmentStatus.COMPLETED:
-      return 'finished'
+      // Check if task has required metadata (project)
+      if (!task.metadata?.project) {
+        return 'error' // Missing project → needs attention
+      }
+      return 'ready'
     default:
       return 'pending'
   }
@@ -162,8 +167,8 @@ export function getEmblemsForLane(lane: Lane): ActionEmblem[] {
       return ['cancel']
     case 'error':
       return ['retry', 'cancel']
-    case 'finished':
-      return [] // P4 deferred: ['confirm']
+    case 'ready':
+      return [] // Ready tasks have no actions in Task Workbench
     default:
       return []
   }
@@ -173,7 +178,7 @@ export function getEmblemsForLane(lane: Lane): ActionEmblem[] {
  * Utility: Transform base Task to TaskWithLane
  */
 export function enrichTaskWithLane(task: Task): TaskWithLane {
-  const lane = getLaneFromStatus(task.enrichment_status)
+  const lane = getLaneFromStatus(task.enrichment_status, task)
   return {
     ...task,
     lane,

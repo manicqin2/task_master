@@ -9,7 +9,7 @@
  */
 
 import React from 'react'
-import { X, RotateCw, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { X, RotateCw, Check, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react'
 import { ActionEmblem as ActionEmblemType } from '@/types/task'
 
 export interface ActionEmblemProps {
@@ -60,7 +60,7 @@ export interface ActionEmblemProps {
 
   /**
    * Optional custom icon name (overrides default icon for type)
-   * Supported: 'X', 'RotateCw', 'Check', 'ChevronDown', 'ChevronUp'
+   * Supported: 'X', 'RotateCw', 'Check', 'ChevronDown', 'ChevronUp', 'ArrowRight'
    */
   icon?: string
 }
@@ -80,6 +80,8 @@ function getIconByName(iconName: string) {
       return ChevronDown
     case 'ChevronUp':
       return ChevronUp
+    case 'ArrowRight':
+      return ArrowRight
     default:
       return X
   }
