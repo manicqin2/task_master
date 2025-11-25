@@ -32,3 +32,16 @@ export async function listTasks(): Promise<ListTasksResponse> {
 export async function getTask(taskId: string): Promise<Task> {
   return await get<Task>(`/tasks/${taskId}`);
 }
+
+/**
+ * Retry a failed task (Feature 003: Multi-Lane Task Workflow)
+ *
+ * Resets the task's enrichment_status from 'failed' back to 'pending'
+ * and re-queues it for processing.
+ *
+ * @param taskId - The ID of the task to retry
+ * @returns The updated task with enrichment_status reset to 'pending'
+ */
+export async function retryTask(taskId: string): Promise<Task> {
+  return await post<Task, {}>(`/tasks/${taskId}/retry`, {});
+}

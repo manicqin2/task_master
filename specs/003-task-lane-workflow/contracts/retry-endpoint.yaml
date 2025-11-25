@@ -1,0 +1,513 @@
+openapi: 3.1.0
+info:
+  title: TaskMaster - Task Retry Endpoint (Feature 003)
+  version: 1.0.0
+  description: |
+    OpenAPI specification for the new retry endpoint added in Feature 003: Multi-Lane Task Workflow.
+
+    This endpoint allows users to re-submit failed tasks for processing by resetting the task's
+    enrichment_status to 'pending' and re-enqueueing it in the background task queue.
+
+    **Key Behaviors:**
+    - Clears the error_message field
+    - Sets enrichment_status to 'pending'
+    - Updates the updated_at timestamp
+    - Re-enqueues task for LLM enrichment (same as new task submission)
+    - Returns updated task object immediately (enrichment happens asynchronously)
+
+    **Use Case:**
+    - User sees task in Error/More Info lane with error_message "Ollama API timeout after 5s"
+    - User clicks retry emblem
+    - Frontend calls POST /api/v1/tasks/{task_id}/retry
+    - Backend resets task state and re-enqueues for processing
+    - Task moves back to Pending lane in UI
+    - Task proceeds through normal enrichment flow
+
+    **No Database Schema Changes:**
+    This endpoint operates on the existing Task entity from Feature 001. No new tables or columns required.
+
+  contact:
+    name: TaskMaster API Support
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: http://backend:8000/api/v1
+    description: Docker container backend
+
+tags:
+  - name: tasks
+    description: Task retry operations (Feature 003)
+
+paths:
+  /tasks/{task_id}/retry:
+    post:
+      summary: Retry a failed task
+      description: |
+        Re-submits a failed task for processing by resetting enrichment state and re-enqueueing.
+
+        **Preconditions:**
+        - Task must exist (404 if not found)
+        - Task should be in retryable state (enrichment_status = 'failed' or status = 'open')
+
+        **Behavior:**
+        1. Validate task exists
+        2. Clear error_message field (set to null)
+        3. Set enrichment_status to 'pending'
+        4. Update updated_at timestamp
+        5. Re-enqueue task in background task queue (async)
+        6. Return updated task object immediately
+
+        **Idempotency:**
+        This endpoint is idempotent. Retrying a task that's already pending will succeed
+        without side effects (no duplicate background tasks created).
+
+        **Unlimited Retries:**
+        There is no limit on the number of times a task can be retried. Users can retry
+        indefinitely until the task succeeds or they cancel it.
+
+        **Frontend Usage:**
+        - Called when user clicks retry emblem in Error/More Info lane
+        - Frontend polls GET /api/v1/tasks to detect when enrichment completes
+        - Task moves from Error lane → Pending lane → Finished lane (on success)
+
+      operationId: retryTask
+      tags:
+        - tasks
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique task identifier (UUID v4)
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+      responses:
+        '200':
+          description: |
+            Task successfully reset and re-enqueued for processing.
+
+            The response includes the updated task object with:
+            - enrichment_status = 'pending'
+            - error_message = null
+            - updated_at = current timestamp
+
+            Frontend should start polling to detect when enrichment completes.
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              examples:
+                retrySuccess:
+                  summary: Task successfully retried
+                  value:
+                    id: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    user_input: "call mom tmrw"
+                    enriched_text: null
+                    status: "open"
+                    enrichment_status: "pending"
+                    created_at: "2025-11-05T10:30:00Z"
+                    updated_at: "2025-11-05T10:35:12Z"
+                    error_message: null
+
+                retryAlreadyPending:
+                  summary: Task already in pending state (idempotent)
+                  value:
+                    id: "b2c3d4e5-f6a7-8901-2345-67890abcdef1"
+                    user_input: "fix bug in login screan"
+                    enriched_text: null
+                    status: "open"
+                    enrichment_status: "pending"
+                    created_at: "2025-11-05T10:30:00Z"
+                    updated_at: "2025-11-05T10:30:05Z"
+                    error_message: null
+
+                retryAfterTimeout:
+                  summary: Task retried after timeout error
+                  value:
+                    id: "c3d4e5f6-a7b8-9012-3456-7890abcdef12"
+                    user_input: "dentist appt tmrw 3pm"
+                    enriched_text: null
+                    status: "open"
+                    enrichment_status: "pending"
+                    created_at: "2025-11-05T10:29:00Z"
+                    updated_at: "2025-11-05T10:40:00Z"
+                    error_message: null
+
+        '400':
+          description: |
+            Bad request - Task is not in a retryable state.
+
+            **Potential Causes:**
+            - Task has already completed successfully (enrichment_status = 'completed')
+            - Task is currently being processed (enrichment_status = 'processing')
+            - Task status is not 'open' (future: closed/archived tasks)
+
+            **Note:** In the current implementation (Feature 001-003), all tasks have status = 'open',
+            so this error primarily occurs when trying to retry a task that's already pending or processing.
+
+            **Recommended Action:**
+            - Wait for task to complete processing before retrying
+            - Check task status via GET /api/v1/tasks/{task_id}
+            - If task is completed, no retry needed
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                alreadyCompleted:
+                  summary: Task already completed successfully
+                  value:
+                    error: "Bad request"
+                    detail: "Task with id 'a1b2c3d4-e5f6-7890-1234-567890abcdef' has already completed successfully"
+                    status_code: 400
+
+                alreadyProcessing:
+                  summary: Task currently being processed
+                  value:
+                    error: "Bad request"
+                    detail: "Task with id 'b2c3d4e5-f6a7-8901-2345-67890abcdef1' is already being processed"
+                    status_code: 400
+
+        '404':
+          description: |
+            Task not found - No task exists with the provided ID.
+
+            **Potential Causes:**
+            - Task ID does not exist in database
+            - Task ID is malformed (not a valid UUID)
+            - Task was previously deleted (future: soft delete support)
+
+            **Recommended Action:**
+            - Verify task ID is correct
+            - Check if task exists via GET /api/v1/tasks
+            - Ensure task was not deleted by another action
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                taskNotFound:
+                  summary: Task ID doesn't exist
+                  value:
+                    error: "Not found"
+                    detail: "Task with id 'invalid-id' not found"
+                    status_code: 404
+
+                malformedUUID:
+                  summary: Invalid UUID format
+                  value:
+                    error: "Not found"
+                    detail: "Task with id 'not-a-uuid' not found"
+                    status_code: 404
+
+        '500':
+          description: |
+            Internal server error - Unexpected failure during retry operation.
+
+            **Potential Causes:**
+            - Database connection failure
+            - Background task queue unavailable
+            - Unexpected exception in retry logic
+
+            **Recommended Action:**
+            - Retry the request after a short delay (exponential backoff)
+            - Check backend logs for detailed error information
+            - Verify backend services are healthy (Ollama, database)
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                databaseError:
+                  summary: Database connection failure
+                  value:
+                    error: "Internal server error"
+                    detail: "Failed to update task: database connection lost"
+                    status_code: 500
+
+                queueError:
+                  summary: Background task queue unavailable
+                  value:
+                    error: "Internal server error"
+                    detail: "Failed to enqueue task for processing"
+                    status_code: 500
+
+components:
+  schemas:
+    Task:
+      type: object
+      required:
+        - id
+        - user_input
+        - status
+        - enrichment_status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique task identifier (auto-generated UUID v4)
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+        user_input:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Original user message from chat (trimmed)
+          example: "call mom tmrw"
+
+        enriched_text:
+          type: string
+          nullable: true
+          maxLength: 2000
+          description: |
+            LLM-improved version of user_input (null during enrichment).
+
+            After retry, this field is reset to null and will be populated
+            when background enrichment completes successfully.
+          example: "Call Mom tomorrow to discuss weekend plans"
+
+        status:
+          type: string
+          enum:
+            - open
+          description: |
+            Task completion status (always "open" for Feature 001-003).
+
+            Future features may introduce additional statuses:
+            - closed: Task marked as complete by user
+            - archived: Task moved to archive
+          example: "open"
+
+        enrichment_status:
+          type: string
+          enum:
+            - pending
+            - processing
+            - completed
+            - failed
+          description: |
+            LLM enrichment processing state.
+
+            State transitions:
+            - pending: Waiting in queue for processing
+            - processing: Currently being enriched by LLM
+            - completed: Successfully enriched (final state)
+            - failed: Enrichment failed with error (retryable)
+
+            After retry, this field is set to 'pending' and the task
+            proceeds through the normal enrichment flow:
+            pending → processing → (completed OR failed)
+          example: "pending"
+
+        created_at:
+          type: string
+          format: date-time
+          description: |
+            Task creation timestamp (UTC, ISO8601).
+
+            This field is NOT updated on retry - it represents the original
+            creation time, not the retry time.
+          example: "2025-11-05T10:30:00Z"
+
+        updated_at:
+          type: string
+          format: date-time
+          description: |
+            Last modification timestamp (UTC, ISO8601).
+
+            This field IS updated on retry to reflect when the retry occurred.
+            Frontend can use this to detect task state changes during polling.
+          example: "2025-11-05T10:35:12Z"
+
+        error_message:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: |
+            Error details if enrichment fails (null otherwise).
+
+            After retry, this field is cleared (set to null) to indicate
+            the error has been acknowledged and the task is being retried.
+
+            If enrichment fails again, this field will be populated with
+            the new error message.
+          example: "Ollama API timeout after 5s"
+
+    Error:
+      type: object
+      required:
+        - error
+        - detail
+        - status_code
+      properties:
+        error:
+          type: string
+          description: High-level error category
+          example: "Not found"
+
+        detail:
+          type: string
+          description: Specific error message for debugging
+          example: "Task with id 'invalid-id' not found"
+
+        status_code:
+          type: integer
+          description: HTTP status code (matches response status)
+          example: 404
+
+  securitySchemes: {}
+  # No authentication for this feature (single-user local deployment)
+
+security: []
+
+# Extension: Additional metadata for code generation and documentation
+x-feature-id: "003-task-lane-workflow"
+x-feature-name: "Multi-Lane Task Workflow"
+x-endpoint-purpose: "Re-submit failed tasks for processing"
+x-database-changes: false
+x-backward-compatible: true
+
+# Extension: Implementation notes for backend developers
+x-implementation-notes:
+  backend_changes:
+    - "Add new POST endpoint: /api/v1/tasks/{task_id}/retry"
+    - "Reuse existing enrichment queue from Feature 001"
+    - "No database schema changes required"
+    - "No new database migrations needed"
+
+  business_logic:
+    - "Validate task exists (404 if not found)"
+    - "Clear error_message field (set to null)"
+    - "Set enrichment_status to 'pending'"
+    - "Update updated_at timestamp"
+    - "Re-enqueue task using existing enrich_task() function"
+    - "Return updated task object"
+
+  idempotency:
+    - "Safe to call multiple times on same task"
+    - "If already pending, no-op (no duplicate background tasks)"
+    - "Return 200 with current task state"
+
+  testing_strategy:
+    - "Contract test: Verify response schema matches Task schema"
+    - "Unit test: Verify error_message cleared, enrichment_status set to pending"
+    - "Integration test: Verify task re-enqueued and enrichment completes"
+    - "Edge case: Retry non-existent task (404)"
+    - "Edge case: Retry already-pending task (idempotent, 200)"
+    - "Edge case: Retry completed task (400 bad request)"
+
+  performance:
+    - "Request latency: <100ms (database update only, no LLM call)"
+    - "Async processing: Enrichment happens in background (5-30s)"
+    - "No rate limiting needed (idempotent, safe to spam)"
+
+# Extension: Frontend integration examples
+x-frontend-examples:
+  react_mutation_hook: |
+    import { useMutation, useQueryClient } from '@tanstack/react-query'
+
+    const useRetryTask = () => {
+      const queryClient = useQueryClient()
+
+      return useMutation({
+        mutationFn: async (taskId: string) => {
+          const response = await fetch(
+            `/api/v1/tasks/${taskId}/retry`,
+            { method: 'POST' }
+          )
+
+          if (!response.ok) {
+            throw new Error('Failed to retry task')
+          }
+
+          return response.json()
+        },
+
+        onSuccess: () => {
+          // Invalidate tasks query to refetch updated task list
+          queryClient.invalidateQueries({ queryKey: ['tasks'] })
+        },
+
+        onError: (error) => {
+          console.error('Retry failed:', error)
+          // Show error toast to user
+        }
+      })
+    }
+
+  action_emblem_usage: |
+    const { mutate: retryTask, isPending } = useRetryTask()
+
+    <ActionEmblem
+      type="retry"
+      icon={RotateCw}
+      tooltip="Retry this task"
+      onClick={() => retryTask(task.id)}
+      disabled={isPending}
+    />
+
+  error_handling: |
+    const { mutate: retryTask } = useRetryTask()
+
+    const handleRetry = async (taskId: string) => {
+      try {
+        await retryTask(taskId)
+        toast.success('Task retrying...')
+      } catch (error) {
+        if (error.status === 404) {
+          toast.error('Task not found')
+        } else if (error.status === 400) {
+          toast.error('Task cannot be retried (already processing or completed)')
+        } else {
+          toast.error('Failed to retry task. Please try again.')
+        }
+      }
+    }
+
+# Extension: Backend implementation example (Python/FastAPI)
+x-backend-implementation: |
+  from fastapi import APIRouter, HTTPException
+  from sqlalchemy.ext.asyncio import AsyncSession
+  from datetime import datetime
+
+  router = APIRouter()
+
+  @router.post("/tasks/{task_id}/retry", response_model=Task)
+  async def retry_task(
+      task_id: str,
+      db: AsyncSession
+  ) -> Task:
+      """Retry a failed task by resetting enrichment state and re-enqueueing."""
+
+      # Validate task exists
+      task = await db.get(Task, task_id)
+      if not task:
+          raise HTTPException(status_code=404, detail=f"Task with id '{task_id}' not found")
+
+      # Optional: Validate task is in retryable state
+      # if task.enrichment_status == 'completed':
+      #     raise HTTPException(status_code=400, detail="Task already completed")
+
+      # Reset enrichment state
+      task.enrichment_status = 'pending'
+      task.error_message = None
+      task.updated_at = datetime.utcnow()
+
+      # Persist changes
+      await db.commit()
+      await db.refresh(task)
+
+      # Re-enqueue for processing (reuse existing function from Feature 001)
+      from app.services.enrichment import enrich_task
+      await enrich_task(task_id, db)
+
+      return task
