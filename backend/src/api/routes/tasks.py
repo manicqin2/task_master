@@ -1,4 +1,5 @@
 """API routes for task management."""
+import logging
 from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -11,6 +12,9 @@ from ...models.enums import EnrichmentStatus, TaskStatus
 from ...services.task_service import TaskService
 from ...services.enrichment_service import EnrichmentService
 from ...services.task_queue import enrich_task_background
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
@@ -186,6 +190,130 @@ async def get_task(task_id: str, db: AsyncSession = Depends(get_db)):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Task {task_id} not found",
             )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )
+
+
+@router.post(
+    "/{task_id}/retry",
+    response_model=TaskResponse,
+    summary="Retry a failed task",
+    description="""
+    Retry a failed task by re-enqueueing it for enrichment.
+
+    This endpoint:
+    - Resets the task's enrichment_status to 'pending'
+    - Clears any error_message
+    - Re-enqueues the task to the background enrichment queue
+    - Is idempotent (safe to call multiple times)
+
+    Feature 003: Multi-Lane Task Workflow - Phase 6 (T091-T095, T098)
+    """,
+    responses={
+        200: {
+            "description": "Task successfully retried and re-enqueued",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "user_input": "call mom",
+                        "enriched_text": None,
+                        "status": "open",
+                        "enrichment_status": "pending",
+                        "created_at": "2025-11-05T12:00:00Z",
+                        "updated_at": "2025-11-05T12:05:00Z",
+                        "error_message": None,
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Task not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Task 550e8400-e29b-41d4-a716-446655440000 not found"}
+                }
+            },
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Internal server error: ..."}
+                }
+            },
+        },
+    },
+)
+async def retry_task(
+    task_id: str,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
+    """Retry a failed task by re-enqueueing it for enrichment.
+
+    Feature 003: Multi-Lane Task Workflow - Phase 6 (T091-T095)
+
+    Args:
+        task_id: Task UUID to retry.
+        background_tasks: FastAPI background tasks for async enrichment.
+        db: Database session.
+
+    Returns:
+        Updated task with pending enrichment status.
+
+    Raises:
+        HTTPException: 404 if task not found (T094).
+    """
+    try:
+        # T097: Log retry attempt
+        logger.info(f"Retrying task {task_id}")
+
+        # T091-T093: Use TaskService to retry task
+        task_service = TaskService(db)
+        task = await task_service.retry_task(task_id)
+
+        # T092: Re-enqueue task to enrichment queue
+        enrichment_service = EnrichmentService()
+        background_tasks.add_task(
+            enrich_task_background,
+            task.id,
+            db,
+            enrichment_service,
+        )
+
+        # T095: Idempotency - multiple retries are safe due to background task design
+        # Each retry simply resets status and re-enqueues, which is harmless
+
+        # T097: Log successful retry
+        logger.info(
+            f"Task {task_id} retry successful - reset to pending and re-enqueued"
+        )
+
+        return TaskResponse(
+            id=task.id,
+            user_input=task.user_input,
+            enriched_text=task.enriched_text,
+            status=task.status,
+            enrichment_status=task.enrichment_status,
+            created_at=task.created_at.isoformat(),
+            updated_at=task.updated_at.isoformat(),
+            error_message=task.error_message,
+        )
+
+    except Exception as e:
+        # T094: Return 404 for non-existent task
+        if "not found" in str(e).lower():
+            # T097: Log 404 error
+            logger.warning(f"Task {task_id} not found for retry")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Task {task_id} not found",
+            )
+        # T097: Log internal error
+        logger.error(f"Error retrying task {task_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}",

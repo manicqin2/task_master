@@ -1,0 +1,1187 @@
+{
+  "config": {
+    "configFile": "/Users/bzpysmn/work/task_master/frontend/playwright.config.ts",
+    "rootDir": "/Users/bzpysmn/work/task_master/frontend/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/bzpysmn/work/task_master/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/bzpysmn/work/task_master/frontend/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 4,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "task-entry.spec.ts",
+      "file": "task-entry.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Chat-Based Task Entry",
+          "file": "task-entry.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load the task entry page",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 6511,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveTitle\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/Task Master/\u001b[39m\nReceived string:  \u001b[31m\"TaskMaster\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveTitle\" with timeout 5000ms\u001b[22m\n\u001b[2m    9 × unexpected value \"TaskMaster\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveTitle\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/Task Master/\u001b[39m\nReceived string:  \u001b[31m\"TaskMaster\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveTitle\" with timeout 5000ms\u001b[22m\n\u001b[2m    9 × unexpected value \"TaskMaster\"\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:19:24",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 24,
+                          "line": 19
+                        },
+                        "snippet": "  17 |   test('should load the task entry page', async ({ page }) => {\n  18 |     // Check page title\n> 19 |     await expect(page).toHaveTitle(/Task Master/);\n     |                        ^\n  20 |\n  21 |     // Check for main heading\n  22 |     const heading = page.getByRole('heading', { name: /Task Entry/i });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 24,
+                            "line": 19
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveTitle\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/Task Master/\u001b[39m\nReceived string:  \u001b[31m\"TaskMaster\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveTitle\" with timeout 5000ms\u001b[22m\n\u001b[2m    9 × unexpected value \"TaskMaster\"\u001b[22m\n\n\n  17 |   test('should load the task entry page', async ({ page }) => {\n  18 |     // Check page title\n> 19 |     await expect(page).toHaveTitle(/Task Master/);\n     |                        ^\n  20 |\n  21 |     // Check for main heading\n  22 |     const heading = page.getByRole('heading', { name: /Task Entry/i });\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:19:24"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:49:33.455Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d0c07-ld-load-the-task-entry-page-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d0c07-ld-load-the-task-entry-page-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d0c07-ld-load-the-task-entry-page-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 24,
+                        "line": 19
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-914589730ff75a2a320c",
+              "file": "task-entry.spec.ts",
+              "line": 17,
+              "column": 3
+            },
+            {
+              "title": "should create a task from natural language input",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 31121,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 39
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  37 |     const taskText = 'Buy groceries tomorrow at 3pm';\n  38 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 39 |     await input.fill(taskText);\n     |                 ^\n  40 |\n  41 |     // Submit the task\n  42 |     const sendButton = page.getByRole('button', { name: /Send/i });\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:39:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:49:33.460Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f380b-from-natural-language-input-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f380b-from-natural-language-input-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f380b-from-natural-language-input-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-b7dc492962f64a6ca718",
+              "file": "task-entry.spec.ts",
+              "line": 35,
+              "column": 3
+            },
+            {
+              "title": "should display enrichment progress",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 31158,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 62
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  60 |     // Create a task\n  61 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 62 |     await input.fill('Finish the project report by Friday');\n     |                 ^\n  63 |     await page.getByRole('button', { name: /Send/i }).click();\n  64 |\n  65 |     // Wait for task to appear\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:62:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:49:33.457Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-74dd9-display-enrichment-progress-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-74dd9-display-enrichment-progress-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-74dd9-display-enrichment-progress-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-5a3dd2b3d6f4a7c8b5db",
+              "file": "task-entry.spec.ts",
+              "line": 59,
+              "column": 3
+            },
+            {
+              "title": "should complete enrichment cycle",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 31142,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 85
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  83 |     const taskText = 'Schedule meeting with team next week';\n  84 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 85 |     await input.fill(taskText);\n     |                 ^\n  86 |     await page.getByRole('button', { name: /Send/i }).click();\n  87 |\n  88 |     // Wait for task to appear\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:85:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:49:33.464Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f4ad8-d-complete-enrichment-cycle-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f4ad8-d-complete-enrichment-cycle-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f4ad8-d-complete-enrichment-cycle-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-280e4c05bb992d58e26a",
+              "file": "task-entry.spec.ts",
+              "line": 81,
+              "column": 3
+            },
+            {
+              "title": "should create multiple tasks",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30909,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 19,
+                            "line": 115
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  113 |     for (const taskText of tasks) {\n  114 |       const input = page.getByPlaceholder(/What needs to be done/i);\n> 115 |       await input.fill(taskText);\n      |                   ^\n  116 |       await page.getByRole('button', { name: /Send/i }).click();\n  117 |\n  118 |       // Wait a bit between submissions\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:115:19"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:49:40.621Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d5486-hould-create-multiple-tasks-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d5486-hould-create-multiple-tasks-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-d5486-hould-create-multiple-tasks-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-4de53e91ad8a4ecfa0ac",
+              "file": "task-entry.spec.ts",
+              "line": 105,
+              "column": 3
+            },
+            {
+              "title": "should handle empty input validation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 6218,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: \u001b[32m\"\"\u001b[39m\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: \u001b[32m\"\"\u001b[39m\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:137:25",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 25,
+                          "line": 137
+                        },
+                        "snippet": "  135 |     // Button should be disabled when input is empty\n  136 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 137 |     await expect(input).toHaveValue('');\n      |                         ^\n  138 |\n  139 |     // Try clicking send button (should not create task if disabled)\n  140 |     const initialTaskCount = await page.getByTestId('task-item').count();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 25,
+                            "line": 137
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: \u001b[32m\"\"\u001b[39m\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toHaveValue\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  135 |     // Button should be disabled when input is empty\n  136 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 137 |     await expect(input).toHaveValue('');\n      |                         ^\n  138 |\n  139 |     // Try clicking send button (should not create task if disabled)\n  140 |     const initialTaskCount = await page.getByTestId('task-item').count();\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:137:25"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:05.348Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f37db-ndle-empty-input-validation-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f37db-ndle-empty-input-validation-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-f37db-ndle-empty-input-validation-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 25,
+                        "line": 137
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-028771928b938eeb5253",
+              "file": "task-entry.spec.ts",
+              "line": 131,
+              "column": 3
+            },
+            {
+              "title": "should handle very long task descriptions",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 30961,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 155
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  153 |     const longText = 'a'.repeat(500) + ' complete this extremely long task with many details';\n  154 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 155 |     await input.fill(longText);\n      |                 ^\n  156 |     await page.getByRole('button', { name: /Send/i }).click();\n  157 |\n  158 |     // Wait for task to appear\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:155:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:05.349Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-66f00-very-long-task-descriptions-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-66f00-very-long-task-descriptions-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-66f00-very-long-task-descriptions-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-3c37adfb0b4df7ea0b85",
+              "file": "task-entry.spec.ts",
+              "line": 151,
+              "column": 3
+            },
+            {
+              "title": "should display error state gracefully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30962,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 172
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  170 |     // Create a task that might fail\n  171 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 172 |     await input.fill('Test error handling');\n      |                 ^\n  173 |     await page.getByRole('button', { name: /Send/i }).click();\n  174 |\n  175 |     // If there's an error, verify error message is displayed\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:172:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:05.348Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-dac43-play-error-state-gracefully-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-dac43-play-error-state-gracefully-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-dac43-play-error-state-gracefully-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-c4c9941333280915e3ab",
+              "file": "task-entry.spec.ts",
+              "line": 166,
+              "column": 3
+            },
+            {
+              "title": "should be keyboard accessible",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5965,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: focused\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: focused\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:192:25",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 25,
+                          "line": 192
+                        },
+                        "snippet": "  190 |     // Tab to input\n  191 |     await page.keyboard.press('Tab');\n> 192 |     await expect(input).toBeFocused();\n      |                         ^\n  193 |\n  194 |     // Type task text\n  195 |     await page.keyboard.type('Keyboard test task');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 25,
+                            "line": 192
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeFocused\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: focused\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeFocused\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  190 |     // Tab to input\n  191 |     await page.keyboard.press('Tab');\n> 192 |     await expect(input).toBeFocused();\n      |                         ^\n  193 |\n  194 |     // Type task text\n  195 |     await page.keyboard.type('Keyboard test task');\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:192:25"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:12.050Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-fdccc-ould-be-keyboard-accessible-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-fdccc-ould-be-keyboard-accessible-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-fdccc-ould-be-keyboard-accessible-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 25,
+                        "line": 192
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-c9214ccae8a6f0bcfdbf",
+              "file": "task-entry.spec.ts",
+              "line": 186,
+              "column": 3
+            },
+            {
+              "title": "should show task metadata after enrichment",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 31267,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 17,
+                            "line": 210
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  208 |     const taskText = 'Meeting with client on Friday at 2pm';\n  209 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 210 |     await input.fill(taskText);\n      |                 ^\n  211 |     await page.getByRole('button', { name: /Send/i }).click();\n  212 |\n  213 |     // Wait for enrichment to complete\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:210:17"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:12.090Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-ebd88-k-metadata-after-enrichment-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-ebd88-k-metadata-after-enrichment-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Chat-Based-Task-ebd88-k-metadata-after-enrichment-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-dd4d8de9f6ba413c2791",
+              "file": "task-entry.spec.ts",
+              "line": 206,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Task List Display",
+          "file": "task-entry.spec.ts",
+          "line": 225,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should show empty state when no tasks exist",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5969,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/No tasks yet/i).or(getByText(/Get started/i))\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/No tasks yet/i).or(getByText(/Get started/i))\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/No tasks yet/i).or(getByText(/Get started/i))\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/No tasks yet/i).or(getByText(/Get started/i))\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:237:34",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 34,
+                          "line": 237
+                        },
+                        "snippet": "  235 |       // Verify empty state message is shown\n  236 |       const emptyMessage = page.getByText(/No tasks yet/i).or(page.getByText(/Get started/i));\n> 237 |       await expect(emptyMessage).toBeVisible();\n      |                                  ^\n  238 |     }\n  239 |   });\n  240 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 34,
+                            "line": 237
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/No tasks yet/i).or(getByText(/Get started/i))\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/No tasks yet/i).or(getByText(/Get started/i))\u001b[22m\n\n\n  235 |       // Verify empty state message is shown\n  236 |       const emptyMessage = page.getByText(/No tasks yet/i).or(page.getByText(/Get started/i));\n> 237 |       await expect(emptyMessage).toBeVisible();\n      |                                  ^\n  238 |     }\n  239 |   });\n  240 |\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:237:34"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:18.494Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-c9909-y-state-when-no-tasks-exist-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-c9909-y-state-when-no-tasks-exist-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-c9909-y-state-when-no-tasks-exist-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 34,
+                        "line": 237
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-434b3e31b0d587867916",
+              "file": "task-entry.spec.ts",
+              "line": 226,
+              "column": 3
+            },
+            {
+              "title": "should scroll through long task list",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30906,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 19,
+                            "line": 247
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  245 |     for (let i = 1; i <= 10; i++) {\n  246 |       const input = page.getByPlaceholder(/What needs to be done/i);\n> 247 |       await input.fill(`Task ${i}`);\n      |                   ^\n  248 |       await page.getByRole('button', { name: /Send/i }).click();\n  249 |       await page.waitForTimeout(300);\n  250 |     }\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:247:19"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:24.932Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-13d4e-roll-through-long-task-list-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-13d4e-roll-through-long-task-list-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Task-List-Displ-13d4e-roll-through-long-task-list-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-63142529ff2646aeddd9",
+              "file": "task-entry.spec.ts",
+              "line": 241,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Responsive Design",
+          "file": "task-entry.spec.ts",
+          "line": 265,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should work on mobile viewport",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 5546,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:273:25",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 25,
+                          "line": 273
+                        },
+                        "snippet": "  271 |     // Verify key elements are visible and usable\n  272 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 273 |     await expect(input).toBeVisible();\n      |                         ^\n  274 |\n  275 |     const sendButton = page.getByRole('button', { name: /Send/i });\n  276 |     await expect(sendButton).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 25,
+                            "line": 273
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByPlaceholder(/What needs to be done/i)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  271 |     // Verify key elements are visible and usable\n  272 |     const input = page.getByPlaceholder(/What needs to be done/i);\n> 273 |     await expect(input).toBeVisible();\n      |                         ^\n  274 |\n  275 |     const sendButton = page.getByRole('button', { name: /Send/i });\n  276 |     await expect(sendButton).toBeVisible();\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:273:25"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:36.886Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-mobile-viewport-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-mobile-viewport-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-mobile-viewport-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 25,
+                        "line": 273
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-60b214682a163d548744",
+              "file": "task-entry.spec.ts",
+              "line": 266,
+              "column": 3
+            },
+            {
+              "title": "should work on tablet viewport",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 13,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 5475,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /Task Entry/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /Task Entry/i })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /Task Entry/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /Task Entry/i })\u001b[22m\n\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:294:27",
+                        "location": {
+                          "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                          "column": 27,
+                          "line": 294
+                        },
+                        "snippet": "  292 |     // Verify layout works\n  293 |     const heading = page.getByRole('heading', { name: /Task Entry/i });\n> 294 |     await expect(heading).toBeVisible();\n      |                           ^\n  295 |\n  296 |     const input = page.getByPlaceholder(/What needs to be done/i);\n  297 |     await expect(input).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 27,
+                            "line": 294
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /Task Entry/i })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /Task Entry/i })\u001b[22m\n\n\n  292 |     // Verify layout works\n  293 |     const heading = page.getByRole('heading', { name: /Task Entry/i });\n> 294 |     await expect(heading).toBeVisible();\n      |                           ^\n  295 |\n  296 |     const input = page.getByPlaceholder(/What needs to be done/i);\n  297 |     await expect(input).toBeVisible();\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:294:27"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:36.886Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-tablet-viewport-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-tablet-viewport-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Responsive-Design-should-work-on-tablet-viewport-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                        "column": 27,
+                        "line": 294
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-302fd69c19b651167aed",
+              "file": "task-entry.spec.ts",
+              "line": 287,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Performance",
+          "file": "task-entry.spec.ts",
+          "line": 301,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load page quickly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 381,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:42.914Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-386bdb769641b9b7268c",
+              "file": "task-entry.spec.ts",
+              "line": 302,
+              "column": 3
+            },
+            {
+              "title": "should handle rapid task creation",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30892,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts",
+                            "column": 19,
+                            "line": 320
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByPlaceholder(/What needs to be done/i)\u001b[22m\n\n\n  318 |\n  319 |     for (let i = 1; i <= 5; i++) {\n> 320 |       await input.fill(`Rapid task ${i}`);\n      |                   ^\n  321 |       await sendButton.click();\n  322 |       // Small delay to avoid overwhelming the system\n  323 |       await page.waitForTimeout(100);\n    at /Users/bzpysmn/work/task_master/frontend/tests/e2e/task-entry.spec.ts:320:19"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-05T09:50:42.992Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Performance-should-handle-rapid-task-creation-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Performance-should-handle-rapid-task-creation-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/bzpysmn/work/task_master/frontend/test-results/task-entry-Performance-should-handle-rapid-task-creation-chromium/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "557c5b1e7337c5cbf52b-81f6af64f0cb4df55b8c",
+              "file": "task-entry.spec.ts",
+              "line": 312,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-05T09:49:32.917Z",
+    "duration": 101161.764,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 15,
+    "flaky": 0
+  }
+}
