@@ -1,0 +1,83 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: task_master-ollama-prod
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Memory optimization for VPS 1
+    mem_limit: 1.5g
+    mem_reservation: 800m
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: task_master-ollama-init-prod
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: /bin/sh
+    command: -c "ollama pull llama3.2 && echo 'Model pulled successfully'"
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: task_master-backend-prod
+    ports:
+      - "8000:8000"
+    volumes:
+      # Only persist database, not source code
+      - db_data:/app/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2}
+      - DATABASE_URL=sqlite+aiosqlite:///./data/tasks.db
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-120}
+      - ENVIRONMENT=production
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Memory optimization for VPS 1
+    mem_limit: 512m
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.prod.Dockerfile
+    container_name: task_master-frontend-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    # Memory optimization for VPS 1
+    mem_limit: 256m
+
+volumes:
+  ollama_data:
+    driver: local
+  db_data:
+    driver: local

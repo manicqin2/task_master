@@ -7,9 +7,7 @@ WORKDIR /app
 COPY frontend /app
 
 # Install dependencies (after copying source to avoid overwriting node_modules)
-# Delete package-lock.json to force fresh resolution of optional dependencies
-RUN rm -f package-lock.json && \
-    npm install && \
+RUN npm ci && \
     # Manually install rollup ARM64 binary to work around npm optional dependency bug
     npm install @rollup/rollup-linux-arm64-musl --save-optional
 

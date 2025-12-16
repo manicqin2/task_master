@@ -94,7 +94,7 @@ Task cards display extracted metadata fields in a scannable, visually distinct f
 - **FR-007**: System MUST determine task priority (e.g., low, normal, high, urgent) from explicit keywords (e.g., "urgent", "high priority", "ASAP") or implicit cues (e.g., "as soon as possible", "critical")
 - **FR-008**: System MUST generate and store chain_of_thought data for each extraction, including reasoning steps, confidence scores, and alternative interpretations considered
 - **FR-009**: System MUST calculate and store confidence scores (0-100%) for each extracted metadata field
-- **FR-010**: System MUST identify tasks with low-confidence or missing required fields and route them to a "Need Attention" lane
+- **FR-010**: System MUST identify tasks with low-confidence or missing required fields (specifically `project`, which is required to move to Ready lane per Feature 003) and route them to a "Need Attention" lane via `requires_attention` flag
 - **FR-011**: Users MUST be able to view extracted metadata on task cards in a structured, scannable format
 - **FR-012**: Users MUST be able to manually correct or confirm metadata for tasks in the "Need Attention" lane
 - **FR-013**: System MUST persist all extracted metadata fields along with the task entity
@@ -156,6 +156,7 @@ Task cards display extracted metadata fields in a scannable, visually distinct f
 - Users have existing projects and contacts in the system that can be referenced for disambiguation
 - Confidence threshold of 70% is appropriate for auto-populating fields (can be tuned based on user feedback)
 - "Need Attention" lane exists in the UI (part of Feature 003's lane workflow)
+- **Project field is REQUIRED**: Tasks must have `project` metadata assigned (with confidence ≥70%) to move from More Info lane to Ready lane (per Feature 003 Task Workbench concept)
 - Backend enrichment service can be extended to support structured metadata extraction beyond current status tracking
 - Users prefer automatic extraction with occasional corrections over manual entry for every field
 - Debug/chain_of_thought data is primarily for developers and power users, not displayed by default

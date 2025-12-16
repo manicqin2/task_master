@@ -4,8 +4,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from .enums import Priority, TaskType
-
 
 class FieldSuggestion(BaseModel):
     """Suggestion for a metadata field with confidence score."""
@@ -27,10 +25,10 @@ class MetadataExtractionResponse(BaseModel):
     deadline: Optional[str] = Field(None, max_length=200)
     deadline_confidence: float = Field(ge=0.0, le=1.0)
 
-    task_type: Optional[TaskType] = None
+    task_type: Optional[str] = Field(None, max_length=50)
     task_type_confidence: float = Field(ge=0.0, le=1.0)
 
-    priority: Optional[Priority] = None
+    priority: Optional[str] = Field(None, max_length=20)
     priority_confidence: float = Field(ge=0.0, le=1.0)
 
     effort_estimate: Optional[int] = Field(None, gt=0)
@@ -56,8 +54,8 @@ class TaskMetadataResponse(BaseModel):
 
     project: Optional[str] = None
     persons: list[str] = Field(default_factory=list)
-    task_type: Optional[TaskType] = None
-    priority: Optional[Priority] = None
+    task_type: Optional[str] = None
+    priority: Optional[str] = None
     deadline_text: Optional[str] = None
     deadline_parsed: Optional[datetime] = None
     effort_estimate: Optional[int] = None
@@ -76,8 +74,8 @@ class TaskMetadataUpdate(BaseModel):
 
     project: Optional[str] = Field(None, max_length=100)
     persons: Optional[list[str]] = None
-    task_type: Optional[TaskType] = None
-    priority: Optional[Priority] = None
+    task_type: Optional[str] = Field(None, max_length=50)
+    priority: Optional[str] = Field(None, max_length=20)
     deadline_text: Optional[str] = Field(None, max_length=200)
     deadline_parsed: Optional[datetime] = None
     effort_estimate: Optional[int] = Field(None, gt=0)

@@ -9,19 +9,19 @@
  */
 
 import { useMemo } from 'react'
-import { Task } from '@/lib/types'
+import { WorkbenchTask } from '@/lib/types'
 import { TaskWithLane, Lane, enrichTaskWithLane } from '@/types/task'
 
 /**
  * Hook for managing lane-based task workflow
  *
- * Transforms base Task objects to TaskWithLane by:
+ * Transforms base WorkbenchTask objects to TaskWithLane by:
  * 1. Computing lane assignment from enrichment_status
  * 2. Determining available action emblems per lane
  * 3. Sorting tasks chronologically (newest first)
  * 4. Grouping tasks by lane
  */
-export function useLaneWorkflow(tasks: Task[]) {
+export function useLaneWorkflow(tasks: WorkbenchTask[]) {
   // Transform tasks and distribute across lanes
   const { pendingTasks, errorTasks, finishedTasks } = useMemo(() => {
     // Enrich all tasks with lane information

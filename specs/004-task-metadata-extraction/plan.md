@@ -26,6 +26,7 @@ Extend the existing task enrichment pipeline to extract structured metadata from
 **Constraints**:
 - Must reuse existing Feature 001 enrichment infrastructure
 - Cannot block task creation if extraction fails
+- LLM timeout set via OLLAMA_TIMEOUT environment variable (default: 60 seconds)
 - Chain of thought data must not impact primary user experience (debug-only)
 - Must work with existing 500ms polling interval from Feature 001
 **Scale/Scope**:

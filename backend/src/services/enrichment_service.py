@@ -98,9 +98,9 @@ class EnrichmentService:
             "persons_confidence": response.persons_confidence,
             "deadline": response.deadline,
             "deadline_confidence": response.deadline_confidence,
-            "task_type": response.task_type.value if response.task_type else None,
+            "task_type": response.task_type,  # Now string instead of enum
             "task_type_confidence": response.task_type_confidence,
-            "priority": response.priority.value if response.priority else None,
+            "priority": response.priority,  # Now string instead of enum
             "priority_confidence": response.priority_confidence,
             "effort_estimate": response.effort_estimate,
             "effort_confidence": response.effort_confidence,

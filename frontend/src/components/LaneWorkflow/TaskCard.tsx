@@ -72,8 +72,8 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateM
   }
 
   // Add "move to ready" emblem if task is in More Info lane (always visible, disabled if no project)
-  const hasProject = updatedMetadata?.project || task.metadata?.project
-  if (task.lane === 'error' && task.enrichment_status === 'completed' && !task.metadata?.project) {
+  const hasProject = updatedMetadata?.project || task.project
+  if (task.lane === 'error' && task.workbench.enrichment_status === 'completed' && !task.project) {
     emblems.push('confirm' as const)
   }
 
@@ -101,21 +101,21 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateM
       </div>
 
       {/* Error Message (if applicable) */}
-      {task.error_message && <ErrorMessage message={task.error_message} />}
+      {task.workbench.error_message && <ErrorMessage message={task.workbench.error_message} />}
 
       {/* Metadata Display (Feature 004) */}
-      {task.metadata && (
+      {(task.project || task.persons?.length > 0 || task.deadline_parsed) && (
         <div className="mt-2 space-y-1">
-          <MetadataBadges metadata={task.metadata} />
-          <PersonAvatars persons={task.metadata.persons} />
-          <DeadlineIndicator metadata={task.metadata} />
+          <MetadataBadges metadata={task} />
+          <PersonAvatars persons={task.persons} />
+          <DeadlineIndicator metadata={task} />
         </div>
       )}
 
       {/* Metadata Editor (More Info lane only) */}
-      {task.lane === 'error' && task.enrichment_status === 'completed' && !task.metadata?.project && (
+      {task.lane === 'error' && task.workbench.enrichment_status === 'completed' && !task.project && (
         <MetadataEditor
-          currentMetadata={task.metadata}
+          currentMetadata={task}
           onMetadataChange={(metadata) => setUpdatedMetadata(metadata)}
         />
       )}

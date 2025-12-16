@@ -171,7 +171,7 @@ This research covers best practices and implementation patterns for extracting s
 - **Single LLM Call**: All fields extracted in one request (already decided in Section 1)
 - **FastAPI BackgroundTasks**: Extract metadata asynchronously after task creation
 - **Redis Cache**: Cache LLM responses for identical inputs (TTL: 1 hour)
-- **Timeout**: 5s LLM call timeout (fail gracefully if exceeded)
+- **Timeout**: 60s LLM call timeout via OLLAMA_TIMEOUT env var (fail gracefully if exceeded)
 
 **Rationale:**
 1. **<2s Target Achievable**: Background processing decouples extraction from HTTP response
@@ -285,7 +285,7 @@ pydantic = ">=2.5.0"         # Already in use, ensure v2+
 METADATA_EXTRACTION_ENABLED = True
 METADATA_CACHE_TTL = 3600  # 1 hour
 METADATA_CONFIDENCE_THRESHOLD = 0.7
-LLM_TIMEOUT = 5.0  # seconds
+LLM_TIMEOUT = 60.0  # seconds (configurable via OLLAMA_TIMEOUT env var)
 REDIS_URL = "redis://redis:6379"
 ```
 
@@ -320,7 +320,7 @@ REDIS_URL = "redis://redis:6379"
 |------|--------|-------------|-----------|
 | **LLM Hallucination** (extracts names not in text) | High | Medium | Low temperature (0.1), validation against input, user review UI |
 | **Ollama Incompatibility** (no Structured Outputs) | High | High | Fallback to JSON mode + Pydantic validation layer |
-| **Slow Extraction** (>5s) | Medium | Medium | Timeout + graceful degradation, cache hits reduce calls |
+| **Slow Extraction** (>60s) | Medium | Medium | Timeout + graceful degradation, cache hits reduce calls |
 | **Cache Poisoning** (bad extraction cached) | Low | Low | Short TTL (1hr), manual invalidation endpoint |
 | **Overconfident Scores** (LLM says 0.9 but wrong) | Medium | High | Conservative thresholds (0.7), user can always override |
 | **Timezone Ambiguity** (user in US, server in UTC) | Medium | Low | Default to UTC, document assumption, future: user timezone pref |

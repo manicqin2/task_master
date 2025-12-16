@@ -1,77 +1,115 @@
 /**
- * TaskEntryPage - Main page for task entry with chat interface
- *
- * Updated for Feature 003: Multi-Lane Task Workflow
- * Replaced TaskList with LaneWorkflow for kanban-style visualization
+ * TaskEntryPage - Main application page
  */
+
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChatInput } from '@/components/ChatInput';
-import { LaneWorkflow } from '@/components/LaneWorkflow';
-import { useTaskPolling } from '@/services/useTaskPolling';
-import { createTask } from '@/services/api';
-import { Card } from '@/components/ui/card';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Navigation, NavigationTab } from '@/components/Navigation/Navigation';
+import { LaneWorkflow } from '@/components/LaneWorkflow/LaneWorkflow';
+import { TodoList } from '@/components/Todos/TodoList';
+import { QueryBar } from '@/components/QueryBar/QueryBar';
+import { ProjectsView } from '@/components/Projects/ProjectsView';
+import { PersonsView } from '@/components/Persons/PersonsView';
+import { AgendaView } from '@/components/Agenda/AgendaView';
+import { listTodoTasks, updateTaskStatus, createTask } from '@/services/api';
 
 export function TaskEntryPage() {
+  const [activeTab, setActiveTab] = useState<NavigationTab>('workbench');
+  const [queryInput, setQueryInput] = useState('');
   const queryClient = useQueryClient();
-  const { tasks, isLoading } = useTaskPolling();
-  const [error, setError] = useState<string | null>(null);
 
-  // Mutation for creating tasks
+  // Fetch todos
+  const { data: todosData } = useQuery({
+    queryKey: ['todo-tasks'],
+    queryFn: listTodoTasks,
+    refetchInterval: 2000, // Poll every 2s
+  });
+
+  const todos = todosData?.tasks || [];
+
+  // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: createTask,
     onSuccess: () => {
-      // Invalidate and refetch tasks to show the new task immediately
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      setError(null);
-    },
-    onError: (err: Error) => {
-      setError(err.message || 'Failed to create task');
+      queryClient.invalidateQueries({ queryKey: ['workbench-tasks'] });
+      setQueryInput(''); // Clear input after successful creation
     },
   });
 
-  const handleSubmit = async (input: string) => {
-    try {
-      await createTaskMutation.mutateAsync(input);
-    } catch (err) {
-      // Error handled by onError callback
-      console.error('Failed to create task:', err);
+  // Finish todo mutation
+  const finishMutation = useMutation({
+    mutationFn: (taskId: string) => updateTaskStatus(taskId, 'completed'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todo-tasks'] });
+    },
+  });
+
+  // Archive todo mutation
+  const archiveMutation = useMutation({
+    mutationFn: (taskId: string) => updateTaskStatus(taskId, 'archived'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todo-tasks'] });
+    },
+  });
+
+  const handleCreateTask = (userInput: string) => {
+    createTaskMutation.mutate(userInput);
+  };
+
+  const handleFinish = (taskId: string) => {
+    finishMutation.mutate(taskId);
+  };
+
+  const handleArchive = (taskId: string) => {
+    archiveMutation.mutate(taskId);
+  };
+
+  const handleRephraseTask = (originalText: string) => {
+    // If there's already text, append with separator
+    if (queryInput.trim()) {
+      setQueryInput(queryInput + '\n\n' + originalText);
+    } else {
+      setQueryInput(originalText);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="p-4 border-b">
-        <h1 className="text-2xl font-bold">TaskMaster</h1>
-        <p className="text-sm text-muted-foreground">
-          Rapid task capture with AI enrichment
-        </p>
+    <div className="flex flex-col h-screen w-full bg-white">
+      {/* Navigation */}
+      <div className="flex-none px-6 py-4 border-b border-gray-200">
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
-      {/* Error Banner */}
-      {error && (
-        <div className="p-4 bg-destructive/10 border-b border-destructive">
-          <p className="text-sm text-destructive">{error}</p>
-        </div>
-      )}
-
-      {/* Lane Workflow (Feature 003) */}
-      <div className="flex-1 overflow-hidden p-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Loading tasks...</p>
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden px-6 py-6">
+        {activeTab === 'workbench' && (
+          <div className="flex flex-col h-full gap-4">
+            <QueryBar
+              onSubmit={handleCreateTask}
+              isLoading={createTaskMutation.isPending}
+              value={queryInput}
+              onChange={setQueryInput}
+            />
+            <div className="flex-1 overflow-hidden">
+              <LaneWorkflow onRephrase={handleRephraseTask} />
+            </div>
           </div>
-        ) : (
-          <LaneWorkflow />
         )}
-      </div>
 
-      {/* Chat Input */}
-      <ChatInput
-        onSubmit={handleSubmit}
-        disabled={createTaskMutation.isPending}
-      />
+        {activeTab === 'todos' && (
+          <div className="h-full overflow-y-auto">
+            <TodoList
+              tasks={todos}
+              onFinish={handleFinish}
+              onArchive={handleArchive}
+            />
+          </div>
+        )}
+
+        {activeTab === 'projects' && <ProjectsView />}
+        {activeTab === 'persons' && <PersonsView />}
+        {activeTab === 'agenda' && <AgendaView />}
+      </div>
     </div>
   );
 }

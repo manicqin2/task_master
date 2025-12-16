@@ -5,7 +5,7 @@
  * Extended types for Feature 003 (Multi-Lane Task Workflow)
  */
 
-import { Task, EnrichmentStatus } from '@/lib/types'
+import { WorkbenchTask, EnrichmentStatus } from '@/lib/types'
 
 /**
  * Lane identifiers for Task Workbench (task creation workflow)
@@ -18,10 +18,10 @@ export type Lane = 'pending' | 'error' | 'ready'
 export type ActionEmblem = 'cancel' | 'retry' | 'confirm' | 'expand'
 
 /**
- * Extended Task interface for Feature 003 lane workflow
+ * Extended WorkbenchTask interface for Feature 003 lane workflow
  * Adds computed client-side fields for UI presentation
  */
-export interface TaskWithLane extends Task {
+export interface TaskWithLane extends WorkbenchTask {
   /**
    * Computed lane assignment based on task status and metadata
    * - 'pending': status = 'pending' | 'processing'
@@ -74,6 +74,7 @@ export interface ActionEmblemConfig {
 
 /**
  * Constants for lane configurations (Task Workbench)
+ * Updated border colors to match Figma design at node-id=1:5
  */
 export const LANE_CONFIGS: LaneConfig[] = [
   {
@@ -82,15 +83,15 @@ export const LANE_CONFIGS: LaneConfig[] = [
     description: 'Tasks being enriched',
     emptyMessage: 'No pending tasks',
     bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
+    borderColor: 'border-[#bedbff]',
   },
   {
     id: 'error',
     title: 'More Info',
     description: 'Tasks needing attention',
     emptyMessage: 'All tasks have required info',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-[#fee685]',
   },
   {
     id: 'ready',
@@ -98,7 +99,7 @@ export const LANE_CONFIGS: LaneConfig[] = [
     description: 'Ready to enter todo list',
     emptyMessage: 'No tasks ready',
     bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    borderColor: 'border-[#b9f8cf]',
   },
 ]
 
@@ -140,7 +141,7 @@ export const ACTION_EMBLEM_CONFIGS: Record<ActionEmblem, ActionEmblemConfig> = {
  * Utility: Derive lane from task enrichment status and metadata
  * Tasks without a project go to More Info lane even if enrichment completed
  */
-export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus, task: Task): Lane {
+export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus, task: WorkbenchTask): Lane {
   switch (enrichmentStatus) {
     case EnrichmentStatus.PENDING:
     case EnrichmentStatus.PROCESSING:
@@ -149,7 +150,7 @@ export function getLaneFromStatus(enrichmentStatus: EnrichmentStatus, task: Task
       return 'error'
     case EnrichmentStatus.COMPLETED:
       // Check if task has required metadata (project)
-      if (!task.metadata?.project) {
+      if (!task.project) {
         return 'error' // Missing project → needs attention
       }
       return 'ready'
@@ -175,10 +176,10 @@ export function getEmblemsForLane(lane: Lane): ActionEmblem[] {
 }
 
 /**
- * Utility: Transform base Task to TaskWithLane
+ * Utility: Transform base WorkbenchTask to TaskWithLane
  */
-export function enrichTaskWithLane(task: Task): TaskWithLane {
-  const lane = getLaneFromStatus(task.enrichment_status, task)
+export function enrichTaskWithLane(task: WorkbenchTask): TaskWithLane {
+  const lane = getLaneFromStatus(task.workbench.enrichment_status, task)
   return {
     ...task,
     lane,
@@ -191,8 +192,8 @@ export function enrichTaskWithLane(task: Task): TaskWithLane {
 /**
  * Type guard: Check if a task has an error
  */
-export function hasError(task: Task): boolean {
-  return task.error_message !== null && task.error_message.length > 0
+export function hasError(task: WorkbenchTask): boolean {
+  return task.workbench.error_message !== null && task.workbench.error_message.length > 0
 }
 
 /**
@@ -205,6 +206,6 @@ export function needsTruncation(userInput: string, maxLength: number = 100): boo
 /**
  * Utility: Get display text for a task (enriched_text if available, otherwise user_input)
  */
-export function getTaskDisplayText(task: Task): string {
+export function getTaskDisplayText(task: WorkbenchTask): string {
   return task.enriched_text || task.user_input
 }

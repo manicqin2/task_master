@@ -10,16 +10,20 @@
  * @phase Phase 3 - User Story 1 (Basic Lane Visualization + Metadata Display)
  */
 
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
-import { listTasks } from '@/services/api'
+import { listWorkbenchTasks } from '@/services/api'
 import { useLaneWorkflow } from '@/hooks/useLaneWorkflow'
 import { useTaskActions } from '@/hooks/useTaskActions'
 import { Lane } from './Lane'
-import { LANE_CONFIGS, ActionEmblem } from '@/types/task'
+import { LANE_CONFIGS } from '@/types/task'
 
 export interface LaneWorkflowProps {
+  /**
+   * Callback when rephrase action is triggered
+   */
+  onRephrase?: (originalText: string) => void
+
   /**
    * Additional CSS classes to apply to the container
    */
@@ -34,11 +38,11 @@ export interface LaneWorkflowProps {
  *
  * Tasks without required metadata (e.g., project) go to More Info lane.
  */
-export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
-  // Fetch tasks using existing polling mechanism from Feature 001
+export function LaneWorkflow({ onRephrase, className = '' }: LaneWorkflowProps) {
+  // Fetch workbench tasks using existing polling mechanism from Feature 001
   const { data: tasksData } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: listTasks,
+    queryKey: ['workbench-tasks'],
+    queryFn: listWorkbenchTasks,
     refetchInterval: 500, // Poll every 500ms
   })
 
@@ -48,10 +52,10 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
   const { pendingTasks, errorTasks, finishedTasks } = useLaneWorkflow(tasks)
 
   // Task action handlers (Phase 4: Cancel, Phase 5: Retry, Phase 8: Confirm)
-  const { handleCancel, handleRetry, handleConfirm, handleExpand, handleUpdateMetadata } = useTaskActions()
+  const { handleCancel, handleRetry, handleConfirm, handleExpand, handleUpdateMetadata, handleRephrase } = useTaskActions(onRephrase)
 
   // Route action to appropriate handler
-  const handleTaskAction = (taskId: string, action: ActionEmblem) => {
+  const handleTaskAction = (taskId: string, action: string) => {
     switch (action) {
       case 'cancel':
         handleCancel(taskId)
@@ -64,6 +68,9 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
         break
       case 'expand':
         handleExpand(taskId)
+        break
+      case 'rephrase':
+        handleRephrase(taskId)
         break
       default:
         console.warn(`Unknown action: ${action}`)
@@ -84,7 +91,7 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
       >
         {/* Pending Lane */}
         <Lane
-          config={LANE_CONFIGS[0]} // Pending lane config
+          config={LANE_CONFIGS[0]!}
           tasks={pendingTasks}
           onTaskAction={handleTaskAction}
           onUpdateMetadata={handleUpdateMetadata}
@@ -92,7 +99,7 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
 
         {/* More Info Lane */}
         <Lane
-          config={LANE_CONFIGS[1]} // More Info lane config
+          config={LANE_CONFIGS[1]!}
           tasks={errorTasks}
           onTaskAction={handleTaskAction}
           onUpdateMetadata={handleUpdateMetadata}
@@ -100,7 +107,7 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
 
         {/* Ready Lane */}
         <Lane
-          config={LANE_CONFIGS[2]} // Ready lane config
+          config={LANE_CONFIGS[2]!}
           tasks={finishedTasks}
           onTaskAction={handleTaskAction}
           onUpdateMetadata={handleUpdateMetadata}

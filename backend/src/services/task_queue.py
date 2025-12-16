@@ -17,11 +17,11 @@ async def enrich_task_background(
 
     This function runs asynchronously in the background to enrich tasks and extract metadata.
     It handles the complete enrichment workflow:
-    1. Update status to PROCESSING
+    1. Update workbench status to PROCESSING
     2. Call EnrichmentService for text enrichment
     3. Extract metadata using MetadataExtractor
     4. Parse deadline and populate fields based on confidence threshold
-    5. Update status to COMPLETED or FAILED
+    5. Update workbench status to COMPLETED or FAILED
     6. Store enriched text, metadata, or error message
 
     Feature 004: Task Metadata Extraction - Phase 3 User Story 1 (T025)
@@ -34,8 +34,9 @@ async def enrich_task_background(
     task_service = TaskService(db)
 
     try:
-        # Get task
+        # Get task and workbench entry
         task = await task_service.get_by_id(task_id)
+        workbench = await task_service.get_workbench_entry(task_id)
 
         # Update to processing
         await task_service.update_enrichment(
@@ -56,12 +57,12 @@ async def enrich_task_background(
         # Only populate fields with confidence >= 0.7
         extractor = enrichment_service.metadata_extractor
 
-        # Store full extraction response as JSON for frontend suggestions
-        task.metadata_suggestions = enrichment_service.serialize_metadata_suggestions(
+        # Store full extraction response as JSON in workbench for frontend suggestions
+        workbench.metadata_suggestions = enrichment_service.serialize_metadata_suggestions(
             metadata_response
         )
 
-        # Populate high-confidence fields
+        # Populate high-confidence fields on task
         if extractor.should_populate_field(metadata_response.project_confidence):
             task.project = metadata_response.project
 
@@ -93,13 +94,16 @@ async def enrich_task_background(
         if extractor.should_populate_field(metadata_response.tags_confidence):
             task.tags = json.dumps(metadata_response.tags)
 
-        # Set extracted_at timestamp
+        # Set extracted_at timestamp on task
         task.extracted_at = datetime.now(timezone.utc)
 
         # Set requires_attention flag based on confidence scores (T016)
         task.requires_attention = extractor.requires_attention(metadata_response)
 
-        # Update to completed
+        # Commit task metadata changes
+        await db.commit()
+
+        # Update workbench to completed
         await task_service.update_enrichment(
             task_id,
             status=EnrichmentStatus.COMPLETED,
@@ -110,7 +114,7 @@ async def enrich_task_background(
         # Handle enrichment/extraction failure (FR-018)
         error_message = str(e)
 
-        # Update to failed with error message
+        # Update workbench to failed with error message
         await task_service.update_enrichment(
             task_id,
             status=EnrichmentStatus.FAILED,

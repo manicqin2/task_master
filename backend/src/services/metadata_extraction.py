@@ -19,7 +19,6 @@ from typing import Optional
 from openai import AsyncOpenAI
 
 from src.lib.metadata_parsers import parse_deadline, extract_tags, normalize_person_name
-from src.models.enums import Priority, TaskType
 from src.models.task_metadata import MetadataExtractionResponse
 
 
@@ -191,23 +190,23 @@ Current date/time for reference: {self.reference_time.isoformat()}
         # Combine and deduplicate tags
         all_tags = list(set(extracted_tags + llm_tags))
 
-        # Parse task_type enum
+        # Normalize task_type to lowercase
         task_type_str = extraction_data.get("task_type")
         task_type = None
         if task_type_str:
-            try:
-                task_type = TaskType(task_type_str.lower())
-            except ValueError:
-                task_type = TaskType.OTHER
+            # Validate against known types, default to "other" if unknown
+            valid_types = ["meeting", "call", "email", "review", "development", "research", "administrative", "other"]
+            task_type_lower = task_type_str.lower()
+            task_type = task_type_lower if task_type_lower in valid_types else "other"
 
-        # Parse priority enum
+        # Normalize priority to lowercase
         priority_str = extraction_data.get("priority")
         priority = None
         if priority_str:
-            try:
-                priority = Priority(priority_str.lower())
-            except ValueError:
-                priority = Priority.NORMAL
+            # Validate against known priorities, default to "normal" if unknown
+            valid_priorities = ["low", "normal", "high", "urgent"]
+            priority_lower = priority_str.lower()
+            priority = priority_lower if priority_lower in valid_priorities else "normal"
 
         # Build response
         return MetadataExtractionResponse(

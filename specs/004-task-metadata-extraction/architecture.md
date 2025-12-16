@@ -396,7 +396,7 @@ flowchart TD
 ```
 
 **Graceful Degradation**:
-- LLM timeout (>5s): Task still created, metadata empty
+- LLM timeout (>60s via OLLAMA_TIMEOUT): Task still created, metadata empty
 - LLM error: Task created, user can manually enter metadata
 - Cache failure: Fall back to LLM (no impact on extraction)
 - Parsing error: Store raw response, mark for debug review

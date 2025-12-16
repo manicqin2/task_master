@@ -29,7 +29,7 @@ This document defines the data entities and their relationships for the Task Met
 | `effort_estimate` | integer? | minutes | Estimated time to complete if mentioned |
 | `dependencies` | string[] | JSON array | Blockers or prerequisites mentioned |
 | `tags` | string[] | JSON array | User-defined or auto-extracted tags (e.g., ["#bug", "#urgent"]) |
-| `metadata_suggestions` | JSON | JSON object | Full extraction response including confidence scores (for "Need Attention" UI) |
+| `metadata_suggestions` | JSON | JSON object | Full MetadataExtractionResponse stored as JSON text (backend storage). API transforms this to `suggestions` object for frontend. |
 | `extracted_at` | datetime | timezone-aware | Timestamp when extraction occurred |
 | `requires_attention` | boolean | default false | Whether task needs user review due to low confidence |
 
@@ -67,7 +67,8 @@ Priority = Literal[
 
 **Relationships**:
 - One-to-one with `Task` (embedded fields, not separate table)
-- `metadata_suggestions` references `MetadataExtractionResponse` schema (stored as JSON text)
+- `metadata_suggestions` references `MetadataExtractionResponse` schema (stored as JSON text in database)
+- API layer transforms `metadata_suggestions` to `suggestions` field in TaskMetadata response (see contracts/metadata-extraction.yaml)
 
 **State Transitions**:
 ```
@@ -120,8 +121,9 @@ Confirmed State: User has reviewed and confirmed/edited metadata
 
 **Usage**:
 - Returned by `MetadataExtractor.extract()` service method
-- Stored as JSON string in `Task.metadata_suggestions` for frontend access
-- Used by frontend to render suggestions in "Need Attention" lane
+- Stored as JSON string in `Task.metadata_suggestions` (backend database field)
+- API transforms to per-field `suggestions` object (FieldSuggestion schema) when `requires_attention=true`
+- Frontend receives transformed `suggestions` in TaskMetadata response to render "Need Attention" lane UI
 
 ---
 
@@ -217,11 +219,7 @@ SET
     metadata_suggestions = :full_response_json,
     extracted_at = NOW(),
     requires_attention = (
-        :project_conf < 0.7 OR
-        :persons_conf < 0.7 OR
-        :deadline_conf < 0.7 OR
-        :type_conf < 0.7 OR
-        :priority_conf < 0.7
+        :project_conf < 0.7 OR :project IS NULL
     )
 WHERE id = :id;
 ```
@@ -271,7 +269,7 @@ WHERE id = :id;
 
 2. **Deadline Pairing**: If `deadline_text` is not NULL, `deadline_parsed` SHOULD be not NULL (may fail parsing, but attempt must be made)
 
-3. **Attention Flag**: `requires_attention = true` IFF at least one confidence score in `metadata_suggestions` is < 0.7
+3. **Attention Flag**: `requires_attention = true` IFF the `project` field (REQUIRED for Ready lane) has confidence < 0.7 OR is NULL. Other fields (persons, deadline, type, priority) are optional and low confidence does not trigger `requires_attention`.
 
 4. **Immutability**: Once metadata is extracted and `extracted_at` is set, metadata fields should not be re-extracted unless explicitly requested (prevents overwriting user edits)
 
@@ -279,7 +277,7 @@ WHERE id = :id;
 
 - **I1**: `extracted_at` is NULL ⟹ all metadata fields are NULL
 - **I2**: `metadata_suggestions` is not NULL ⟹ `extracted_at` is not NULL
-- **I3**: `requires_attention = true` ⟹ `metadata_suggestions` contains at least one field with confidence < 0.7
+- **I3**: `requires_attention = true` ⟹ `project` field in `metadata_suggestions` has confidence < 0.7 or is NULL (project is the only required field)
 - **I4**: `deadline_parsed` is not NULL ⟹ `deadline_text` is not NULL (but converse not guaranteed)
 
 ---

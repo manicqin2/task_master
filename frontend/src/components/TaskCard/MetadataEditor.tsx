@@ -7,7 +7,14 @@
  */
 
 import { useState, useEffect } from 'react'
-import { TaskMetadata, TaskType, Priority } from '@/lib/types'
+import { TaskMetadata } from '@/lib/types'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 export interface MetadataEditorProps {
   /**
@@ -43,25 +50,25 @@ const DEFAULT_PROJECTS = [
 /**
  * Task type options
  */
-const TASK_TYPES: { value: TaskType; label: string }[] = [
-  { value: TaskType.MEETING, label: 'Meeting' },
-  { value: TaskType.CALL, label: 'Call' },
-  { value: TaskType.EMAIL, label: 'Email' },
-  { value: TaskType.REVIEW, label: 'Review' },
-  { value: TaskType.DEVELOPMENT, label: 'Development' },
-  { value: TaskType.RESEARCH, label: 'Research' },
-  { value: TaskType.ADMINISTRATIVE, label: 'Administrative' },
-  { value: TaskType.OTHER, label: 'Other' },
+const TASK_TYPES: { value: string; label: string }[] = [
+  { value: 'meeting', label: 'Meeting' },
+  { value: 'call', label: 'Call' },
+  { value: 'email', label: 'Email' },
+  { value: 'review', label: 'Review' },
+  { value: 'development', label: 'Development' },
+  { value: 'research', label: 'Research' },
+  { value: 'administrative', label: 'Administrative' },
+  { value: 'other', label: 'Other' },
 ]
 
 /**
  * Priority options
  */
-const PRIORITIES: { value: Priority; label: string; icon: string }[] = [
-  { value: Priority.LOW, label: 'Low', icon: '' },
-  { value: Priority.NORMAL, label: 'Normal', icon: '' },
-  { value: Priority.HIGH, label: 'High', icon: '⚠️' },
-  { value: Priority.URGENT, label: 'Urgent', icon: '🔥' },
+const PRIORITIES: { value: string; label: string; icon: string }[] = [
+  { value: 'low', label: 'Low', icon: '' },
+  { value: 'normal', label: 'Normal', icon: '' },
+  { value: 'high', label: 'High', icon: '⚠️' },
+  { value: 'urgent', label: 'Urgent', icon: '🔥' },
 ]
 
 /**
@@ -73,8 +80,8 @@ export function MetadataEditor({
   isUpdating = false,
 }: MetadataEditorProps) {
   const [project, setProject] = useState<string>(currentMetadata?.project || 'General')
-  const [taskType, setTaskType] = useState<TaskType | null>(currentMetadata?.task_type || null)
-  const [priority, setPriority] = useState<Priority | null>(currentMetadata?.priority || null)
+  const [taskType, setTaskType] = useState<string | null>(currentMetadata?.task_type || null)
+  const [priority, setPriority] = useState<string | null>(currentMetadata?.priority || null)
   const [deadlineText, setDeadlineText] = useState<string>(currentMetadata?.deadline_text || '')
   const [isCustomProject, setIsCustomProject] = useState(false)
 
@@ -136,19 +143,23 @@ export function MetadataEditor({
           📁 Project <span className="text-red-600">*</span>
         </label>
         {!isCustomProject ? (
-          <select
+          <Select
             value={project}
-            onChange={(e) => handleProjectChange(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-yellow-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            onValueChange={handleProjectChange}
             disabled={isUpdating}
           >
-            {DEFAULT_PROJECTS.map((proj) => (
-              <option key={proj} value={proj}>
-                {proj}
-              </option>
-            ))}
-            <option value="__custom__">+ Custom project...</option>
-          </select>
+            <SelectTrigger className="w-full border-yellow-300 focus:ring-yellow-500">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DEFAULT_PROJECTS.map((proj) => (
+                <SelectItem key={proj} value={proj}>
+                  {proj}
+                </SelectItem>
+              ))}
+              <SelectItem value="__custom__">+ Custom project...</SelectItem>
+            </SelectContent>
+          </Select>
         ) : (
           <div className="flex gap-2">
             <input
@@ -176,30 +187,34 @@ export function MetadataEditor({
         <label className="block text-xs font-medium text-gray-700 mb-1">
           📋 Task Type
         </label>
-        <select
-          value={taskType || ''}
-          onChange={(e) => {
-            const newType = e.target.value ? (e.target.value as TaskType) : null
-            setTaskType(newType)
+        <Select
+          value={taskType || 'none'}
+          onValueChange={(newType) => {
+            const finalType = newType === 'none' ? null : newType
+            setTaskType(finalType)
             setTimeout(() => {
               onMetadataChange({
                 project: project.trim() || null,
-                task_type: newType,
+                task_type: finalType,
                 priority: priority,
                 deadline_text: deadlineText.trim() || null,
               })
             }, 0)
           }}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isUpdating}
         >
-          <option value="">Not specified</option>
-          {TASK_TYPES.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Not specified" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Not specified</SelectItem>
+            {TASK_TYPES.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Priority Selector (Optional) */}
@@ -207,30 +222,34 @@ export function MetadataEditor({
         <label className="block text-xs font-medium text-gray-700 mb-1">
           ⚡ Priority
         </label>
-        <select
-          value={priority || ''}
-          onChange={(e) => {
-            const newPriority = e.target.value ? (e.target.value as Priority) : null
-            setPriority(newPriority)
+        <Select
+          value={priority || 'none'}
+          onValueChange={(newPriority) => {
+            const finalPriority = newPriority === 'none' ? null : newPriority
+            setPriority(finalPriority)
             setTimeout(() => {
               onMetadataChange({
                 project: project.trim() || null,
                 task_type: taskType,
-                priority: newPriority,
+                priority: finalPriority,
                 deadline_text: deadlineText.trim() || null,
               })
             }, 0)
           }}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isUpdating}
         >
-          <option value="">Not specified</option>
-          {PRIORITIES.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.icon} {p.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Not specified" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Not specified</SelectItem>
+            {PRIORITIES.map((p) => (
+              <SelectItem key={p.value} value={p.value}>
+                {p.icon} {p.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Deadline Input (Optional) */}

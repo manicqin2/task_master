@@ -74,7 +74,7 @@ Web app structure:
 - [ ] T022 [US1] Extend EnrichmentService in backend/src/api/tasks.py to queue metadata extraction as BackgroundTask
 - [ ] T023 [US1] Update POST /api/tasks endpoint to trigger metadata extraction in backend/src/api/tasks.py
 - [ ] T024 [US1] Update GET /api/tasks/{id} endpoint to include metadata in response in backend/src/api/tasks.py
-- [ ] T025 [US1] Implement async metadata extraction handler with timeout (5s) in backend/src/services/enrichment.py
+- [ ] T025 [US1] Implement async metadata extraction handler with timeout (OLLAMA_TIMEOUT env var, default 60s) in backend/src/services/enrichment.py
 - [ ] T026 [US1] Run contract and unit tests - verify all pass with docker compose exec backend pytest
 
 **Checkpoint**: At this point, backend extracts metadata and returns it in GET /api/tasks/{id}
