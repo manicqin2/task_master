@@ -133,6 +133,7 @@ docker compose exec frontend npm run test:e2e
 - 005-three-table-schema: Added Python 3.11+ (backend matches existing project)
 - 004-task-metadata-extraction: Added Python 3.11+ (backend), TypeScript 5.2+ (frontend)
 - 003-task-lane-workflow: Added TypeScript 5.x + React 18 + React 18, @tanstack/react-query 5.x, shadcn/ui components, Framer Motion (animations)
+- 002-gitlab-security-pipeline: Added GitLab CI/CD YAML (v1), Python 3.11+ (for backend), Node.js 18+ (for frontend) + GitLab CI Templates (Secret-Detection, Dependency-Scanning, SAST), Gitleaks (secret detection), Gemnasium (dependency scanning), Semgrep (SAST)
 
 
 <!-- MANUAL ADDITIONS START -->
@@ -157,8 +158,14 @@ LaneWorkflow (Task Workbench container)
 ```
 
 **State Management**:
+- TanStack Query cache stores tasks with `isExpanded` client-side flag
+- Mutations: cancelMutation (removes from cache), retryMutation (backend call), expandMutation (toggles flag)
+- Optimistic updates for instant UI feedback on cancel/expand
 
 **Testing Strategy**:
+- Unit tests: Component rendering, emblem visibility, lane derivation logic
+- Integration tests: Polling updates, cache invalidation, mutation behavior
+- E2E tests (Playwright): Full user journeys, performance validation, timeout scenarios
 
 ### Feature 004: Task Metadata Extraction
 
