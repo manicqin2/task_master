@@ -7,6 +7,10 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 - GitLab Security Dashboard (native), Artifact storage for security reports (JSON) (002-gitlab-security-pipeline)
 - TypeScript 5.x + React 18 + React 18, @tanstack/react-query 5.x, shadcn/ui components, Framer Motion (animations) (003-task-lane-workflow)
 - N/A (extends existing backend from Feature 001, no new database tables) (003-task-lane-workflow)
+- Python 3.11+ (backend), TypeScript 5.2+ (frontend) (004-task-metadata-extraction)
+- SQLite via SQLAlchemy (async), extending existing Task model with metadata fields (004-task-metadata-extraction)
+- Python 3.11+ (backend matches existing project) (005-three-table-schema)
+- SQLite with foreign key support enabled (existing database) (005-three-table-schema)
 
 ### Feature: 001-chat-task-entry
 
@@ -126,30 +130,29 @@ docker compose exec frontend npm run test:e2e
 - shadcn/ui component conventions
 
 ## Recent Changes
+- 005-three-table-schema: Added Python 3.11+ (backend matches existing project)
+- 004-task-metadata-extraction: Added Python 3.11+ (backend), TypeScript 5.2+ (frontend)
 - 003-task-lane-workflow: Added TypeScript 5.x + React 18 + React 18, @tanstack/react-query 5.x, shadcn/ui components, Framer Motion (animations)
 - 002-gitlab-security-pipeline: Added GitLab CI/CD YAML (v1), Python 3.11+ (for backend), Node.js 18+ (for frontend) + GitLab CI Templates (Secret-Detection, Dependency-Scanning, SAST), Gitleaks (secret detection), Gemnasium (dependency scanning), Semgrep (SAST)
 
-- 001-chat-task-entry: Added
 
 <!-- MANUAL ADDITIONS START -->
 
-### Feature 003: Multi-Lane Task Workflow
+### Feature 003: Multi-Lane Task Workflow (Task Workbench)
+
+**Purpose**: Task creation workflow - transforms raw user input into enriched, metadata-complete tasks ready for the todo list.
 
 **Key Concepts**:
-- Three-lane layout: Pending, Error/More Info, Finished
-- Lane derivation: Based on `enrichment_status` (pending/processing → Pending, failed → Error, completed → Finished)
-- Action emblems: Cancel (Pending), Retry+Cancel (Error), Expand (long text)
-- Frontend-only actions: Cancel and Expand (optimistic updates, no backend calls)
-- Backend integration: Retry action calls POST /api/tasks/:id/retry
-- Text truncation: 100 character limit with line-clamp CSS, expand/collapse toggle
-- Animations: Framer Motion with <300ms targets for perceived performance
-- Polling: Reuses Feature 001's 500ms polling for status updates
+  - **Pending**: Tasks being enriched by LLM (status: pending/processing)
+  - **More Info**: Tasks needing user attention (status: failed OR missing required metadata like project)
+  - **Ready**: Tasks complete and ready to enter todo list (status: completed AND has all required metadata)
 
 **Component Architecture**:
 ```
-LaneWorkflow (container)
-├── Lane × 3 (Pending, Error, Finished)
+LaneWorkflow (Task Workbench container)
+├── Lane × 3 (Pending, More Info, Ready)
 │   └── TaskCard × N
+│       ├── Metadata Display (badges, avatars, deadline indicator)
 │       ├── ActionEmblem (cancel/retry/expand buttons with tooltips)
 │       └── ErrorMessage (for failed tasks)
 ```
@@ -163,5 +166,15 @@ LaneWorkflow (container)
 - Unit tests: Component rendering, emblem visibility, lane derivation logic
 - Integration tests: Polling updates, cache invalidation, mutation behavior
 - E2E tests (Playwright): Full user journeys, performance validation, timeout scenarios
+
+### Feature 004: Task Metadata Extraction
+
+**Purpose**: Automatically extract structured metadata from natural language task descriptions using LLM.
+
+**Extracted Fields**:
+
+**Confidence Threshold**: 0.7 - fields with lower confidence require user attention
+
+**Timeout**: 60 seconds (configurable via OLLAMA_TIMEOUT env var)
 
 <!-- MANUAL ADDITIONS END -->

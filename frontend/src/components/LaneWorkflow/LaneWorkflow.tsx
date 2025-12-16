@@ -1,24 +1,29 @@
 /**
- * LaneWorkflow Component
+ * LaneWorkflow Component - Task Workbench
  *
- * Container component that renders three lanes (Pending, Error, Finished)
- * using CSS Grid layout. Manages task distribution across lanes based on
- * enrichment status.
+ * Container component for task creation workflow with three lanes:
+ * - Pending: Tasks being enriched by LLM
+ * - More Info: Tasks needing user attention (failed enrichment or missing required metadata)
+ * - Ready: Tasks ready to enter the todo list (enriched with all required metadata)
  *
- * @feature 003-task-lane-workflow
- * @phase Phase 3 - User Story 1 (Basic Lane Visualization)
+ * @feature 003-task-lane-workflow, 004-task-metadata-extraction
+ * @phase Phase 3 - User Story 1 (Basic Lane Visualization + Metadata Display)
  */
 
-import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
-import { listTasks } from '@/services/api'
+import { listWorkbenchTasks } from '@/services/api'
 import { useLaneWorkflow } from '@/hooks/useLaneWorkflow'
 import { useTaskActions } from '@/hooks/useTaskActions'
 import { Lane } from './Lane'
-import { LANE_CONFIGS, ActionEmblem } from '@/types/task'
+import { LANE_CONFIGS } from '@/types/task'
 
 export interface LaneWorkflowProps {
+  /**
+   * Callback when rephrase action is triggered
+   */
+  onRephrase?: (originalText: string) => void
+
   /**
    * Additional CSS classes to apply to the container
    */
@@ -26,16 +31,18 @@ export interface LaneWorkflowProps {
 }
 
 /**
- * Main LaneWorkflow container component
+ * Main LaneWorkflow container component (Task Workbench)
  *
- * Fetches tasks via TanStack Query, distributes them across three lanes,
- * and renders each lane with its respective tasks.
+ * Fetches tasks via TanStack Query, distributes them across three lanes
+ * based on enrichment status and metadata completeness, and renders each lane.
+ *
+ * Tasks without required metadata (e.g., project) go to More Info lane.
  */
-export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
-  // Fetch tasks using existing polling mechanism from Feature 001
+export function LaneWorkflow({ onRephrase, className = '' }: LaneWorkflowProps) {
+  // Fetch workbench tasks using existing polling mechanism from Feature 001
   const { data: tasksData } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: listTasks,
+    queryKey: ['workbench-tasks'],
+    queryFn: listWorkbenchTasks,
     refetchInterval: 500, // Poll every 500ms
   })
 
@@ -45,10 +52,10 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
   const { pendingTasks, errorTasks, finishedTasks } = useLaneWorkflow(tasks)
 
   // Task action handlers (Phase 4: Cancel, Phase 5: Retry, Phase 8: Confirm)
-  const { handleCancel, handleRetry, handleConfirm, handleExpand } = useTaskActions()
+  const { handleCancel, handleRetry, handleConfirm, handleExpand, handleUpdateMetadata, handleRephrase } = useTaskActions(onRephrase)
 
   // Route action to appropriate handler
-  const handleTaskAction = (taskId: string, action: ActionEmblem) => {
+  const handleTaskAction = (taskId: string, action: string) => {
     switch (action) {
       case 'cancel':
         handleCancel(taskId)
@@ -61,6 +68,9 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
         break
       case 'expand':
         handleExpand(taskId)
+        break
+      case 'rephrase':
+        handleRephrase(taskId)
         break
       default:
         console.warn(`Unknown action: ${action}`)
@@ -81,23 +91,26 @@ export function LaneWorkflow({ className = '' }: LaneWorkflowProps) {
       >
         {/* Pending Lane */}
         <Lane
-          config={LANE_CONFIGS[0]} // Pending lane config
+          config={LANE_CONFIGS[0]!}
           tasks={pendingTasks}
           onTaskAction={handleTaskAction}
+          onUpdateMetadata={handleUpdateMetadata}
         />
 
-        {/* Error / More Info Lane */}
+        {/* More Info Lane */}
         <Lane
-          config={LANE_CONFIGS[1]} // Error lane config
+          config={LANE_CONFIGS[1]!}
           tasks={errorTasks}
           onTaskAction={handleTaskAction}
+          onUpdateMetadata={handleUpdateMetadata}
         />
 
-        {/* Finished Lane */}
+        {/* Ready Lane */}
         <Lane
-          config={LANE_CONFIGS[2]} // Finished lane config
+          config={LANE_CONFIGS[2]!}
           tasks={finishedTasks}
           onTaskAction={handleTaskAction}
+          onUpdateMetadata={handleUpdateMetadata}
         />
       </div>
     </AnimatePresence>

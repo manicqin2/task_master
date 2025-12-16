@@ -1,0 +1,585 @@
+openapi: 3.1.0
+info:
+  title: Task Metadata Extraction API
+  description: |
+    API endpoints for extracting and managing structured metadata from task descriptions.
+    Extends Feature 001 (Chat Task Entry) with automatic metadata extraction including
+    projects, persons, deadlines, types, priorities, and confidence scores.
+  version: 1.0.0
+  contact:
+    name: TaskMaster Development Team
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: http://backend:8000
+    description: Docker backend service
+
+tags:
+  - name: tasks
+    description: Task operations (extends Feature 001)
+  - name: metadata
+    description: Metadata extraction and management
+
+paths:
+  /api/tasks:
+    post:
+      summary: Create task with automatic metadata extraction
+      description: |
+        Creates a new task and queues background metadata extraction.
+        Returns immediately with task ID; client should poll GET /api/tasks/{id}
+        for metadata extraction results.
+      tags:
+        - tasks
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateRequest'
+            examples:
+              with_full_metadata:
+                summary: Task with rich metadata
+                value:
+                  user_input: "Call Sarah Johnson tomorrow at 3pm about ProjectX quarterly review - urgent"
+              ambiguous_task:
+                summary: Task requiring user attention
+                value:
+                  user_input: "Send report by Friday"
+      responses:
+        '201':
+          description: Task created successfully, metadata extraction queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCreateResponse'
+              examples:
+                success:
+                  value:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    status: "created"
+                    enrichment_status: "pending"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}:
+    get:
+      summary: Get task with metadata
+      description: |
+        Retrieves task details including extracted metadata if available.
+        Poll this endpoint after task creation to get metadata extraction results.
+      tags:
+        - tasks
+      operationId: getTask
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Task retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+              examples:
+                completed_metadata:
+                  summary: Task with complete metadata
+                  value:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    user_input: "Call Sarah Johnson tomorrow at 3pm about ProjectX - urgent"
+                    enriched_text: "Schedule a phone call with Sarah Johnson..."
+                    enrichment_status: "completed"
+                    created_at: "2025-11-05T10:00:00Z"
+                    updated_at: "2025-11-05T10:00:05Z"
+                    metadata:
+                      project: "ProjectX"
+                      persons: ["Sarah Johnson"]
+                      task_type: "call"
+                      priority: "urgent"
+                      deadline_text: "tomorrow at 3pm"
+                      deadline_parsed: "2025-11-06T15:00:00Z"
+                      effort_estimate: 30
+                      dependencies: []
+                      tags: ["#quarterly-review"]
+                      extracted_at: "2025-11-05T10:00:03Z"
+                      requires_attention: false
+                needs_attention:
+                  summary: Task requiring user input
+                  value:
+                    id: "234e5678-e89b-12d3-a456-426614174001"
+                    user_input: "Send report by Friday"
+                    enriched_text: "Prepare and send a report..."
+                    enrichment_status: "completed"
+                    created_at: "2025-11-05T11:00:00Z"
+                    updated_at: "2025-11-05T11:00:04Z"
+                    metadata:
+                      project: null
+                      persons: []
+                      task_type: "email"
+                      priority: "normal"
+                      deadline_text: "by Friday"
+                      deadline_parsed: "2025-11-08T23:59:59Z"
+                      extracted_at: "2025-11-05T11:00:02Z"
+                      requires_attention: true
+                      suggestions:
+                        project:
+                          value: null
+                          confidence: 0.2
+                          alternatives: ["Work", "Personal"]
+                        persons:
+                          value: []
+                          confidence: 0.0
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}/metadata:
+    patch:
+      summary: Update task metadata
+      description: |
+        Updates metadata fields for a task. Used when user confirms or edits
+        suggested values from "Need Attention" lane.
+      tags:
+        - metadata
+      operationId: updateTaskMetadata
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetadataUpdateRequest'
+            examples:
+              confirm_suggestions:
+                summary: User confirms suggested values
+                value:
+                  project: "Work"
+                  persons: ["Sarah Johnson"]
+                  task_type: "call"
+                  priority: "high"
+              partial_update:
+                summary: User updates only some fields
+                value:
+                  project: "ProjectX"
+                  priority: "urgent"
+      responses:
+        '200':
+          description: Metadata updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/tasks/{id}/metadata/debug:
+    get:
+      summary: Get metadata extraction debug info
+      description: |
+        Returns detailed extraction information including chain of thought
+        reasoning, confidence scores, and alternatives considered.
+        Only available in debug mode or for admin users.
+      tags:
+        - metadata
+      operationId: getMetadataDebug
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Debug information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataDebugResponse'
+              examples:
+                debug_info:
+                  value:
+                    task_id: "123e4567-e89b-12d3-a456-426614174000"
+                    extracted_at: "2025-11-05T10:00:03Z"
+                    extraction_time_ms: 1247
+                    llm_model: "llama3.2"
+                    fields:
+                      project:
+                        value: "ProjectX"
+                        confidence: 0.95
+                        chain_of_thought: "Explicit mention 'about ProjectX' → high confidence"
+                      persons:
+                        value: ["Sarah Johnson"]
+                        confidence: 1.0
+                        chain_of_thought: "Full name 'Sarah Johnson' after 'Call' verb → person entity"
+                      deadline:
+                        value: "tomorrow at 3pm"
+                        confidence: 1.0
+                        chain_of_thought: "Relative date 'tomorrow' + time '3pm' → explicit deadline"
+                      task_type:
+                        value: "call"
+                        confidence: 1.0
+                        chain_of_thought: "Action verb 'Call' → task_type=call"
+                        alternatives:
+                          - value: "meeting"
+                            confidence: 0.3
+                            reason: "Could be phone meeting, but 'call' is more specific"
+                      priority:
+                        value: "urgent"
+                        confidence: 1.0
+                        chain_of_thought: "Explicit keyword 'urgent' at end of task"
+        '403':
+          description: Debug mode not enabled or insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    TaskId:
+      name: id
+      in: path
+      required: true
+      description: Unique task identifier (UUID)
+      schema:
+        type: string
+        format: uuid
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+  schemas:
+    TaskCreateRequest:
+      type: object
+      required:
+        - user_input
+      properties:
+        user_input:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          description: Natural language task description
+          example: "Call Sarah Johnson tomorrow at 3pm about ProjectX - urgent"
+
+    TaskCreateResponse:
+      type: object
+      required:
+        - id
+        - status
+        - enrichment_status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique task identifier
+        status:
+          type: string
+          enum: [created]
+          description: Task creation status
+        enrichment_status:
+          type: string
+          enum: [pending, processing, completed, failed]
+          description: Background enrichment and metadata extraction status
+
+    TaskResponse:
+      type: object
+      required:
+        - id
+        - user_input
+        - enrichment_status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_input:
+          type: string
+          description: Original task description
+        enriched_text:
+          type: string
+          nullable: true
+          description: LLM-enhanced description (from Feature 001)
+        enrichment_status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        metadata:
+          $ref: '#/components/schemas/TaskMetadata'
+
+    TaskMetadata:
+      type: object
+      nullable: true
+      description: Extracted metadata fields (null if extraction not completed)
+      properties:
+        project:
+          type: string
+          nullable: true
+          maxLength: 100
+          description: Project or category name
+          example: "ProjectX"
+        persons:
+          type: array
+          items:
+            type: string
+          description: Names of people mentioned
+          example: ["Sarah Johnson", "Mike Chen"]
+        task_type:
+          type: string
+          nullable: true
+          enum: [meeting, call, email, review, development, research, administrative, other]
+          description: Category of task
+        priority:
+          type: string
+          nullable: true
+          enum: [low, normal, high, urgent]
+          description: Urgency level
+        deadline_text:
+          type: string
+          nullable: true
+          maxLength: 200
+          description: Original deadline phrase from user input
+          example: "tomorrow at 3pm"
+        deadline_parsed:
+          type: string
+          format: date-time
+          nullable: true
+          description: Normalized deadline datetime (ISO 8601, timezone-aware)
+          example: "2025-11-06T15:00:00Z"
+        effort_estimate:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: Estimated time to complete in minutes
+          example: 30
+        dependencies:
+          type: array
+          items:
+            type: string
+          description: Blockers or prerequisites mentioned
+          example: ["Waiting for API deployment", "After John's review"]
+        tags:
+          type: array
+          items:
+            type: string
+          description: User-defined or auto-extracted tags
+          example: ["#bug", "#urgent", "#quarterly-review"]
+        extracted_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when extraction occurred
+        requires_attention:
+          type: boolean
+          description: Whether task needs user review due to low confidence
+          default: false
+        suggestions:
+          type: object
+          nullable: true
+          description: Suggested values for fields with low confidence (only present if requires_attention=true)
+          additionalProperties:
+            $ref: '#/components/schemas/FieldSuggestion'
+
+    FieldSuggestion:
+      type: object
+      required:
+        - value
+        - confidence
+      properties:
+        value:
+          description: Suggested value for the field
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+            - type: 'null'
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence score (0.0-1.0)
+        alternatives:
+          type: array
+          items:
+            type: string
+          description: Alternative values to consider
+          example: ["Work", "Personal", "ProjectX"]
+
+    MetadataUpdateRequest:
+      type: object
+      description: Partial update to task metadata fields
+      properties:
+        project:
+          type: string
+          nullable: true
+          maxLength: 100
+        persons:
+          type: array
+          items:
+            type: string
+        task_type:
+          type: string
+          nullable: true
+          enum: [meeting, call, email, review, development, research, administrative, other]
+        priority:
+          type: string
+          nullable: true
+          enum: [low, normal, high, urgent]
+        deadline_text:
+          type: string
+          nullable: true
+          maxLength: 200
+        deadline_parsed:
+          type: string
+          format: date-time
+          nullable: true
+        effort_estimate:
+          type: integer
+          nullable: true
+          minimum: 1
+        dependencies:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    MetadataDebugResponse:
+      type: object
+      required:
+        - task_id
+        - extracted_at
+        - extraction_time_ms
+        - llm_model
+        - fields
+      properties:
+        task_id:
+          type: string
+          format: uuid
+        extracted_at:
+          type: string
+          format: date-time
+        extraction_time_ms:
+          type: integer
+          description: Time taken for extraction in milliseconds
+        llm_model:
+          type: string
+          description: LLM model used for extraction
+          example: "llama3.2"
+        fields:
+          type: object
+          description: Debug information per metadata field
+          additionalProperties:
+            $ref: '#/components/schemas/FieldDebugInfo'
+
+    FieldDebugInfo:
+      type: object
+      required:
+        - value
+        - confidence
+        - chain_of_thought
+      properties:
+        value:
+          description: Extracted value
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+        chain_of_thought:
+          type: string
+          description: LLM reasoning process for this field
+        alternatives:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlternativeValue'
+
+    AlternativeValue:
+      type: object
+      required:
+        - value
+        - confidence
+      properties:
+        value:
+          description: Alternative extracted value considered
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+        reason:
+          type: string
+          description: Why this alternative was not selected
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "user_input field is required"
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validation_error:
+              value:
+                error: "VALIDATION_ERROR"
+                message: "user_input must be between 1 and 5000 characters"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            task_not_found:
+              value:
+                error: "NOT_FOUND"
+                message: "Task with id 123e4567-e89b-12d3-a456-426614174000 not found"
+
+    InternalServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            llm_timeout:
+              value:
+                error: "EXTRACTION_TIMEOUT"
+                message: "Metadata extraction timed out after 60 seconds"
+            llm_error:
+              value:
+                error: "LLM_ERROR"
+                message: "Failed to extract metadata: connection refused"

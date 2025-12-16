@@ -2,7 +2,7 @@
  * Task Actions Hook
  *
  * Provides action handlers for task interactions:
- * - cancel: Remove task from pending lane (optimistic UI update, frontend-only)
+ * - cancel: Remove task from lane (deletes from backend if in error lane)
  * - retry: Re-queue failed task for processing (backend integration)
  * - confirm: Archive completed task (deferred to P4, frontend-only)
  * - expand: Toggle task card expansion for long titles
@@ -11,8 +11,8 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { retryTask } from '@/services/api'
-import { ListTasksResponse, Task } from '@/lib/types'
+import { retryTask, deleteTask, updateTaskMetadata, UpdateMetadataRequest, moveTaskToTodos } from '@/services/api'
+import { ListWorkbenchTasksResponse, WorkbenchTask } from '@/lib/types'
 
 /**
  * Hook for task action handlers
@@ -20,27 +20,33 @@ import { ListTasksResponse, Task } from '@/lib/types'
  * Phase 4 (User Story 2): Cancel action with optimistic update
  * Phase 5 (User Story 3): Retry action with backend integration
  */
-export function useTaskActions() {
+export function useTaskActions(onRephraseCallback?: (originalText: string) => void) {
   const queryClient = useQueryClient()
 
   /**
-   * Cancel mutation - frontend-only, optimistic update
-   * Removes task from React Query cache without backend communication
+   * Cancel mutation
+   * - For More Info lane tasks (failed OR missing project): Deletes from backend
+   * - For other tasks: Frontend-only removal from cache
    */
   const cancelMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      // Frontend-only - no API call
+    mutationFn: async ({ taskId, shouldDelete }: { taskId: string; shouldDelete: boolean }) => {
+      if (shouldDelete) {
+        // Delete from backend for More Info lane tasks
+        await deleteTask(taskId)
+      }
+      // For other tasks, frontend-only (no API call needed)
+
       return { taskId }
     },
-    onMutate: async (taskId) => {
-      // Cancel any outgoing refetches for tasks query
-      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+    onMutate: async ({ taskId, shouldDelete }) => {
+      // Cancel any outgoing refetches for workbench tasks query
+      await queryClient.cancelQueries({ queryKey: ['workbench-tasks'] })
 
       // Snapshot the previous value
-      const previousTasks = queryClient.getQueryData<ListTasksResponse>(['tasks'])
+      const previousTasks = queryClient.getQueryData<ListWorkbenchTasksResponse>(['workbench-tasks'])
 
       // Optimistically update by removing the task from the cache
-      queryClient.setQueryData<ListTasksResponse>(['tasks'], (old) => {
+      queryClient.setQueryData<ListWorkbenchTasksResponse>(['workbench-tasks'], (old) => {
         if (!old) return old
         return {
           ...old,
@@ -52,15 +58,15 @@ export function useTaskActions() {
       // Return context with previous data for rollback if needed
       return { previousTasks }
     },
-    onError: (err, taskId, context) => {
+    onError: (err, { taskId }, context) => {
       // Rollback on error
       if (context?.previousTasks) {
-        queryClient.setQueryData(['tasks'], context.previousTasks)
+        queryClient.setQueryData(['workbench-tasks'], context.previousTasks)
       }
     },
     onSettled: () => {
       // Refetch tasks after mutation settles (success or error)
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['workbench-tasks'] })
     },
   })
 
@@ -71,8 +77,35 @@ export function useTaskActions() {
   const retryMutation = useMutation({
     mutationFn: retryTask,
     onSuccess: () => {
-      // Invalidate tasks query to refetch updated task status
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      // Invalidate workbench tasks query to refetch updated task status
+      queryClient.invalidateQueries({ queryKey: ['workbench-tasks'] })
+    },
+  })
+
+  /**
+   * Update metadata mutation - backend integration
+   * Updates task metadata (e.g., project) and invalidates query
+   */
+  const updateMetadataMutation = useMutation({
+    mutationFn: async ({ taskId, metadata }: { taskId: string; metadata: UpdateMetadataRequest }) => {
+      return await updateTaskMetadata(taskId, metadata)
+    },
+    onSuccess: () => {
+      // Invalidate workbench tasks query to refetch with updated metadata
+      queryClient.invalidateQueries({ queryKey: ['workbench-tasks'] })
+    },
+  })
+
+  /**
+   * Move to todos mutation - backend integration
+   * Moves a task from Ready lane to the todos list
+   */
+  const moveToTodosMutation = useMutation({
+    mutationFn: moveTaskToTodos,
+    onSuccess: () => {
+      // Invalidate both queries to update workbench and todos views
+      queryClient.invalidateQueries({ queryKey: ['workbench-tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['todo-tasks'] })
     },
   })
 
@@ -87,17 +120,17 @@ export function useTaskActions() {
     },
     onMutate: async (taskId) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+      await queryClient.cancelQueries({ queryKey: ['workbench-tasks'] })
 
       // Snapshot previous value
-      const previousTasks = queryClient.getQueryData<ListTasksResponse>(['tasks'])
+      const previousTasks = queryClient.getQueryData<ListWorkbenchTasksResponse>(['workbench-tasks'])
 
       // Optimistically toggle isExpanded for the task
-      queryClient.setQueryData<ListTasksResponse>(['tasks'], (old) => {
+      queryClient.setQueryData<ListWorkbenchTasksResponse>(['workbench-tasks'], (old) => {
         if (!old) return old
         return {
           ...old,
-          tasks: old.tasks.map((task: Task) => {
+          tasks: old.tasks.map((task: WorkbenchTask) => {
             if (task.id === taskId) {
               // Toggle isExpanded state
               return {
@@ -115,28 +148,47 @@ export function useTaskActions() {
     onError: (err, taskId, context) => {
       // Rollback on error
       if (context?.previousTasks) {
-        queryClient.setQueryData(['tasks'], context.previousTasks)
+        queryClient.setQueryData(['workbench-tasks'], context.previousTasks)
       }
     },
   })
 
   return {
     handleCancel: (taskId: string) => {
-      cancelMutation.mutate(taskId)
+      // Always delete the task from the backend
+      cancelMutation.mutate({ taskId, shouldDelete: true })
     },
     handleRetry: (taskId: string) => {
       retryMutation.mutate(taskId)
     },
     handleConfirm: (taskId: string) => {
-      // TODO: Deferred to P4 - frontend-only state update
-      console.log('Confirm action deferred to P4:', taskId)
+      // Move task from Ready lane to todos list
+      moveToTodosMutation.mutate(taskId)
     },
     handleExpand: (taskId: string) => {
       expandMutation.mutate(taskId)
+    },
+    handleUpdateMetadata: (taskId: string, metadata: UpdateMetadataRequest) => {
+      updateMetadataMutation.mutate({ taskId, metadata })
+    },
+    handleRephrase: (taskId: string) => {
+      // Get the task to access its user_input
+      const tasks = queryClient.getQueryData<ListWorkbenchTasksResponse>(['workbench-tasks'])
+      const task = tasks?.tasks.find((t) => t.id === taskId)
+
+      if (task && onRephraseCallback) {
+        // Move the original user input back to the query bar
+        onRephraseCallback(task.user_input)
+
+        // Delete the task from the workbench
+        cancelMutation.mutate({ taskId, shouldDelete: true })
+      }
     },
     // Expose mutations for testing
     cancelMutation,
     retryMutation,
     expandMutation,
+    updateMetadataMutation,
+    moveToTodosMutation,
   }
 }

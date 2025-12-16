@@ -11,7 +11,9 @@ from alembic import context
 # Import models to ensure they're registered with Base.metadata
 from src.models import Base
 from src.models.task import Task  # noqa: F401
-from src.models.enums import TaskStatus, EnrichmentStatus  # noqa: F401
+from src.models.workbench import Workbench  # noqa: F401
+from src.models.todos import Todo  # noqa: F401
+from src.models.enums import TodoStatus, EnrichmentStatus  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config
