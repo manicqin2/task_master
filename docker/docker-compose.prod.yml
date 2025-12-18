@@ -13,7 +13,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    # Memory optimization for VPS 1
     mem_limit: 1.5g
     mem_reservation: 800m
 
@@ -31,13 +30,12 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: docker/backend.Dockerfile
+      context: ..                           # ← Parent directory (project root)
+      dockerfile: docker/backend.Dockerfile # ← Relative to context (..)
     container_name: task_master-backend-prod
     ports:
       - "8000:8000"
     volumes:
-      # Only persist database, not source code
       - db_data:/app/data
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
@@ -57,13 +55,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Memory optimization for VPS 1
     mem_limit: 512m
 
   frontend:
     build:
-      context: .
-      dockerfile: docker/frontend.prod.Dockerfile
+      context: ..                            # ← Parent directory (project root)
+      dockerfile: docker/frontend.Dockerfile # ← Relative to context (..)
     container_name: task_master-frontend-prod
     ports:
       - "3000:3000"
@@ -73,7 +70,6 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
-    # Memory optimization for VPS 1
     mem_limit: 256m
 
 volumes:
