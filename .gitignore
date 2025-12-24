@@ -10,7 +10,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+**/venv/**/lib/
+**/.venv/**/lib/
+**/ENV/**/lib/
+**/env/**/lib/
 lib64/
 parts/
 sdist/
