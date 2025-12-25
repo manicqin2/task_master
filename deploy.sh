@@ -102,15 +102,15 @@ fi
 
 echo ""
 print_info "🛑 Stopping existing containers..."
-$USE_SUDO docker compose -f "$COMPOSE_FILE" down || true
+$USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" down || true
 
 echo ""
 print_info "🏗️  Building Docker images..."
-$USE_SUDO docker compose -f "$COMPOSE_FILE" build $BUILD_NO_CACHE
+$USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build $BUILD_NO_CACHE
 
 echo ""
 print_info "🚀 Starting services..."
-$USE_SUDO docker compose -f "$COMPOSE_FILE" up -d
+$USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
 
 echo ""
 print_info "⏳ Waiting for services to be healthy..."
@@ -142,20 +142,20 @@ done
 # Check if Ollama model is loaded
 print_info "   Checking Ollama..."
 for i in {1..60}; do
-    if $USE_SUDO docker compose -f "$COMPOSE_FILE" exec -T ollama ollama list 2>/dev/null | grep -q llama3.2; then
+    if $USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T ollama ollama list 2>/dev/null | grep -q llama3.2; then
         print_success "   ✅ Ollama model loaded"
         break
     fi
     if [ $i -eq 60 ]; then
         print_warning "   ⚠️  Ollama model still loading (this is normal on first run)"
-        print_warning "   Monitor with: $USE_SUDO docker compose -f $COMPOSE_FILE logs -f ollama-init"
+        print_warning "   Monitor with: $USE_SUDO docker compose -f $COMPOSE_FILE --env-file $ENV_FILE logs -f ollama-init"
     fi
     sleep 2
 done
 
 echo ""
 print_info "📊 Container Status:"
-$USE_SUDO docker compose -f "$COMPOSE_FILE" ps
+$USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
 
 echo ""
 echo "========================================="
