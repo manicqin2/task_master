@@ -44,6 +44,7 @@ services:
       - DATABASE_URL=sqlite+aiosqlite:///./data/tasks.db
       - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-120}
       - ENVIRONMENT=production
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
     depends_on:
       ollama:
         condition: service_healthy

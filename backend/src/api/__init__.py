@@ -1,4 +1,5 @@
 """API layer for TaskMaster backend."""
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,13 +19,22 @@ def create_app() -> FastAPI:
     )
 
     # Configure CORS for frontend access
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[
+    # In production, allow all origins (or configure ALLOWED_ORIGINS env var)
+    environment = os.getenv("ENVIRONMENT", "development")
+    if environment == "production":
+        allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+        if "*" in allowed_origins:
+            allowed_origins = ["*"]
+    else:
+        allowed_origins = [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-        ],
-        allow_credentials=True,
+        ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True if allowed_origins != ["*"] else False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
