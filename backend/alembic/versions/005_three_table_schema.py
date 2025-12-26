@@ -176,61 +176,61 @@ def upgrade():
         print(f"✓ Set moved_to_todos_at for {moved_count} tasks")
 
     # T028: Drop old columns from tasks table
-    if baseline_task_count > 0:
-        print("\n=== DROPPING OLD COLUMNS ===")
+    # IMPORTANT: Always check for old columns, even with empty database
+    print("\n=== DROPPING OLD COLUMNS ===")
 
-        columns = [col['name'] for col in inspector.get_columns('tasks')]
+    columns = [col['name'] for col in inspector.get_columns('tasks')]
 
-        # SQLite doesn't support DROP COLUMN directly, need to recreate table
-        # But only if old columns exist
-        if 'enrichment_status' in columns or 'status' in columns or 'error_message' in columns:
-            print("⚠ Dropping columns requires table recreation in SQLite")
-            print("  Columns enrichment_status, status, error_message will be removed")
+    # SQLite doesn't support DROP COLUMN directly, need to recreate table
+    # But only if old columns exist
+    if 'enrichment_status' in columns or 'status' in columns or 'error_message' in columns:
+        print("⚠ Dropping columns requires table recreation in SQLite")
+        print("  Columns enrichment_status, status, error_message will be removed")
 
-            # Create new tasks table without old columns
-            op.create_table(
-                'tasks_new',
-                sa.Column('id', sa.String(36), primary_key=True),
-                sa.Column('user_input', sa.Text(), nullable=False),
-                sa.Column('enriched_text', sa.Text(), nullable=True),
-                sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-                sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+        # Create new tasks table without old columns
+        op.create_table(
+            'tasks_new',
+            sa.Column('id', sa.String(36), primary_key=True),
+            sa.Column('user_input', sa.Text(), nullable=False),
+            sa.Column('enriched_text', sa.Text(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+            sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
 
-                # Metadata fields (keep these)
-                sa.Column('project', sa.String(100), nullable=True),
-                sa.Column('persons', sa.Text(), nullable=True),
-                sa.Column('task_type', sa.String(50), nullable=True),
-                sa.Column('priority', sa.String(20), nullable=True),
-                sa.Column('deadline_text', sa.String(200), nullable=True),
-                sa.Column('deadline_parsed', sa.DateTime(timezone=True), nullable=True),
-                sa.Column('effort_estimate', sa.Integer(), nullable=True),
-                sa.Column('dependencies', sa.Text(), nullable=True),
-                sa.Column('tags', sa.Text(), nullable=True),
-                sa.Column('extracted_at', sa.DateTime(timezone=True), nullable=True),
-                sa.Column('requires_attention', sa.Boolean(), nullable=False, default=False),
+            # Metadata fields (keep these)
+            sa.Column('project', sa.String(100), nullable=True),
+            sa.Column('persons', sa.Text(), nullable=True),
+            sa.Column('task_type', sa.String(50), nullable=True),
+            sa.Column('priority', sa.String(20), nullable=True),
+            sa.Column('deadline_text', sa.String(200), nullable=True),
+            sa.Column('deadline_parsed', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('effort_estimate', sa.Integer(), nullable=True),
+            sa.Column('dependencies', sa.Text(), nullable=True),
+            sa.Column('tags', sa.Text(), nullable=True),
+            sa.Column('extracted_at', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('requires_attention', sa.Boolean(), nullable=False, default=False),
+        )
+
+        # Copy data to new table (excluding old columns)
+        conn.execute(text("""
+            INSERT INTO tasks_new (
+                id, user_input, enriched_text, created_at, updated_at,
+                project, persons, task_type, priority, deadline_text, deadline_parsed,
+                effort_estimate, dependencies, tags, extracted_at, requires_attention
             )
+            SELECT
+                id, user_input, enriched_text, created_at, updated_at,
+                project, persons, task_type, priority, deadline_text, deadline_parsed,
+                effort_estimate, dependencies, tags, extracted_at, requires_attention
+            FROM tasks
+        """))
 
-            # Copy data to new table (excluding old columns)
-            conn.execute(text("""
-                INSERT INTO tasks_new (
-                    id, user_input, enriched_text, created_at, updated_at,
-                    project, persons, task_type, priority, deadline_text, deadline_parsed,
-                    effort_estimate, dependencies, tags, extracted_at, requires_attention
-                )
-                SELECT
-                    id, user_input, enriched_text, created_at, updated_at,
-                    project, persons, task_type, priority, deadline_text, deadline_parsed,
-                    effort_estimate, dependencies, tags, extracted_at, requires_attention
-                FROM tasks
-            """))
+        # Drop old table and rename new one
+        op.drop_table('tasks')
+        op.rename_table('tasks_new', 'tasks')
 
-            # Drop old table and rename new one
-            op.drop_table('tasks')
-            op.rename_table('tasks_new', 'tasks')
-
-            print("✓ Old columns removed from tasks table")
-        else:
-            print("✓ No old columns to remove")
+        print("✓ Old columns removed from tasks table")
+    else:
+        print("✓ No old columns to remove")
 
     # T029: Create indexes
     print("\n=== CREATING INDEXES ===")
