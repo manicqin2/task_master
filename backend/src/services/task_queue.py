@@ -47,15 +47,11 @@ async def enrich_task_background(
         # Enrich task text
         enriched_text = await enrichment_service.enrich(task.user_input)
 
-        # Extract metadata (T025)
+        # Extract metadata using Gemini
         metadata_response = await enrichment_service.extract_metadata(
             task.user_input,
             reference_time=datetime.now(timezone.utc),
         )
-
-        # Apply confidence threshold filtering (T021)
-        # Only populate fields with confidence >= 0.7
-        extractor = enrichment_service.metadata_extractor
 
         # Store full extraction response as JSON in workbench for frontend suggestions
         workbench.metadata_suggestions = enrichment_service.serialize_metadata_suggestions(
@@ -63,19 +59,19 @@ async def enrich_task_background(
         )
 
         # Populate high-confidence fields on task
-        if extractor.should_populate_field(metadata_response.project_confidence):
+        if enrichment_service.should_populate_field(metadata_response.project_confidence):
             task.project = metadata_response.project
 
-        if extractor.should_populate_field(metadata_response.persons_confidence):
+        if enrichment_service.should_populate_field(metadata_response.persons_confidence):
             task.persons = json.dumps(metadata_response.persons)
 
-        if extractor.should_populate_field(metadata_response.task_type_confidence):
+        if enrichment_service.should_populate_field(metadata_response.task_type_confidence):
             task.task_type = metadata_response.task_type
 
-        if extractor.should_populate_field(metadata_response.priority_confidence):
+        if enrichment_service.should_populate_field(metadata_response.priority_confidence):
             task.priority = metadata_response.priority
 
-        if extractor.should_populate_field(metadata_response.deadline_confidence):
+        if enrichment_service.should_populate_field(metadata_response.deadline_confidence):
             task.deadline_text = metadata_response.deadline
             # Parse deadline text to datetime
             if metadata_response.deadline:
@@ -85,20 +81,20 @@ async def enrich_task_background(
                 )
                 task.deadline_parsed = parsed_deadline
 
-        if extractor.should_populate_field(metadata_response.effort_confidence):
+        if enrichment_service.should_populate_field(metadata_response.effort_confidence):
             task.effort_estimate = metadata_response.effort_estimate
 
-        if extractor.should_populate_field(metadata_response.dependencies_confidence):
+        if enrichment_service.should_populate_field(metadata_response.dependencies_confidence):
             task.dependencies = json.dumps(metadata_response.dependencies)
 
-        if extractor.should_populate_field(metadata_response.tags_confidence):
+        if enrichment_service.should_populate_field(metadata_response.tags_confidence):
             task.tags = json.dumps(metadata_response.tags)
 
         # Set extracted_at timestamp on task
         task.extracted_at = datetime.now(timezone.utc)
 
         # Set requires_attention flag based on confidence scores (T016)
-        task.requires_attention = extractor.requires_attention(metadata_response)
+        task.requires_attention = enrichment_service.requires_attention(metadata_response)
 
         # Commit task metadata changes
         await db.commit()

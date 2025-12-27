@@ -9,7 +9,7 @@
  * @phase Phase 3 - User Story 1 (Basic Lane Visualization + Metadata Display)
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { TaskWithLane, getTaskDisplayText, ACTION_EMBLEM_CONFIGS, needsTruncation } from '@/types/task'
 import { ActionEmblem } from './ActionEmblem'
@@ -77,6 +77,11 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateM
     emblems.push('confirm' as const)
   }
 
+  // Add "move to todos" emblem if task is in Ready lane
+  if (task.lane === 'ready') {
+    emblems.push('confirm' as const)
+  }
+
   return (
     <motion.div
       layout
@@ -133,13 +138,22 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateM
               ? 'Collapse task details'
               : emblemConfig.tooltip
 
-            // For confirm emblem (move to ready), customize icon and action
+            // For confirm emblem, customize icon and action based on lane
             const isConfirmEmblem = emblemType === 'confirm'
             const finalIcon = isConfirmEmblem ? 'ArrowRight' : customIcon
-            const finalTooltip = isConfirmEmblem
-              ? (hasProject ? 'Move to Ready lane' : 'Select a project first')
-              : customTooltip
-            const isDisabled = isConfirmEmblem && !hasProject
+
+            // Determine tooltip based on lane
+            let finalTooltip = customTooltip
+            let isDisabled = false
+
+            if (isConfirmEmblem) {
+              if (task.lane === 'ready') {
+                finalTooltip = 'Move to Todos'
+              } else if (task.lane === 'error') {
+                finalTooltip = hasProject ? 'Move to Ready lane' : 'Select a project first'
+                isDisabled = !hasProject
+              }
+            }
 
             return (
               <ActionEmblem
@@ -147,10 +161,15 @@ export const TaskCard = React.memo(function TaskCard({ task, onAction, onUpdateM
                 type={emblemType}
                 tooltip={finalTooltip}
                 onClick={() => {
-                  if (isConfirmEmblem && hasProject && onUpdateMetadata && updatedMetadata) {
-                    // Move to Ready: update task with all metadata
-                    onUpdateMetadata(task.id, updatedMetadata)
-                  } else if (!isConfirmEmblem) {
+                  if (isConfirmEmblem) {
+                    if (task.lane === 'ready') {
+                      // Move to Todos: call confirm action
+                      onAction('confirm')
+                    } else if (task.lane === 'error' && hasProject && onUpdateMetadata && updatedMetadata) {
+                      // Move to Ready: update task with all metadata
+                      onUpdateMetadata(task.id, updatedMetadata)
+                    }
+                  } else {
                     onAction(emblemType)
                   }
                 }}
