@@ -31,7 +31,7 @@ class MetadataExtractionResponse(BaseModel):
     priority: Optional[str] = Field(None, max_length=20)
     priority_confidence: float = Field(ge=0.0, le=1.0)
 
-    effort_estimate: Optional[int] = Field(None, gt=0)
+    effort_estimate: Optional[int] = None
     effort_confidence: float = Field(ge=0.0, le=1.0)
 
     dependencies: list[str] = Field(default_factory=list)

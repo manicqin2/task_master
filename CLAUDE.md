@@ -11,13 +11,15 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 - SQLite via SQLAlchemy (async), extending existing Task model with metadata fields (004-task-metadata-extraction)
 - Python 3.11+ (backend matches existing project) (005-three-table-schema)
 - SQLite with foreign key support enabled (existing database) (005-three-table-schema)
+- Python 3.11+ (matches existing backend, google-genai requires 3.9+) + `google-genai` (unified SDK, GA since May 2025) - replaces openai package for Ollama (006-gemini-llm)
+- SQLite via SQLAlchemy (no changes - existing database schema supports this migration) (006-gemini-llm)
 
 ### Feature: 001-chat-task-entry
 
 **Backend**:
 - Python 3.11+ with FastAPI
 - SQLAlchemy 2.0 + SQLite
-- Ollama (OpenAI-compatible client)
+- Google Gemini API (google-genai SDK v1.56+)
 - pytest + pytest-asyncio
 
 **Frontend**:
@@ -29,7 +31,7 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 
 **Infrastructure**:
 - Docker + docker-compose
-- Ollama llama3.2 model
+- Gemini 3 Flash (cloud-based LLM)
 
 ## Project Structure
 
@@ -39,7 +41,7 @@ backend/
 │   ├── models/           # Task, Message domain models
 │   ├── services/         # Enrichment, TaskQueue, Storage services
 │   ├── api/              # REST API endpoints
-│   └── lib/              # Ollama client, async utilities
+│   └── lib/              # Gemini client, async utilities, database
 └── tests/
     ├── contract/         # API contract tests
     ├── integration/      # Service integration tests
@@ -73,6 +75,24 @@ docker/
 ├── backend.Dockerfile
 ├── frontend.Dockerfile
 └── docker-compose.yml
+```
+
+## Environment Variables
+
+### Required Configuration
+
+**Gemini API** (for task enrichment):
+- `GEMINI_API_KEY`: Your Google AI API key (get from https://aistudio.google.com/)
+- `GEMINI_MODEL`: Model name (default: `gemini-3-flash-preview`)
+- `GEMINI_TIMEOUT`: Request timeout in seconds (default: `15.0`)
+- `GEMINI_MAX_RETRIES`: Maximum retry attempts (default: `3`)
+
+Create a `.env` file in the project root:
+```bash
+GEMINI_API_KEY=your_api_key_here
+GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_TIMEOUT=15.0
+GEMINI_MAX_RETRIES=3
 ```
 
 ## Commands
@@ -130,10 +150,9 @@ docker compose exec frontend npm run test:e2e
 - shadcn/ui component conventions
 
 ## Recent Changes
+- 006-gemini-llm: Added Python 3.11+ (matches existing backend, google-genai requires 3.9+) + `google-genai` (unified SDK, GA since May 2025) - replaces openai package for Ollama
 - 005-three-table-schema: Added Python 3.11+ (backend matches existing project)
 - 004-task-metadata-extraction: Added Python 3.11+ (backend), TypeScript 5.2+ (frontend)
-- 003-task-lane-workflow: Added TypeScript 5.x + React 18 + React 18, @tanstack/react-query 5.x, shadcn/ui components, Framer Motion (animations)
-- 002-gitlab-security-pipeline: Added GitLab CI/CD YAML (v1), Python 3.11+ (for backend), Node.js 18+ (for frontend) + GitLab CI Templates (Secret-Detection, Dependency-Scanning, SAST), Gitleaks (secret detection), Gemnasium (dependency scanning), Semgrep (SAST)
 
 
 <!-- MANUAL ADDITIONS START -->
@@ -158,14 +177,8 @@ LaneWorkflow (Task Workbench container)
 ```
 
 **State Management**:
-- TanStack Query cache stores tasks with `isExpanded` client-side flag
-- Mutations: cancelMutation (removes from cache), retryMutation (backend call), expandMutation (toggles flag)
-- Optimistic updates for instant UI feedback on cancel/expand
 
 **Testing Strategy**:
-- Unit tests: Component rendering, emblem visibility, lane derivation logic
-- Integration tests: Polling updates, cache invalidation, mutation behavior
-- E2E tests (Playwright): Full user journeys, performance validation, timeout scenarios
 
 ### Feature 004: Task Metadata Extraction
 
