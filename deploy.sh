@@ -2,6 +2,11 @@
 
 # Task Master - Unified Deployment Script
 # Works for both development and production environments
+#
+# Updated: 2026-01-06 (Feature 007 - Gemini Migration)
+# - Removed Ollama service dependencies
+# - Added Gemini API configuration validation
+# - Updated health checks for cloud-based LLM architecture
 
 set -e  # Exit on error
 
@@ -63,15 +68,25 @@ if [ ! -f "$ENV_FILE" ]; then
     else
         print_info "Creating default development environment file..."
         cat > .env.development <<EOF
-OLLAMA_BASE_URL=http://ollama:11434
-OLLAMA_MODEL=llama3.2
-OLLAMA_TIMEOUT=120
+# Gemini API Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_TIMEOUT=15.0
+GEMINI_MAX_RETRIES=3
+
+# Database
 DATABASE_URL=sqlite+aiosqlite:///./data/tasks.db
+
+# Frontend
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_POLLING_INTERVAL=500
+
+# Environment
 ENVIRONMENT=development
 EOF
-        print_success "✅ Created .env.development"
+        print_success "✅ Created .env.development with default values"
+        print_warning "⚠️  IMPORTANT: Update GEMINI_API_KEY with your actual API key"
+        echo "    Get your API key from: https://aistudio.google.com/"
     fi
 fi
 
@@ -87,7 +102,9 @@ print_info "📦 Current deployment configuration:"
 echo "  - Environment:     $ENVIRONMENT"
 echo "  - Compose File:    $COMPOSE_FILE"
 echo "  - Env File:        $ENV_FILE"
-echo "  - Ollama Model:    ${OLLAMA_MODEL:-llama3.2}"
+echo "  - Gemini Model:    ${GEMINI_MODEL:-gemini-2.5-flash}"
+echo "  - Gemini Timeout:  ${GEMINI_TIMEOUT:-15.0}s"
+echo "  - Max Retries:     ${GEMINI_MAX_RETRIES:-3}"
 echo "  - API Base URL:    ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}"
 echo "  - Use sudo:        $([ -n "$USE_SUDO" ] && echo "Yes" || echo "No")"
 echo ""
@@ -116,15 +133,20 @@ echo ""
 print_info "⏳ Waiting for services to be healthy..."
 sleep 10
 
-# Wait for backend health check
-print_info "   Checking backend..."
+# Wait for backend health check (includes Gemini validation)
+print_info "   Checking backend (includes Gemini validation)..."
 for i in {1..30}; do
     if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
-        print_success "   ✅ Backend is healthy"
+        print_success "   ✅ Backend healthy (Gemini configured correctly)"
         break
     fi
     if [ $i -eq 30 ]; then
         print_error "   ❌ Backend health check failed"
+        echo ""
+        print_warning "Common issues:"
+        echo "   - Check GEMINI_API_KEY validity"
+        echo "   - Ensure API key has proper permissions"
+        echo "   - Verify network connectivity to Gemini API"
         echo ""
         print_warning "Check logs with:"
         if [ "$ENVIRONMENT" = "production" ]; then
@@ -135,20 +157,6 @@ for i in {1..30}; do
             echo "   docker logs task_master-backend"
         fi
         exit 1
-    fi
-    sleep 2
-done
-
-# Check if Ollama model is loaded
-print_info "   Checking Ollama..."
-for i in {1..60}; do
-    if $USE_SUDO docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T ollama ollama list 2>/dev/null | grep -q llama3.2; then
-        print_success "   ✅ Ollama model loaded"
-        break
-    fi
-    if [ $i -eq 60 ]; then
-        print_warning "   ⚠️  Ollama model still loading (this is normal on first run)"
-        print_warning "   Monitor with: $USE_SUDO docker compose -f $COMPOSE_FILE --env-file $ENV_FILE logs -f ollama-init"
     fi
     sleep 2
 done
@@ -186,7 +194,6 @@ echo "   Stop services:    $USE_SUDO docker compose -f $COMPOSE_FILE down"
 echo "   Restart:          bash deploy.sh $ENVIRONMENT"
 echo ""
 print_info "💾 Database location: Docker volume 'db_data'"
-print_info "📁 Ollama models:     Docker volume 'ollama_data'"
 echo ""
 
 if [ "$ENVIRONMENT" = "development" ]; then
@@ -195,6 +202,6 @@ if [ "$ENVIRONMENT" = "development" ]; then
     echo "   - Source code mounted as volumes"
 fi
 
-print_warning "⚠️  First enrichment will be slow (~30s) while Ollama loads the model"
-echo "    Subsequent enrichments will be faster (~3-5s)"
+print_warning "⚠️  First enrichment may take 1-2 seconds due to Gemini API latency"
+echo "    Subsequent enrichments will have similar response times"
 echo ""
