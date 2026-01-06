@@ -23,7 +23,7 @@ Replace the current Ollama local LLM with Google's Gemini 3 API for task enrichm
 **Constraints**:
 - Free tier: 10 RPM (requests per minute) for gemini-2.5-flash
 - Estimated cost: ~$0.60/month on paid tier ($0.10/1M input tokens, $0.40/1M output)
-- 120 second timeout for API requests (existing constraint, will reduce to 15-20s based on best practices)
+- Timeout: 120s (Ollama legacy) → 15s (Gemini target, configurable via GEMINI_TIMEOUT env var)
 - Must handle rate limiting gracefully with exponential backoff
 - Zero downtime migration (existing tasks must remain accessible)
 **Scale/Scope**:
