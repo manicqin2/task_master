@@ -114,14 +114,12 @@ export function MetadataEditor({
       setIsCustomProject(false)
       setProject(value)
       // Trigger change immediately for preset projects
-      setTimeout(() => {
-        onMetadataChange({
-          project: value,
-          task_type: taskType,
-          priority: priority,
-          deadline_text: deadlineText.trim() || null,
-        })
-      }, 0)
+      onMetadataChange({
+        project: value,
+        task_type: taskType,
+        priority: priority,
+        deadline_text: deadlineText.trim() || null,
+      })
     }
   }
 
@@ -193,14 +191,12 @@ export function MetadataEditor({
           onValueChange={(newType) => {
             const finalType = newType === 'none' ? null : newType
             setTaskType(finalType)
-            setTimeout(() => {
-              onMetadataChange({
-                project: project.trim() || null,
-                task_type: finalType,
-                priority: priority,
-                deadline_text: deadlineText.trim() || null,
-              })
-            }, 0)
+            onMetadataChange({
+              project: project.trim() || null,
+              task_type: finalType,
+              priority: priority,
+              deadline_text: deadlineText.trim() || null,
+            })
           }}
           disabled={isUpdating}
         >
@@ -228,14 +224,12 @@ export function MetadataEditor({
           onValueChange={(newPriority) => {
             const finalPriority = newPriority === 'none' ? null : newPriority
             setPriority(finalPriority)
-            setTimeout(() => {
-              onMetadataChange({
-                project: project.trim() || null,
-                task_type: taskType,
-                priority: finalPriority,
-                deadline_text: deadlineText.trim() || null,
-              })
-            }, 0)
+            onMetadataChange({
+              project: project.trim() || null,
+              task_type: taskType,
+              priority: finalPriority,
+              deadline_text: deadlineText.trim() || null,
+            })
           }}
           disabled={isUpdating}
         >
@@ -263,14 +257,12 @@ export function MetadataEditor({
           onChange={(isoDate) => {
             setDeadlineText(isoDate)
             // Trigger change immediately when deadline is confirmed
-            setTimeout(() => {
-              onMetadataChange({
-                project: project.trim() || null,
-                task_type: taskType,
-                priority: priority,
-                deadline_text: isoDate || null,
-              })
-            }, 0)
+            onMetadataChange({
+              project: project.trim() || null,
+              task_type: taskType,
+              priority: priority,
+              deadline_text: isoDate || null,
+            })
           }}
           disabled={isUpdating}
         />

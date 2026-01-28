@@ -8,10 +8,11 @@
 import { useState, useMemo } from 'react'
 import { TaskListView } from '@/components/TaskList/TaskListView'
 import { TaskFilter } from '@/types/filters'
+import { Task } from '@/lib/types'
 
 export interface PersonsViewProps {
-  tasks: any[] // Should be Task[] - using any for compatibility
-  onTaskClick?: (task: any) => void
+  tasks: Task[]
+  onTaskClick?: (task: Task) => void
   onTaskAction?: (taskId: string, action: string) => void
   className?: string
 }

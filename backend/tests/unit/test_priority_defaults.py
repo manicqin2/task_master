@@ -70,15 +70,19 @@ class TestTaskPriorityDefaults:
         # Assert
         assert task.priority == "Low"
 
-    def test_priority_none_coalesces_to_low_in_ui(self):
-        """Test that null priority should be treated as 'Low' in UI layer."""
+    def test_priority_explicit_none_stays_none(self):
+        """Test that explicitly setting priority=None keeps it as None.
+
+        This verifies backward compatibility: old tasks with null priority
+        are preserved, while UI layer handles display as 'Low'.
+        """
         # Arrange & Act
         task = Task(
             user_input="task with explicit null priority",
             project="General",
-            priority=None
+            priority=None  # Explicitly set to None
         )
 
-        # Assert - Model allows None, UI should coalesce to "Low"
-        # This test verifies backward compatibility with old data
-        assert task.priority is None or task.priority == "Low"
+        # Assert - When explicitly set to None, it should stay None
+        # The Column default only applies when priority is not provided at all
+        assert task.priority is None

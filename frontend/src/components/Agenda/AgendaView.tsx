@@ -9,10 +9,11 @@
 import { useState, useMemo } from 'react'
 import { TaskListView } from '@/components/TaskList/TaskListView'
 import { TaskFilter } from '@/types/filters'
+import { Task } from '@/lib/types'
 
 export interface AgendaViewProps {
-  tasks: any[] // Should be Task[] - using any for compatibility
-  onTaskClick?: (task: any) => void
+  tasks: Task[]
+  onTaskClick?: (task: Task) => void
   onTaskAction?: (taskId: string, action: string) => void
   className?: string
 }
@@ -26,23 +27,23 @@ export function AgendaView({
   onTaskAction,
   className = ''
 }: AgendaViewProps) {
-  // Extract unique deadline dates from tasks
+  // Extract unique deadline dates from tasks (consolidated logic)
   const deadlines = useMemo(() => {
     const dateSet = new Set<string>()
-    tasks.forEach(task => {
-      if (task.deadline_text) {
-        // Extract ISO date if it's in ISO format
-        const isoMatch = task.deadline_text.match(/^\d{4}-\d{2}-\d{2}/)
-        if (isoMatch) {
-          dateSet.add(isoMatch[0])
-        }
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}/
+
+    for (const task of tasks) {
+      // Prefer deadline_parsed, fallback to deadline_text
+      const dateSource = task.deadline_parsed || task.deadline_text
+      if (!dateSource) continue
+
+      // Extract ISO date portion (handles both ISO dates and datetimes)
+      const match = dateSource.match(isoDateRegex)
+      if (match) {
+        dateSet.add(match[0])
       }
-      if (task.deadline_parsed) {
-        const date = new Date(task.deadline_parsed)
-        const isoDate = date.toISOString().split('T')[0]
-        dateSet.add(isoDate)
-      }
-    })
+    }
+
     return Array.from(dateSet).sort()
   }, [tasks])
 
@@ -56,8 +57,8 @@ export function AgendaView({
     : undefined
 
   // Group deadlines by category for better UX
-  const today = new Date().toISOString().split('T')[0]
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0]!
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]!
 
   const categorizedDeadlines = useMemo(() => {
     return {

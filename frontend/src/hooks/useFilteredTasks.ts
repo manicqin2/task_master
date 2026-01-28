@@ -9,21 +9,11 @@
 import { useMemo } from 'react'
 import { TaskFilter } from '@/types/filters'
 import { sortTasksByPriorityAndDeadline } from '@/lib/taskSorting'
+import { Task } from '@/lib/types'
 
-// Placeholder for task type - should match your actual Task type
-interface Task {
-  id: string
-  user_input: string
-  enriched_text?: string | null
-  project?: string | null
-  deadline_text?: string | null
-  deadline_parsed?: string | null
-  persons?: string | null // JSON array as string
-  priority?: string | null
-  task_type?: string | null
-  created_at: string
-  updated_at: string
-  [key: string]: any
+// Extended Task type for filtering (persons stored as string in DB)
+interface FilterableTask extends Omit<Task, 'persons'> {
+  persons?: string | null // JSON array as string from DB
 }
 
 /**
@@ -33,7 +23,7 @@ interface Task {
  * @param filter - Filter criteria (project, deadline, person)
  * @returns Filtered and sorted tasks
  */
-export function useFilteredTasks(tasks: Task[], filter?: TaskFilter): Task[] {
+export function useFilteredTasks(tasks: FilterableTask[], filter?: TaskFilter): FilterableTask[] {
   return useMemo(() => {
     let filtered = tasks
 
@@ -62,8 +52,11 @@ export function useFilteredTasks(tasks: Task[], filter?: TaskFilter): Task[] {
           // Parse JSON array of persons
           const personsArray = JSON.parse(task.persons)
           return personsArray.includes(filter.person)
-        } catch {
-          // If parsing fails, check if person is in the string
+        } catch (e) {
+          // If parsing fails, log in development and fallback to string inclusion
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Failed to parse persons JSON for task ${task.id}:`, e)
+          }
           return task.persons.includes(filter.person)
         }
       })

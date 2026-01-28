@@ -8,17 +8,7 @@
 
 import { TaskFilter } from '@/types/filters'
 import { useFilteredTasks } from '@/hooks/useFilteredTasks'
-
-// Placeholder types - should match your actual types
-interface Task {
-  id: string
-  user_input: string
-  enriched_text?: string | null
-  project?: string | null
-  deadline_text?: string | null
-  priority?: string | null
-  [key: string]: any
-}
+import { Task } from '@/lib/types'
 
 export interface TaskListViewProps {
   /** Array of all tasks */
