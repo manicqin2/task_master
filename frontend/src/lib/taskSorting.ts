@@ -3,19 +3,20 @@
  * Feature 008: Task Management UI Enhancements
  */
 
-// Priority values (case-insensitive matching)
-type Priority = 'Urgent' | 'High' | 'Normal' | 'Low' | 'urgent' | 'high' | 'normal' | 'low';
-
+// Priority order lookup (lowercase keys for case-insensitive matching)
 const PRIORITY_ORDER: Record<string, number> = {
-  'urgent': 0,
-  'Urgent': 0,
-  'high': 1,
-  'High': 1,
-  'normal': 2,
-  'Normal': 2,
-  'low': 3,
-  'Low': 3,
+  urgent: 0,
+  high: 1,
+  normal: 2,
+  low: 3,
 };
+
+/**
+ * Get priority order value (case-insensitive)
+ */
+function getPriorityOrder(priority: string | null | undefined): number {
+  return PRIORITY_ORDER[(priority ?? 'low').toLowerCase()] ?? 3;
+}
 
 // Task interface matching actual schema fields
 interface SortableTask {
@@ -46,9 +47,9 @@ function getEffectiveDeadline(task: SortableTask): string | null {
  */
 export function sortTasksByPriorityAndDeadline<T extends SortableTask>(tasks: T[]): T[] {
   return [...tasks].sort((a, b) => {
-    // Primary sort: Priority (Urgent > High > Normal > Low)
-    const priorityA = PRIORITY_ORDER[a.priority ?? 'low'] ?? 3;
-    const priorityB = PRIORITY_ORDER[b.priority ?? 'low'] ?? 3;
+    // Primary sort: Priority (Urgent > High > Normal > Low), case-insensitive
+    const priorityA = getPriorityOrder(a.priority);
+    const priorityB = getPriorityOrder(b.priority);
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB; // Lower number = higher priority

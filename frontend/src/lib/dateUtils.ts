@@ -63,16 +63,18 @@ export function parseNaturalLanguageDate(
     const targetWeekdayNum = weekdayMap[targetWeekday];
 
     // If today is the target weekday, ensure we get NEXT week's occurrence
-    // Check both the weekday match AND if chrono returned today's date
+    // Only add 7 days if chrono returned today's date (daysDiff === 0)
     if (currentWeekday === targetWeekdayNum) {
       const refDateOnly = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
       const parsedDateOnly = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 
-      // If chrono returned today or less than 7 days ahead, add 7 days
       const daysDiff = Math.floor((parsedDateOnly.getTime() - refDateOnly.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysDiff < 7) {
+
+      // Only adjust if chrono returned today's date - don't interfere if it already
+      // correctly returned a future date
+      if (daysDiff === 0) {
         const result = new Date(parsed);
-        result.setDate(result.getDate() + (7 - daysDiff));
+        result.setDate(result.getDate() + 7);
         return result;
       }
     }

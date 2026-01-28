@@ -73,16 +73,20 @@ class TestTaskPriorityDefaults:
     def test_priority_explicit_none_stays_none(self):
         """Test that explicitly setting priority=None keeps it as None.
 
-        This verifies backward compatibility: old tasks with null priority
-        are preserved, while UI layer handles display as 'Low'.
+        This tests SQLAlchemy's Column(default=...) behavior:
+        - The default ("Low") only applies when the column is NOT provided
+        - When explicitly set to None, SQLAlchemy honors that value (nullable=True)
+
+        This is intentional for backward compatibility: existing tasks in the
+        database with null priority should remain null. The UI layer (MetadataBadges)
+        handles displaying null as "Low" for consistent user experience.
         """
         # Arrange & Act
         task = Task(
             user_input="task with explicit null priority",
             project="General",
-            priority=None  # Explicitly set to None
+            priority=None  # Explicitly set to None - bypasses Column default
         )
 
-        # Assert - When explicitly set to None, it should stay None
-        # The Column default only applies when priority is not provided at all
+        # Assert - SQLAlchemy honors explicit None when nullable=True
         assert task.priority is None

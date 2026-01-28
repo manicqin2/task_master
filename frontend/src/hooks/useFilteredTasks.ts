@@ -11,19 +11,17 @@ import { TaskFilter } from '@/types/filters'
 import { sortTasksByPriorityAndDeadline } from '@/lib/taskSorting'
 import { Task } from '@/lib/types'
 
-// Extended Task type for filtering (persons stored as string in DB)
-interface FilterableTask extends Omit<Task, 'persons'> {
-  persons?: string | null // JSON array as string from DB
-}
-
 /**
  * Filter and sort tasks based on provided criteria
+ *
+ * Note: Task.persons is typed as string[] in the Task interface, but may come
+ * from the API as a JSON string. This hook handles both cases for robustness.
  *
  * @param tasks - Array of tasks to filter
  * @param filter - Filter criteria (project, deadline, person)
  * @returns Filtered and sorted tasks
  */
-export function useFilteredTasks(tasks: FilterableTask[], filter?: TaskFilter): FilterableTask[] {
+export function useFilteredTasks(tasks: Task[], filter?: TaskFilter): Task[] {
   return useMemo(() => {
     let filtered = tasks
 
@@ -48,17 +46,21 @@ export function useFilteredTasks(tasks: FilterableTask[], filter?: TaskFilter): 
       filtered = filtered.filter(task => {
         if (!task.persons) return false
 
-        try {
-          // Parse JSON array of persons
-          const personsArray = JSON.parse(task.persons)
-          return personsArray.includes(filter.person)
-        } catch (e) {
-          // If parsing fails, log in development and fallback to string inclusion
-          if (process.env.NODE_ENV === 'development') {
-            console.warn(`Failed to parse persons JSON for task ${task.id}:`, e)
-          }
-          return task.persons.includes(filter.person)
-        }
+        // Handle both string[] (parsed) and string (raw JSON from API) formats
+        const personsArray = Array.isArray(task.persons)
+          ? task.persons
+          : (() => {
+              try {
+                return JSON.parse(task.persons as unknown as string)
+              } catch (e) {
+                if (process.env.NODE_ENV === 'development') {
+                  console.warn(`Failed to parse persons JSON for task ${task.id}:`, e)
+                }
+                return []
+              }
+            })()
+
+        return personsArray.includes(filter.person)
       })
     }
 
