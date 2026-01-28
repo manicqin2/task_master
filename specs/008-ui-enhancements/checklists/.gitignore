@@ -1,0 +1,59 @@
+# Node.js / TypeScript / JavaScript
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env*
+!.env.example
+!.env.production.example
+!.env.development
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Build artifacts
+*.tgz
+*.zip

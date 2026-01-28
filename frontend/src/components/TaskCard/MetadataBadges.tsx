@@ -76,6 +76,9 @@ function formatPriority(priority: Priority): string {
 export function MetadataBadges({ metadata }: MetadataBadgesProps) {
   const { project, task_type, priority } = metadata
 
+  // Feature 008 T042: Backward compatibility - null priority defaults to "Low"
+  const displayPriority = priority || Priority.LOW
+
   // Don't render anything if no metadata to display
   if (!project && !task_type && !priority) {
     return null
@@ -103,17 +106,15 @@ export function MetadataBadges({ metadata }: MetadataBadgesProps) {
         </Badge>
       )}
 
-      {priority && (
-        <Badge
-          variant="outline"
-          className={getPriorityColor(priority)}
-          data-testid="priority-badge"
-        >
-          {priority === Priority.URGENT && '🔥 '}
-          {priority === Priority.HIGH && '⚠️ '}
-          {formatPriority(priority)}
-        </Badge>
-      )}
+      <Badge
+        variant="outline"
+        className={getPriorityColor(displayPriority)}
+        data-testid="priority-badge"
+      >
+        {displayPriority === Priority.URGENT && '🔥 '}
+        {displayPriority === Priority.HIGH && '⚠️ '}
+        {formatPriority(displayPriority)}
+      </Badge>
     </div>
   )
 }

@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 - SQLite via SQLAlchemy (no changes - existing database schema supports this migration) (006-gemini-llm)
 - Bash 4.0+ (compatible with macOS and Linux) (007-update-deployment)
 - N/A (script only modifies deployment workflow) (007-update-deployment)
+- TypeScript 5.2+ (frontend), Python 3.11+ (backend - for date parsing validation) (008-ui-enhancements)
+- SQLite via SQLAlchemy (existing - no schema changes required) (008-ui-enhancements)
 
 ### Feature: 001-chat-task-entry
 
@@ -152,9 +154,9 @@ docker compose exec frontend npm run test:e2e
 - shadcn/ui component conventions
 
 ## Recent Changes
+- 008-ui-enhancements: Added TypeScript 5.2+ (frontend), Python 3.11+ (backend - for date parsing validation)
 - 007-update-deployment: Added Bash 4.0+ (compatible with macOS and Linux)
 - 006-gemini-llm: Added Python 3.11+ (matches existing backend, google-genai requires 3.9+) + `google-genai` (unified SDK, GA since May 2025) - replaces openai package for Ollama
-- 005-three-table-schema: Added Python 3.11+ (backend matches existing project)
 
 
 <!-- MANUAL ADDITIONS START -->
@@ -191,5 +193,74 @@ LaneWorkflow (Task Workbench container)
 **Confidence Threshold**: 0.7 - fields with lower confidence require user attention
 
 **Timeout**: 60 seconds (configurable via OLLAMA_TIMEOUT env var)
+
+### Feature 008: Task Management UI Enhancements
+
+**Purpose**: Improved task management UX with natural language deadline parsing, default priority, and unified task views.
+
+**Key Patterns**:
+
+#### Natural Language Date Parsing (US2)
+- **Frontend**: `chrono-node` library for basic parsing in `frontend/src/lib/dateUtils.ts`
+- **Backend**: Gemini LLM handles complex/typo-tolerant parsing in metadata extraction
+- **FR-013 Edge Case**: "next Monday" on Monday → +7 days (next week Monday, not today)
+- **FR-011 Permanent Dates**: Natural language converted to permanent ISO dates, not recalculated
+- **DeadlineInput Component**: Live preview of parsed dates with error handling
+
+```typescript
+// Example: parseNaturalLanguageDate with FR-013 edge case
+const nextWeekdayPattern = /^next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i;
+if (match && currentWeekday === targetWeekdayNum) {
+  result.setDate(result.getDate() + 7); // Add 7 days if today matches target
+}
+```
+
+#### Priority Defaults (US1)
+- **Backend**: Task model `__init__` sets `priority='Low'` for new tasks
+- **Frontend**: MetadataEditor pre-selects "Low" priority (lines 85, 94)
+- **Backward Compatibility**: Null priority displays as "Low" in UI (MetadataBadges.tsx)
+
+#### Unified Task Views (US3)
+- **Component Composition**: Reusable `TaskListView` component used across all tabs
+- **Custom Hook**: `useFilteredTasks` for filtering by project/deadline/person
+- **Multi-criteria Sorting**: Primary by priority (Urgent→High→Normal→Low), secondary by deadline (ascending), tertiary nulls last
+- **Filter Pattern**: Each tab (Projects, Agenda, Persons) passes `TaskFilter` to `TaskListView`
+
+```typescript
+// Example: useFilteredTasks hook pattern
+export function useFilteredTasks(tasks: Task[], filter?: TaskFilter): Task[] {
+  return useMemo(() => {
+    let filtered = tasks;
+    if (filter?.project) filtered = filtered.filter(task => task.project === filter.project);
+    // ... more filters
+    return sortTasksByPriorityAndDeadline(filtered);
+  }, [tasks, filter]);
+}
+```
+
+**Component Structure**:
+```
+frontend/src/
+├── lib/
+│   ├── dateUtils.ts           # Natural language date parsing (chrono-node + FR-013)
+│   └── taskSorting.ts         # Multi-criteria sorting (priority + deadline)
+├── types/
+│   └── filters.ts             # TaskFilter interface
+├── hooks/
+│   └── useFilteredTasks.ts    # Filtering and sorting hook
+├── components/
+│   ├── TaskWorkbench/
+│   │   └── DeadlineInput.tsx  # Natural language deadline input with preview
+│   ├── TaskList/
+│   │   └── TaskListView.tsx   # Unified task list component
+│   ├── Projects/
+│   │   └── ProjectsView.tsx   # Project-filtered tasks
+│   ├── Agenda/
+│   │   └── AgendaView.tsx     # Deadline-filtered tasks
+│   └── Persons/
+│       └── PersonsView.tsx    # Person-filtered tasks
+```
+
+**Testing**: TDD approach - all tests written before implementation (16/16 US1, 17/17 US2 backend, US3 functional)
 
 <!-- MANUAL ADDITIONS END -->

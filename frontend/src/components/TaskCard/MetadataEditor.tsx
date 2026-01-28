@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DeadlineInput } from '@/components/TaskWorkbench/DeadlineInput'
 
 export interface MetadataEditorProps {
   /**
@@ -81,7 +82,7 @@ export function MetadataEditor({
 }: MetadataEditorProps) {
   const [project, setProject] = useState<string>(currentMetadata?.project || 'General')
   const [taskType, setTaskType] = useState<string | null>(currentMetadata?.task_type || null)
-  const [priority, setPriority] = useState<string | null>(currentMetadata?.priority || null)
+  const [priority, setPriority] = useState<string | null>(currentMetadata?.priority || 'low')  // Feature 008: Default to "low"
   const [deadlineText, setDeadlineText] = useState<string>(currentMetadata?.deadline_text || '')
   const [isCustomProject, setIsCustomProject] = useState(false)
 
@@ -90,7 +91,7 @@ export function MetadataEditor({
     if (currentMetadata) {
       setProject(currentMetadata.project || 'General')
       setTaskType(currentMetadata.task_type || null)
-      setPriority(currentMetadata.priority || null)
+      setPriority(currentMetadata.priority || 'low')  // Feature 008: Default to "low"
       setDeadlineText(currentMetadata.deadline_text || '')
     }
   }, [currentMetadata])
@@ -252,21 +253,27 @@ export function MetadataEditor({
         </Select>
       </div>
 
-      {/* Deadline Input (Optional) */}
+      {/* Deadline Input (Optional) - Feature 008 US2 */}
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">
           📅 Deadline
         </label>
-        <input
-          type="text"
+        <DeadlineInput
           value={deadlineText}
-          onChange={(e) => setDeadlineText(e.target.value)}
-          onBlur={handleChange}
-          placeholder="e.g., tomorrow, next Friday, 2025-12-31"
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(isoDate) => {
+            setDeadlineText(isoDate)
+            // Trigger change immediately when deadline is confirmed
+            setTimeout(() => {
+              onMetadataChange({
+                project: project.trim() || null,
+                task_type: taskType,
+                priority: priority,
+                deadline_text: isoDate || null,
+              })
+            }, 0)
+          }}
           disabled={isUpdating}
         />
-        <p className="text-xs text-gray-500 mt-1">Use natural language or YYYY-MM-DD format</p>
       </div>
     </div>
   )

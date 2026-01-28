@@ -18,6 +18,13 @@ class Task(Base):
 
     __tablename__ = "tasks"
 
+    def __init__(self, **kwargs):
+        """Initialize Task with default priority if not provided."""
+        # Feature 008: Default priority to "Low" if not specified
+        if 'priority' not in kwargs:
+            kwargs['priority'] = 'Low'
+        super().__init__(**kwargs)
+
     id: Mapped[str] = mapped_column(
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
@@ -37,7 +44,7 @@ class Task(Base):
     project: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     persons: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array as TEXT
     task_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # Now a string
-    priority: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # Now a string
+    priority: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)  # Feature 008: Defaults to "Low" via __init__
     deadline_text: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     deadline_parsed: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
