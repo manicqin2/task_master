@@ -13,6 +13,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-04
 - SQLite with foreign key support enabled (existing database) (005-three-table-schema)
 - Python 3.11+ (matches existing backend, google-genai requires 3.9+) + `google-genai` (unified SDK, GA since May 2025) - replaces openai package for Ollama (006-gemini-llm)
 - SQLite via SQLAlchemy (no changes - existing database schema supports this migration) (006-gemini-llm)
+- TypeScript 5.2+ + @playwright/test (latest), Playwright browsers (009-playwright-tests)
+- N/A (test-only feature, no data persistence) (009-playwright-tests)
 
 ### Feature: 001-chat-task-entry
 
@@ -150,9 +152,9 @@ docker compose exec frontend npm run test:e2e
 - shadcn/ui component conventions
 
 ## Recent Changes
+- 009-playwright-tests: Added TypeScript 5.2+ + @playwright/test (latest), Playwright browsers
 - 006-gemini-llm: Added Python 3.11+ (matches existing backend, google-genai requires 3.9+) + `google-genai` (unified SDK, GA since May 2025) - replaces openai package for Ollama
 - 005-three-table-schema: Added Python 3.11+ (backend matches existing project)
-- 004-task-metadata-extraction: Added Python 3.11+ (backend), TypeScript 5.2+ (frontend)
 
 
 <!-- MANUAL ADDITIONS START -->
