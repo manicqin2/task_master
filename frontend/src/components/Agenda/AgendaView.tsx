@@ -57,9 +57,8 @@ export function AgendaView({
     : undefined
 
   // Group deadlines by category for better UX
-  // Note: split('T') always returns at least one element, so [0] is safe
-  const today = new Date().toISOString().split('T')[0]
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const today = new Date().toISOString().split('T')[0] ?? ''
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0] ?? ''
 
   const categorizedDeadlines = useMemo(() => {
     return {

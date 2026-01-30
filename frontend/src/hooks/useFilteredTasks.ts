@@ -12,6 +12,32 @@ import { sortTasksByPriorityAndDeadline } from '@/lib/taskSorting'
 import { Task } from '@/lib/types'
 
 /**
+ * Parse persons field which may be string[] or JSON string from API.
+ * Task.persons is typed as string[] but API may return JSON string.
+ *
+ * @param persons - The persons field value (string[] or JSON string)
+ * @param taskId - Task ID for debug logging
+ * @returns Parsed array of person names
+ */
+function parsePersons(persons: unknown, taskId?: string): string[] {
+  if (Array.isArray(persons)) {
+    return persons
+  }
+  if (typeof persons === 'string') {
+    try {
+      const parsed = JSON.parse(persons)
+      return Array.isArray(parsed) ? parsed : []
+    } catch (e) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Failed to parse persons JSON for task ${taskId}:`, e)
+      }
+      return []
+    }
+  }
+  return []
+}
+
+/**
  * Filter and sort tasks based on provided criteria
  *
  * Note: Task.persons is typed as string[] in the Task interface, but may come
@@ -45,21 +71,7 @@ export function useFilteredTasks(tasks: Task[], filter?: TaskFilter): Task[] {
     if (filter?.person) {
       filtered = filtered.filter(task => {
         if (!task.persons) return false
-
-        // Handle both string[] (parsed) and string (raw JSON from API) formats
-        const personsArray = Array.isArray(task.persons)
-          ? task.persons
-          : (() => {
-              try {
-                return JSON.parse(task.persons as unknown as string)
-              } catch (e) {
-                if (process.env.NODE_ENV === 'development') {
-                  console.warn(`Failed to parse persons JSON for task ${task.id}:`, e)
-                }
-                return []
-              }
-            })()
-
+        const personsArray = parsePersons(task.persons, task.id)
         return personsArray.includes(filter.person)
       })
     }

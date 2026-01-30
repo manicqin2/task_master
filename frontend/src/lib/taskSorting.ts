@@ -12,7 +12,11 @@ const PRIORITY_ORDER: Record<string, number> = {
 };
 
 /**
- * Get priority order value (case-insensitive)
+ * Get priority order value for sorting (case-insensitive).
+ * Lower values = higher priority (Urgent=0, High=1, Normal=2, Low=3).
+ *
+ * @param priority - Priority string (e.g., "Urgent", "high", "LOW") or null/undefined
+ * @returns Numeric order value (0-3), defaults to 3 (Low) for unknown values
  */
 function getPriorityOrder(priority: string | null | undefined): number {
   return PRIORITY_ORDER[(priority ?? 'low').toLowerCase()] ?? 3;
@@ -27,7 +31,11 @@ interface SortableTask {
 }
 
 /**
- * Get effective deadline for sorting (prefer parsed, fallback to text)
+ * Get effective deadline for sorting (prefer parsed, fallback to text).
+ * Extracts date portion from ISO datetime if needed.
+ *
+ * @param task - Task object with deadline fields
+ * @returns ISO date string (YYYY-MM-DD) or null if no deadline
  */
 function getEffectiveDeadline(task: SortableTask): string | null {
   // Use deadline_parsed if available (ISO datetime)
