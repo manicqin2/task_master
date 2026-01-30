@@ -45,7 +45,7 @@ This feature is a **test-only feature** and does not introduce new data persiste
 - `submitButton`: Locator - `[data-testid="submit-button"]`
 - `pendingLane`: Locator - `[data-testid="lane-pending"]`
 - `errorLane`: Locator - `[data-testid="lane-error"]`
-- `readyLane`: Locator - `[data-testid="lane-finished"]`
+- `readyLane`: Locator - `[data-testid="lane-finished"]` (Note: "Ready" lane uses "finished" selector in codebase)
 - `createTask(text: string)`: Create a new task
 - `getTaskCard(text: string)`: Get task card by content
 - `clickRetry(taskText: string)`: Click retry on failed task
@@ -142,3 +142,4 @@ TestFixture
 - No API contracts to define (tests consume existing API)
 - Test data created via existing POST /api/v1/tasks endpoint
 - Test cleanup via existing DELETE /api/v1/tasks/{id} endpoint
+- **Naming convention**: The "Ready" lane uses `lane-finished` as its data-testid selector in the existing codebase

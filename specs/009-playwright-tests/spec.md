@@ -151,7 +151,7 @@ As a developer, I want automated performance tests so that I can ensure the appl
 ## Assumptions
 
 - Playwright is already configured in the frontend project based on existing E2E tests
-- The application runs in Docker containers accessible at localhost ports 3000 (frontend) and 8000 (backend)
+- The application runs in Docker containers accessible at localhost ports 5173 (frontend) and 8000 (backend)
 - Test data can be created and cleaned up via API calls for test isolation
 - The Gemini API is available during test runs (or can be mocked for deterministic testing)
 - Existing data-testid attributes in the codebase are available for test selectors
