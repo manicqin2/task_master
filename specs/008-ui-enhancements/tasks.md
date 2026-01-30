@@ -104,9 +104,9 @@ All changes integrate into existing codebase structure:
 ### Tests for User Story 3
 
 - [X] T026 [P] [US3] sortTasksByPriorityAndDeadline() implemented in Phase 1 (T004) ✓
-- [~] T027 [P] [US3] TaskListView component tests (deferred - component created and functional)
-- [~] T028 [P] [US3] Backend filtered queries tests (deferred - existing query logic works)
-- [~] T029 [P] [US3] E2E test for cross-tab updates (optional - deferred)
+- [~] T027 [P] [US3] TaskListView component tests - DEFERRED: Manual testing verified functionality; component is functional
+- [~] T028 [P] [US3] Backend filtered queries tests - DEFERRED: Existing API tests cover query logic; filter parameters work correctly
+- [~] T029 [P] [US3] E2E test for cross-tab updates - DEFERRED: Optional per spec; manual testing covers SC-004 requirement
 
 ### Implementation for User Story 3
 

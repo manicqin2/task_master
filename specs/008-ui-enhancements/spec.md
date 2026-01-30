@@ -72,8 +72,8 @@ As a user, I want Projects, Agenda, and Persons tabs to show the same task inter
 
 ### Functional Requirements
 
-- **FR-001**: System MUST set task priority to "Low" by default when no priority is specified during task creation
-- **FR-002**: System MUST display "Low" as the pre-selected value in the priority selector for tasks without explicit priority metadata
+- **FR-001**: Backend MUST set task priority Column default to "Low" when no priority is specified during task creation
+- **FR-002**: Frontend MUST display "Low" as the pre-selected value in the priority selector for tasks with null/undefined priority metadata
 - **FR-003**: System MUST accept natural language deadline inputs including "tomorrow", "next [day of week]", "in N days/weeks/months"
 - **FR-004**: System MUST convert natural language deadline inputs to ISO date format (YYYY-MM-DD) for storage and display
 - **FR-005**: System MUST preserve absolute date inputs (YYYY-MM-DD format) without modification
@@ -98,7 +98,13 @@ As a user, I want Projects, Agenda, and Persons tabs to show the same task inter
 ### Measurable Outcomes
 
 - **SC-001**: 100% of tasks created without explicit priority assignment display "Low" priority in all views
-- **SC-002**: Users can successfully create tasks with natural language deadlines with 90%+ accuracy for common phrases (tomorrow, next Friday, in N days/weeks)
+- **SC-002**: Users can successfully create tasks with natural language deadlines with 100% accuracy for supported phrases:
+  - Relative days: "today", "tomorrow"
+  - Relative periods: "in N days", "in N weeks", "in N months" (N = 1-99)
+  - Named weekdays: "Monday", "next Monday", "this Friday"
+  - Next weekday edge case: "next [weekday]" on same weekday → +7 days (FR-013)
+  - ISO passthrough: "YYYY-MM-DD" preserved as-is
+  - Unsupported phrases (e.g., "someday", "ASAP") show validation error per FR-006
 - **SC-003**: All four tab views (Todos, Projects, Agenda, Persons) use identical task card components and support identical task actions
 - **SC-004**: Task state changes (complete, edit, delete) in filtered views reflect immediately (within 500ms) in all other views showing the same task
 - **SC-005**: Invalid deadline inputs show clear validation errors with suggested valid formats, preventing task creation with malformed dates

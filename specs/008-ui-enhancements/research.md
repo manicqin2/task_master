@@ -63,6 +63,20 @@ def parse_natural_language_deadline(text: str) -> str | None:
         return None
 ```
 
+### Supported Natural Language Phrases (SC-002 Reference)
+
+| Category | Examples | Behavior |
+|----------|----------|----------|
+| Relative days | "today", "tomorrow" | Convert to ISO date relative to current date |
+| Relative periods | "in 3 days", "in 2 weeks", "in 1 month" | Add N days/weeks/months to today |
+| Named weekdays | "Monday", "Friday" | Next occurrence of that weekday |
+| Next weekday | "next Monday", "next Friday" | Following week's occurrence |
+| Next weekday (edge case) | "next Monday" on Monday | +7 days per FR-013 |
+| ISO passthrough | "2026-02-15" | Preserve as-is, no conversion |
+| **Invalid/Unsupported** | "someday", "later", "ASAP", "eventually" | Return null, show validation error (FR-006) |
+
+**Edge Case FR-013**: When user enters "next [weekday]" on that same weekday, the system MUST return +7 days (next week), not today.
+
 ---
 
 ### 2. How should we handle timezone considerations for deadline parsing?
